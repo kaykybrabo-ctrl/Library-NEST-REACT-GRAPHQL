@@ -3,14 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Layout from './Layout'
 import { useAuth } from '../contexts/AuthContext'
-import { Author, Book } from '../types'
+import { Author } from '../types'
 import './AuthorDetail.css'
 
 const AuthorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [author, setAuthor] = useState<Author | null>(null)
-  const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -22,7 +21,6 @@ const AuthorDetail: React.FC = () => {
   useEffect(() => {
     if (id) {
       fetchAuthor()
-      fetchAuthorBooks()
     }
   }, [id])
 
@@ -38,16 +36,7 @@ const AuthorDetail: React.FC = () => {
     }
   }
 
-  const fetchAuthorBooks = async () => {
-    try {
-      const response = await axios.get('/api/books?limit=9999&offset=0')
-      const authorBooks = response.data.filter((book: Book) =>
-        book.author_id === Number(id)
-      )
-      setBooks(authorBooks)
-    } catch (err) {
-    }
-  }
+  
 
   const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -200,35 +189,7 @@ const AuthorDetail: React.FC = () => {
 
       </section>
 
-      <section className="book-list">
-        <h3>Books by {author.name_author}</h3>
-        {books.length === 0 ? (
-          <p>No books found for this author.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {books.map(book => (
-                <tr key={book.book_id}>
-                  <td>{book.book_id}</td>
-                  <td>{book.title}</td>
-                  <td>
-                    <button onClick={() => navigate(`/books/${book.book_id}`)}>
-                      View Book
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+      
     </Layout>
   )
 }

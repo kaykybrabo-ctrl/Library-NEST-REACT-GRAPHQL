@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 import Layout from './Layout'
 import { Rating, Typography, Box } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
@@ -30,9 +30,7 @@ const BookDetail: React.FC = () => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await axios.get('/api/user/me', {
-        withCredentials: true
-      })
+      const response = await api.get('/api/user/me')
       setCurrentUser(response.data)
     } catch {
       setCurrentUser(null)
@@ -41,7 +39,7 @@ const BookDetail: React.FC = () => {
 
   const fetchBook = async () => {
     try {
-      const response = await axios.get(`/api/books/${id}`)
+      const response = await api.get(`/api/books/${id}`)
       setBook(response.data)
       setLoading(false)
     } catch (err) {
@@ -52,7 +50,7 @@ const BookDetail: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get('/api/reviews')
+      const response = await api.get('/api/reviews')
       const bookReviews = response.data.filter((review: Review) => 
         review.book_id === Number(id)
       )
@@ -70,7 +68,7 @@ const BookDetail: React.FC = () => {
     formData.append('file', imageFile)
 
     try {
-      await axios.post(`/api/books/${id}/image`, formData, {
+      await api.post(`/api/books/${id}/image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       fetchBook()
@@ -84,9 +82,7 @@ const BookDetail: React.FC = () => {
 
   const handleRentBook = async () => {
     try {
-      await axios.post(`/api/rent/${id}`, {}, {
-        withCredentials: true
-      })
+      await api.post(`/api/rent/${id}`)
       alert('Book rented successfully!')
       setError('')
     } catch (err: any) {
@@ -98,9 +94,7 @@ const BookDetail: React.FC = () => {
 
   const handleFavoriteBook = async () => {
     try {
-      await axios.post(`/api/favorite/${id}`, {}, {
-        withCredentials: true
-      })
+      await api.post(`/api/favorite/${id}`)
       alert('Book added to favorites!')
       setError('')
     } catch (err: any) {
@@ -119,13 +113,11 @@ const BookDetail: React.FC = () => {
     }
 
     try {
-      await axios.post('/api/reviews', {
+      await api.post('/api/reviews', {
         book_id: Number(id),
         user_id: currentUser.id,
         rating: newReview.rating,
         comment: newReview.comment
-      }, {
-        withCredentials: true
       })
       
       setNewReview({ rating: 5, comment: '' })
@@ -191,6 +183,69 @@ const BookDetail: React.FC = () => {
                 {uploading ? 'Uploading...' : 'Update Image'}
               </button>
             </form>
+          </div>
+        )}
+      </section>
+
+      <section className="form-section">
+        <h3>Book Actions</h3>
+        <div className="book-actions">
+          <button onClick={handleRentBook}>Rent Book</button>
+          <button onClick={handleFavoriteBook}>Add to Favorites</button>
+        </div>
+      </section>
+
+      <section className="form-section">
+        <h3>Write a Review</h3>
+        {!currentUser ? (
+          <p>Please log in to write a review.</p>
+        ) : (
+          <form onSubmit={handleSubmitReview}>
+            <Box sx={{ mb: 2 }}>
+              <Typography component="legend" sx={{ mb: 1 }}>Rating:</Typography>
+              <Rating
+                name="book-rating"
+                value={newReview.rating}
+                onChange={(_, newValue) => {
+                  setNewReview({ ...newReview, rating: newValue || 1 })
+                }}
+                max={5}
+                size="large"
+              />
+            </Box>
+
+            <label htmlFor="comment">Comment:</label>
+            <textarea
+              id="comment"
+              value={newReview.comment}
+              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+              rows={4}
+              className="review-textarea"
+            />
+
+            <button type="submit">Submit Review</button>
+          </form>
+        )}
+      </section>
+
+      <section className="form-section">
+        <h3>Reviews</h3>
+        {reviews.length === 0 ? (
+          <p>No reviews yet.</p>
+        ) : (
+          <div>
+            {reviews.map(review => (
+              <div key={review.review_id} className="review-card">
+                <div className="review-header">
+                  <strong>{review.username}</strong>
+                  <span>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                </div>
+                <p>{review.comment}</p>
+                <small className="review-date">
+                  {new Date(review.review_date).toLocaleDateString()}
+                </small>
+              </div>
+            ))}
           </div>
         )}
       </section>
