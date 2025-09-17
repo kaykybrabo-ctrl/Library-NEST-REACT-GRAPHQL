@@ -29,10 +29,8 @@ const UserProfile: React.FC = () => {
 
   const buildImageSrc = (path?: string | null) => {
     if (!path) return ''
-    // append version even for absolute URLs to avoid stale cache
     if (path.startsWith('http')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
     if (path.startsWith('/')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
-    // append a version to bust cache/race after uploads
     return `/api/uploads/${path}${imgVersion ? `?v=${imgVersion}` : ''}`
   }
 
@@ -55,7 +53,6 @@ const UserProfile: React.FC = () => {
       const response = await api.get('/api/get-profile')
       setProfile(response.data)
       setError('')
-      // nada adicional: render direto usa buildImageSrc + key
     } catch (e) {
       setError('Failed to load profile. Please login again.')
     } finally {
@@ -96,7 +93,6 @@ const UserProfile: React.FC = () => {
       const resp = await api.post('/api/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      // resp.data já contém o perfil atualizado com profile_image
       if (resp?.data) {
         setProfile(resp.data)
       }

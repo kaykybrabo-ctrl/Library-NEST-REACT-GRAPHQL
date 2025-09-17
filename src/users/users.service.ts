@@ -25,8 +25,6 @@ export class UsersService {
 
     if (!user) return null;
 
-    // Return just the raw filename (or null) and let the frontend build the URL.
-    // Avoid hardcoding hosts/ports which can break in different environments.
     const result = {
       ...user,
       profile_image:
@@ -77,7 +75,7 @@ export class UsersService {
       data: updateData,
     });
 
-    return this.findOne(id); // Use findOne to ensure consistent response format
+    return this.findOne(id);
   }
 
   async updateProfileImage(id: number, filename: string) {
