@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BooksController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
 const path_1 = require("path");
 const books_service_1 = require("./books.service");
 const create_book_dto_1 = require("./dto/create-book.dto");
@@ -107,8 +108,16 @@ let BooksController = class BooksController {
         if (!file) {
             throw new Error('No file uploaded');
         }
-        await this.booksService.updatePhoto(+id, file.filename);
-        return { photo: file.filename };
+        try {
+            console.log('[BooksController] upload image => id:', id, 'original:', file.originalname, 'stored:', file.filename, 'size:', file.size);
+            await this.booksService.updatePhoto(+id, file.filename);
+            console.log('[BooksController] updatePhoto done for id:', id, 'photo:', file.filename);
+            return { photo: file.filename };
+        }
+        catch (err) {
+            console.error('[BooksController] updateImageApi error:', err);
+            throw err;
+        }
     }
 };
 exports.BooksController = BooksController;
@@ -204,7 +213,19 @@ __decorate([
 ], BooksController.prototype, "removeApi", null);
 __decorate([
     (0, common_1.Post)('books/:id/image'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+            filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
+        }),
+        fileFilter: (req, file, cb) => {
+            if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                return cb(new Error('Only image files are allowed!'), false);
+            }
+            cb(null, true);
+        },
+        limits: { fileSize: 5 * 1024 * 1024 },
+    })),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
@@ -213,7 +234,19 @@ __decorate([
 ], BooksController.prototype, "updateImage", null);
 __decorate([
     (0, common_1.Post)('api/books/:id/image'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+            filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
+        }),
+        fileFilter: (req, file, cb) => {
+            if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                return cb(new Error('Only image files are allowed!'), false);
+            }
+            cb(null, true);
+        },
+        limits: { fileSize: 5 * 1024 * 1024 },
+    })),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),

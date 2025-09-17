@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, Query } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
 import { Response } from 'express';
-import { join } from 'path';
 import { AuthorsService } from './authors.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
@@ -92,7 +93,19 @@ export class AuthorsController {
   }
 
   @Post('authors/:id/image')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: (req, file, cb) => cb(null, join(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+      filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`),
+    }),
+    fileFilter: (req, file, cb) => {
+      if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   async updateImage(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -100,13 +113,26 @@ export class AuthorsController {
     if (!file) {
       throw new Error('No file uploaded');
     }
-
+    console.log('[AuthorsController] upload image => id:', id, 'original:', file.originalname, 'stored:', file.filename, 'size:', file.size);
     await this.authorsService.updatePhoto(+id, file.filename);
+    console.log('[AuthorsController] updatePhoto done for id:', id, 'photo:', file.filename);
     return { photo: file.filename };
   }
 
   @Post('api/authors/:id/image')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: (req, file, cb) => cb(null, join(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+      filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`),
+    }),
+    fileFilter: (req, file, cb) => {
+      if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   async updateImageApi(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -114,8 +140,14 @@ export class AuthorsController {
     if (!file) {
       throw new Error('No file uploaded');
     }
-
-    await this.authorsService.updatePhoto(+id, file.filename);
-    return { photo: file.filename };
+    try {
+      console.log('[AuthorsController] upload image => id:', id, 'original:', file.originalname, 'stored:', file.filename, 'size:', file.size);
+      await this.authorsService.updatePhoto(+id, file.filename);
+      console.log('[AuthorsController] updatePhoto done for id:', id, 'photo:', file.filename);
+      return { photo: file.filename };
+    } catch (err) {
+      console.error('[AuthorsController] updateImageApi error:', err);
+      throw err;
+    }
   }
 }

@@ -257,6 +257,14 @@ nav a.active {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Compact variant for detail pages to avoid large visual border around images */
+.profile-section.image-tight {
+    padding: 0;
+    margin-bottom: 20px;
+    background: transparent;
+    box-shadow: none;
+}
+
 .profile-image {
     width: 100px;
     height: 100px;
@@ -265,7 +273,9 @@ nav a.active {
     margin: 10px 0;
 }
 
-.book-image, .author-image {
+/* Thumbnail sizes for list/table views only */
+table .book-image, table .author-image,
+.book-list .book-image, .author-list .author-image {
     width: 60px;
     height: 80px;
     object-fit: cover;

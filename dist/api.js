@@ -5,19 +5,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const api = axios_1.default.create();
-// Inject Authorization header from localStorage token
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
         if (!config.headers) {
-            // cast to any to satisfy AxiosRequestHeaders typing
             config.headers = {};
         }
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 }, (error) => Promise.reject(error));
-// Handle 401/403 globally: clear auth and redirect to login
 api.interceptors.response.use((response) => response, (error) => {
     const status = error?.response?.status;
     if (status === 401 || status === 403) {

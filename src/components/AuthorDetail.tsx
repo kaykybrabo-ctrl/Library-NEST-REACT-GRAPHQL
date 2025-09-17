@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 import Layout from './Layout'
 import { useAuth } from '../contexts/AuthContext'
 import { Author } from '../types'
@@ -17,16 +17,71 @@ const AuthorDetail: React.FC = () => {
   const [editingBio, setEditingBio] = useState(false)
   const [biography, setBiography] = useState('')
   const { isAdmin } = useAuth()
+  const [imgVersion, setImgVersion] = useState(0)
+  const [previewUrl, setPreviewUrl] = useState('')
+
+  const buildImageSrc = (path?: string | null) => {
+    if (!path) return ''
+    if (path.startsWith('http')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
+    if (path.startsWith('/')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
+    return `/api/uploads/${path}${imgVersion ? `?v=${imgVersion}` : ''}`
+  }
+
+  const onSelectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file (JPG, PNG, GIF, WebP)')
+      event.currentTarget.value = ''
+      return
+    }
+    setImageFile(file)
+    setError('')
+    const url = URL.createObjectURL(file)
+    setPreviewUrl(url)
+    // Auto-upload immediately
+    handleUploadImageClick(file)
+  }
+
+  const handleUploadImageClick = async (fileParam?: File) => {
+    const file = fileParam || imageFile
+    if (!file) return
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      console.log('[AuthorDetail] Uploading image for author', id, 'file=', imageFile?.name)
+      const response = await api.post(`/api/authors/${id}/image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      console.log('[AuthorDetail] Upload success, updating state with photo', response?.data?.photo)
+      setAuthor(prev => prev ? { ...prev, photo: response.data.photo } : null)
+      setImageFile(null)
+      setImgVersion(v => v + 1)
+      setError('')
+      try { alert('Author image updated successfully!') } catch {}
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err?.message || 'Failed to upload author image'
+      setError(msg)
+      console.error('[AuthorDetail] Upload error:', err?.response || err)
+      try { alert(`Error: ${msg}`) } catch {}
+    } finally {
+      setUploading(false)
+    }
+  }
 
   useEffect(() => {
     if (id) {
       fetchAuthor()
     }
-  }, [id])
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [id, previewUrl])
 
   const fetchAuthor = async () => {
     try {
-      const response = await axios.get(`/api/authors/${id}`)
+      const response = await api.get(`/api/authors/${id}`)
       setAuthor(response.data)
       setBiography(response.data.biography || '')
       setLoading(false)
@@ -47,13 +102,14 @@ const AuthorDetail: React.FC = () => {
     formData.append('file', imageFile)
 
     try {
-      const response = await axios.post(`/api/authors/${id}/image`, formData, {
+      const response = await api.post(`/api/authors/${id}/image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setAuthor(prev => prev ? { ...prev, photo: response.data.photo } : null)
       setImageFile(null)
       setError('')
-      alert('Author image updated successfully!')
+      setImgVersion(v => v + 1)
+      try { alert('Author image updated successfully!') } catch {}
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to upload author image')
     } finally {
@@ -64,7 +120,7 @@ const AuthorDetail: React.FC = () => {
   const handleUpdateBiography = async () => {
     setUploading(true)
     try {
-      await axios.put(`/api/authors/${id}`, {
+      await api.put(`/api/authors/${id}`, {
         name_author: author?.name_author,
         biography: biography
       })
@@ -100,7 +156,7 @@ const AuthorDetail: React.FC = () => {
     <Layout title={`Author: ${author.name_author}`}>
       {error && <div className="error-message">{error}</div>}
 
-      <section className="profile-section">
+      <section className="profile-section image-tight">
         <button onClick={() => navigate('/authors')} className="back-button">
           ← Back to Authors
         </button>
@@ -108,9 +164,12 @@ const AuthorDetail: React.FC = () => {
         <h2>{author.name_author}</h2>
 
         <div className="author-info">
-          {author.photo && (
+          {previewUrl ? (
+            <img src={previewUrl} alt="Selected preview" className="author-image" />
+          ) : author.photo ? (
             <img
-              src={author.photo.startsWith('http') ? author.photo : `/api/uploads/${author.photo}`}
+              src={buildImageSrc(author.photo)}
+              key={`${author.photo}-${imgVersion}`}
               alt={author.name_author}
               className="author-image"
               onError={(e) => {
@@ -118,6 +177,18 @@ const AuthorDetail: React.FC = () => {
                 e.currentTarget.src = '/api/uploads/default-user.png'
               }}
             />
+          ) : (
+            <div className="image-placeholder">No photo set yet. Select a file below to upload.</div>
+          )}
+          {author.photo && (
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              Current image src: <a href={buildImageSrc(author.photo)} target="_blank" rel="noreferrer">{buildImageSrc(author.photo)}</a>
+            </div>
+          )}
+          {!author.photo && (
+            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+              No photo set for this author yet.
+            </div>
           )}
 
           <div className="biography-section">
@@ -163,32 +234,33 @@ const AuthorDetail: React.FC = () => {
           {isAdmin && (
             <div className="image-upload image-upload-section">
               <h3>Update Author Photo</h3>
-              <form onSubmit={handleImageUpload}>
+              <div>
                 <input
                   type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file && file.type.startsWith('image/')) {
-                      setImageFile(file)
-                      setError('')
-                    } else {
-                      setError('Please select a valid image file (JPG, PNG, GIF, WebP)')
-                      e.target.value = ''
-                    }
-                  }}
+                  accept="image/*"
+                  onChange={onSelectImage}
                   className="file-input"
+                  disabled={uploading}
                 />
-                <button type="submit" disabled={!imageFile || uploading}>
+                {imageFile && (
+                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selected: {imageFile.name}</div>
+                )}
+                <button onClick={() => handleUploadImageClick()} disabled={!imageFile || uploading}>
                   {uploading ? 'Uploading...' : 'Upload Photo'}
                 </button>
-              </form>
+              </div>
             </div>
           )}
         </div>
 
       </section>
 
+      <details style={{ marginTop: 12 }}>
+        <summary>Debug: Raw author JSON</summary>
+        <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: '#444', background: '#f7f7f7', padding: 8, borderRadius: 4 }}>
+          {JSON.stringify(author, null, 2)}
+        </pre>
+      </details>
       
     </Layout>
   )

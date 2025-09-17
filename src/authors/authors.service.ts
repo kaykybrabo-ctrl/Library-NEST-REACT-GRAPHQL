@@ -61,20 +61,14 @@ export class AuthorsService {
   }
 
   async remove(id: number): Promise<void> {
-    // Find all books for this author
     const books = await this.prisma.book.findMany({ where: { author_id: id }, select: { book_id: true } });
 
     const bookIds = books.map(b => b.book_id);
 
-    // In a transaction, delete related reviews and loans for those books,
-    // then delete the books, and finally delete the author.
     await this.prisma.$transaction([
-      // Delete reviews and loans that depend on the author's books
       this.prisma.review.deleteMany({ where: { book_id: { in: bookIds.length ? bookIds : [-1] } } }),
       this.prisma.loan.deleteMany({ where: { book_id: { in: bookIds.length ? bookIds : [-1] } } }),
-      // Delete books for the author
       this.prisma.book.deleteMany({ where: { author_id: id } }),
-      // Delete the author
       this.prisma.author.delete({ where: { author_id: id } }),
     ]);
   }

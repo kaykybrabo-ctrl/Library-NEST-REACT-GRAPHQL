@@ -50,7 +50,7 @@ export class BooksService {
       book_id: book.book_id,
       title: book.title,
       description: book.description,
-      photo: book.photo ? `http://localhost:8080/api/uploads/${book.photo}` : null,
+      photo: book.photo || null,
       author_name: book.author.name_author,
       author_id: book.author.author_id,
     }));
@@ -75,7 +75,7 @@ export class BooksService {
       book_id: book.book_id,
       title: book.title,
       description: book.description,
-      photo: book.photo ? `http://localhost:8080/api/uploads/${book.photo}` : null,
+      photo: book.photo || null,
       author_name: book.author.name_author,
       author_id: book.author.author_id,
     };
