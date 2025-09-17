@@ -24,7 +24,6 @@ const AuthProvider = ({ children }) => {
                 return JSON.parse(savedUser);
             }
             catch (error) {
-                console.error('Could not parse user from localStorage', error);
                 return null;
             }
         }

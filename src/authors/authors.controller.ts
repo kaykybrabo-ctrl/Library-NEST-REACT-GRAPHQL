@@ -113,9 +113,7 @@ export class AuthorsController {
     if (!file) {
       throw new Error('No file uploaded');
     }
-    console.log('[AuthorsController] upload image => id:', id, 'original:', file.originalname, 'stored:', file.filename, 'size:', file.size);
     await this.authorsService.updatePhoto(+id, file.filename);
-    console.log('[AuthorsController] updatePhoto done for id:', id, 'photo:', file.filename);
     return { photo: file.filename };
   }
 
@@ -141,12 +139,9 @@ export class AuthorsController {
       throw new Error('No file uploaded');
     }
     try {
-      console.log('[AuthorsController] upload image => id:', id, 'original:', file.originalname, 'stored:', file.filename, 'size:', file.size);
       await this.authorsService.updatePhoto(+id, file.filename);
-      console.log('[AuthorsController] updatePhoto done for id:', id, 'photo:', file.filename);
       return { photo: file.filename };
     } catch (err) {
-      console.error('[AuthorsController] updateImageApi error:', err);
       throw err;
     }
   }

@@ -218,9 +218,6 @@ const UserProfile: React.FC = () => {
                     No profile image uploaded yet
                   </div>
                 )}
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                  Current image src: {buildImageSrc(profile?.profile_image) || '—'}
-                </div>
               </div>
             </div>
 
@@ -291,7 +288,7 @@ const UserProfile: React.FC = () => {
                       <p><strong>Loan Date:</strong> {new Date(loan.loan_date).toLocaleDateString()}</p>
                       {loan.description && <p>{loan.description}</p>}
                     </div>
-                    <div>
+                    <div className="loan-actions">
                       {loan.photo && (
                         <img
                           src={buildImageSrc(loan.photo)}

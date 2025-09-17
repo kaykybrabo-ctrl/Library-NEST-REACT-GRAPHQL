@@ -45,12 +45,10 @@ exports.AppModule = AppModule = __decorate([
                 storage: (0, multer_1.diskStorage)({
                     destination: (req, file, cb) => {
                         const uploadPath = (0, path_1.join)(__dirname, '..', 'FRONTEND', 'uploads');
-                        console.log('Multer destination path:', uploadPath);
                         cb(null, uploadPath);
                     },
                     filename: (req, file, cb) => {
                         const filename = `${Date.now()}-${Math.floor(Math.random() * 1000000000)}.${file.originalname.split('.').pop()}`;
-                        console.log('Multer filename:', filename);
                         cb(null, filename);
                     },
                 }),

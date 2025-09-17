@@ -34,12 +34,10 @@ import { UploadsController } from './uploads.controller';
       storage: diskStorage({
         destination: (req, file, cb) => {
           const uploadPath = join(__dirname, '..', 'FRONTEND', 'uploads');
-          console.log('Multer destination path:', uploadPath);
           cb(null, uploadPath);
         },
         filename: (req, file, cb) => {
           const filename = `${Date.now()}-${Math.floor(Math.random() * 1000000000)}.${file.originalname.split('.').pop()}`;
-          console.log('Multer filename:', filename);
           cb(null, filename);
         },
       }),

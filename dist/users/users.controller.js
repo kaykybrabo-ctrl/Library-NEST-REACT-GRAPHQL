@@ -18,7 +18,6 @@ const platform_express_1 = require("@nestjs/platform-express");
 const users_service_1 = require("./users.service");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
-const fs_1 = require("fs");
 const path_1 = require("path");
 let UsersController = class UsersController {
     usersService;
@@ -42,12 +41,10 @@ let UsersController = class UsersController {
         return { message: 'Book added to favorites' };
     }
     async updateProfile(req, updateUserDto, file) {
-        console.log('Update profile request:', { updateUserDto, file: file?.filename, user: req.user });
         if (file) {
             updateUserDto.profile_image = file.filename;
         }
         const result = await this.usersService.update(req.user.id, updateUserDto);
-        console.log('Update profile result:', result);
         const profile = await this.usersService.findOne(req.user.id);
         return profile;
     }
@@ -64,26 +61,15 @@ let UsersController = class UsersController {
         return await this.usersService.findOne(req.user.id);
     }
     async updateProfileApi(req, updateUserDto, file) {
-        console.log('=== UPDATE PROFILE DEBUG ===');
-        console.log('Raw body:', req.body);
-        console.log('UpdateUserDto:', updateUserDto);
-        console.log('File:', file ? { filename: file.filename, originalname: file.originalname } : null);
-        console.log('User:', req.user);
         const updateData = {};
         if (file) {
             updateData.profile_image = file.filename;
-            console.log('Adding profile_image to update:', file.filename);
         }
         if (updateUserDto.description !== undefined && updateUserDto.description !== null && updateUserDto.description.trim() !== '') {
             updateData.description = updateUserDto.description;
-            console.log('Adding description to update:', updateUserDto.description);
         }
-        console.log('Final update data:', updateData);
         const result = await this.usersService.update(req.user.id, updateData);
-        console.log('Update result:', result);
         const profile = await this.usersService.findOne(req.user.id);
-        console.log('Final profile:', profile);
-        console.log('=== END DEBUG ===');
         return profile;
     }
     async getProfile(req) {
@@ -91,19 +77,14 @@ let UsersController = class UsersController {
     }
     async getProfileApi(req) {
         const profile = await this.usersService.findOne(req.user.id);
-        console.log('Profile API response:', profile);
-        console.log('Profile image field:', profile?.profile_image);
         return profile;
     }
     async debugUpdateProfile(req, updateUserDto, file) {
-        console.log('Debug upload request:', { updateUserDto, file: file ? file.filename : null });
         if (file) {
             updateUserDto.profile_image = file.filename;
             const filePath = (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads', file.filename);
-            console.log('Expected file path:', filePath, 'exists:', (0, fs_1.existsSync)(filePath));
         }
         const result = await this.usersService.update(req.user?.id || 0, updateUserDto).catch(e => {
-            console.error('Debug update error:', e);
             return null;
         });
         const profile = await this.usersService.findOne(req.user?.id || 0);

@@ -22,7 +22,6 @@ export class UsersService {
       where: { id }
     });
 
-    console.log('findOne raw user from DB:', user);
 
     if (!user) return null;
 
@@ -36,7 +35,6 @@ export class UsersService {
           : null,
     };
 
-    console.log('findOne final result:', result);
     return result;
   }
 
@@ -53,31 +51,24 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    console.log('UsersService.update called with:', { id, updateUserDto });
 
-    // Get current user data first
     const currentUser = await this.prisma.user.findUnique({ where: { id } });
     if (!currentUser) {
       throw new Error('User not found');
     }
     
-    // Only update the fields that are provided and different from current values
     const updateData: any = {};
     
     if (updateUserDto.profile_image !== undefined) {
       updateData.profile_image = updateUserDto.profile_image || null;
-      console.log('Will update profile_image to:', updateData.profile_image);
     }
     
     if (updateUserDto.description !== undefined) {
       updateData.description = updateUserDto.description || null;
-      console.log('Will update description to:', updateData.description);
     }
 
-    console.log('Final update data:', updateData);
 
     if (Object.keys(updateData).length === 0) {
-      console.log('No valid fields to update, returning current user');
       return currentUser;
     }
 
@@ -86,7 +77,6 @@ export class UsersService {
       data: updateData,
     });
 
-    console.log('UsersService.update result:', result);
     return this.findOne(id); // Use findOne to ensure consistent response format
   }
 

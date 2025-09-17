@@ -38,7 +38,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         return JSON.parse(savedUser);
       } catch (error) {
-        console.error('Could not parse user from localStorage', error);
         return null;
       }
     }

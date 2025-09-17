@@ -39,7 +39,6 @@ const AuthorDetail: React.FC = () => {
     setError('')
     const url = URL.createObjectURL(file)
     setPreviewUrl(url)
-    // Auto-upload immediately
     handleUploadImageClick(file)
   }
 
@@ -50,11 +49,9 @@ const AuthorDetail: React.FC = () => {
     const formData = new FormData()
     formData.append('file', file)
     try {
-      console.log('[AuthorDetail] Uploading image for author', id, 'file=', imageFile?.name)
       const response = await api.post(`/api/authors/${id}/image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      console.log('[AuthorDetail] Upload success, updating state with photo', response?.data?.photo)
       setAuthor(prev => prev ? { ...prev, photo: response.data.photo } : null)
       setImageFile(null)
       setImgVersion(v => v + 1)
@@ -63,7 +60,6 @@ const AuthorDetail: React.FC = () => {
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Failed to upload author image'
       setError(msg)
-      console.error('[AuthorDetail] Upload error:', err?.response || err)
       try { alert(`Error: ${msg}`) } catch {}
     } finally {
       setUploading(false)
@@ -180,11 +176,7 @@ const AuthorDetail: React.FC = () => {
           ) : (
             <div className="image-placeholder">No photo set yet. Select a file below to upload.</div>
           )}
-          {author.photo && (
-            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-              Current image src: <a href={buildImageSrc(author.photo)} target="_blank" rel="noreferrer">{buildImageSrc(author.photo)}</a>
-            </div>
-          )}
+          
           {!author.photo && (
             <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
               No photo set for this author yet.
@@ -255,12 +247,6 @@ const AuthorDetail: React.FC = () => {
 
       </section>
 
-      <details style={{ marginTop: 12 }}>
-        <summary>Debug: Raw author JSON</summary>
-        <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: '#444', background: '#f7f7f7', padding: 8, borderRadius: 4 }}>
-          {JSON.stringify(author, null, 2)}
-        </pre>
-      </details>
       
     </Layout>
   )

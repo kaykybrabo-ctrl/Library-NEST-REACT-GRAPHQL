@@ -55,7 +55,6 @@ export class BooksController {
     const limitNum = Number(limit);
     
     const result = await this.booksService.findAll(pageNum, limitNum, search);
-    console.log('BooksController findAllApi result:', JSON.stringify(result, null, 2));
     return result;
   }
 
@@ -155,12 +154,9 @@ export class BooksController {
       throw new Error('No file uploaded');
     }
     try {
-      console.log('[BooksController] upload image => id:', id, 'original:', file.originalname, 'stored:', file.filename, 'size:', file.size);
       await this.booksService.updatePhoto(+id, file.filename);
-      console.log('[BooksController] updatePhoto done for id:', id, 'photo:', file.filename);
       return { photo: file.filename };
     } catch (err) {
-      console.error('[BooksController] updateImageApi error:', err);
       throw err;
     }
   }

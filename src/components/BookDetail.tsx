@@ -52,11 +52,9 @@ const BookDetail: React.FC = () => {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      console.log('[BookDetail] Uploading image for book', id, 'file=', file?.name)
       const uploadResp = await api.post(`/api/books/${id}/image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      console.log('[BookDetail] Upload success, refreshing book')
       setBook(prev => {
         if (!prev) return prev
         const respPhoto = uploadResp?.data?.photo
@@ -71,7 +69,6 @@ const BookDetail: React.FC = () => {
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Failed to upload image'
       setError(msg)
-      console.error('[BookDetail] Upload error:', err?.response || err)
       setUploadStatus(`Error: ${msg}`)
       try { alert(`Error: ${msg}`) } catch {}
     } finally {
@@ -265,12 +262,7 @@ const BookDetail: React.FC = () => {
           <div className="image-placeholder">No image set yet. Select a file below to upload.</div>
         )}
 
-        {book.photo && (
-          <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-            Current image src: <a href={buildImageSrc(book.photo)} target="_blank" rel="noreferrer">{buildImageSrc(book.photo)}</a>
-            <div>Raw book.photo: <code>{String(book.photo)}</code></div>
-          </div>
-        )}
+        
         {!book.photo && (
           <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
             No image set for this book yet.
@@ -301,12 +293,6 @@ const BookDetail: React.FC = () => {
             {uploadStatus}
           </div>
         )}
-        <details style={{ marginTop: 12 }}>
-          <summary>Debug: Raw book JSON</summary>
-          <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: '#444', background: '#f7f7f7', padding: 8, borderRadius: 4 }}>
-            {JSON.stringify(book, null, 2)}
-          </pre>
-        </details>
       </section>
 
       <section className="form-section">

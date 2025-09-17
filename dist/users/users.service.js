@@ -29,7 +29,6 @@ let UsersService = class UsersService {
         const user = await this.prisma.user.findUnique({
             where: { id }
         });
-        console.log('findOne raw user from DB:', user);
         if (!user)
             return null;
         // Return just the raw filename (or null) and let the frontend build the URL.
@@ -40,7 +39,6 @@ let UsersService = class UsersService {
                 ? user.profile_image
                 : null,
         };
-        console.log('findOne final result:', result);
         return result;
     }
     async findByUsername(username) {
@@ -54,32 +52,24 @@ let UsersService = class UsersService {
         });
     }
     async update(id, updateUserDto) {
-        console.log('UsersService.update called with:', { id, updateUserDto });
-        // Get current user data first
         const currentUser = await this.prisma.user.findUnique({ where: { id } });
         if (!currentUser) {
             throw new Error('User not found');
         }
-        // Only update the fields that are provided and different from current values
         const updateData = {};
         if (updateUserDto.profile_image !== undefined) {
             updateData.profile_image = updateUserDto.profile_image || null;
-            console.log('Will update profile_image to:', updateData.profile_image);
         }
         if (updateUserDto.description !== undefined) {
             updateData.description = updateUserDto.description || null;
-            console.log('Will update description to:', updateData.description);
         }
-        console.log('Final update data:', updateData);
         if (Object.keys(updateData).length === 0) {
-            console.log('No valid fields to update, returning current user');
             return currentUser;
         }
         const result = await this.prisma.user.update({
             where: { id },
             data: updateData,
         });
-        console.log('UsersService.update result:', result);
         return this.findOne(id); // Use findOne to ensure consistent response format
     }
     async updateProfileImage(id, filename) {

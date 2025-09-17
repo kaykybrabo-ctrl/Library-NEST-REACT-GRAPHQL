@@ -19,7 +19,6 @@ const Authors: React.FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log('[Authors] isAdmin =', isAdmin)
     fetchAuthors()
   }, [currentPage])
 
@@ -69,7 +68,6 @@ const Authors: React.FC = () => {
     if (!editData.name.trim() || !editingAuthor) return
 
     try {
-      console.log('[Authors] Saving edit id=', editingAuthor)
       await api.patch(`/api/authors/${editingAuthor}`, {
         name_author: editData.name.trim()
       })
@@ -77,7 +75,6 @@ const Authors: React.FC = () => {
       setEditingAuthor(null)
       fetchAuthors()
     } catch (err) {
-      console.error('[Authors] Update failed id=', editingAuthor, err)
       setError('Failed to update author')
       alert('Failed to update author')
     }
@@ -92,12 +89,10 @@ const Authors: React.FC = () => {
     if (!confirm('Are you sure you want to delete this author?')) return
 
     try {
-      console.log('[Authors] Deleting author id=', authorId)
       await api.delete(`/api/authors/${authorId}`)
       alert('Author deleted successfully')
       fetchAuthors()
     } catch (err) {
-      console.error('[Authors] Delete failed id=', authorId, err)
       setError('Failed to delete author')
       alert('Failed to delete author')
     }

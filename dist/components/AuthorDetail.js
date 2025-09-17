@@ -45,7 +45,6 @@ const AuthorDetail = () => {
         setError('');
         const url = URL.createObjectURL(file);
         setPreviewUrl(url);
-        // Auto-upload immediately
         handleUploadImageClick(file);
     };
     const handleUploadImageClick = async (fileParam) => {
@@ -56,11 +55,9 @@ const AuthorDetail = () => {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            console.log('[AuthorDetail] Uploading image for author', id, 'file=', imageFile?.name);
             const response = await api_1.default.post(`/api/authors/${id}/image`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            console.log('[AuthorDetail] Upload success, updating state with photo', response?.data?.photo);
             setAuthor(prev => prev ? { ...prev, photo: response.data.photo } : null);
             setImageFile(null);
             setImgVersion(v => v + 1);
@@ -73,7 +70,6 @@ const AuthorDetail = () => {
         catch (err) {
             const msg = err?.response?.data?.error || err?.message || 'Failed to upload author image';
             setError(msg);
-            console.error('[AuthorDetail] Upload error:', err?.response || err);
             try {
                 alert(`Error: ${msg}`);
             }
@@ -159,9 +155,9 @@ const AuthorDetail = () => {
     return ((0, jsx_runtime_1.jsxs)(Layout_1.default, { title: `Author: ${author.name_author}`, children: [error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), (0, jsx_runtime_1.jsxs)("section", { className: "profile-section image-tight", children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => navigate('/authors'), className: "back-button", children: "\u2190 Back to Authors" }), (0, jsx_runtime_1.jsx)("h2", { children: author.name_author }), (0, jsx_runtime_1.jsxs)("div", { className: "author-info", children: [previewUrl ? ((0, jsx_runtime_1.jsx)("img", { src: previewUrl, alt: "Selected preview", className: "author-image" })) : author.photo ? ((0, jsx_runtime_1.jsx)("img", { src: buildImageSrc(author.photo), alt: author.name_author, className: "author-image", onError: (e) => {
                                     e.currentTarget.onerror = null;
                                     e.currentTarget.src = '/api/uploads/default-user.png';
-                                } }, `${author.photo}-${imgVersion}`)) : ((0, jsx_runtime_1.jsx)("div", { className: "image-placeholder", children: "No photo set yet. Select a file below to upload." })), author.photo && ((0, jsx_runtime_1.jsxs)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: ["Current image src: ", (0, jsx_runtime_1.jsx)("a", { href: buildImageSrc(author.photo), target: "_blank", rel: "noreferrer", children: buildImageSrc(author.photo) })] })), !author.photo && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: "No photo set for this author yet." })), (0, jsx_runtime_1.jsxs)("div", { className: "biography-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Biography" }), editingBio ? ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("textarea", { value: biography, onChange: (e) => setBiography(e.target.value), placeholder: "Enter author biography...", rows: 6, className: "biography-textarea" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleUpdateBiography, disabled: uploading, children: uploading ? 'Saving...' : 'Save Biography' }), (0, jsx_runtime_1.jsx)("button", { onClick: () => {
+                                } }, `${author.photo}-${imgVersion}`)) : ((0, jsx_runtime_1.jsx)("div", { className: "image-placeholder", children: "No photo set yet. Select a file below to upload." })), !author.photo && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: "No photo set for this author yet." })), (0, jsx_runtime_1.jsxs)("div", { className: "biography-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Biography" }), editingBio ? ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("textarea", { value: biography, onChange: (e) => setBiography(e.target.value), placeholder: "Enter author biography...", rows: 6, className: "biography-textarea" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleUpdateBiography, disabled: uploading, children: uploading ? 'Saving...' : 'Save Biography' }), (0, jsx_runtime_1.jsx)("button", { onClick: () => {
                                                             setEditingBio(false);
                                                             setBiography(author?.biography || '');
-                                                        }, className: "cancel-button", children: "Cancel" })] })] })) : ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("p", { className: "biography-text", children: author.biography || 'No biography available yet.' }), isAdmin && ((0, jsx_runtime_1.jsx)("button", { onClick: () => setEditingBio(true), children: "Edit Biography" }))] }))] }), isAdmin && ((0, jsx_runtime_1.jsxs)("div", { className: "image-upload image-upload-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Update Author Photo" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { type: "file", accept: "image/*", onChange: onSelectImage, className: "file-input", disabled: uploading }), imageFile && ((0, jsx_runtime_1.jsxs)("div", { style: { fontSize: 12, color: '#666', marginTop: 4 }, children: ["Selected: ", imageFile.name] })), (0, jsx_runtime_1.jsx)("button", { onClick: () => handleUploadImageClick(), disabled: !imageFile || uploading, children: uploading ? 'Uploading...' : 'Upload Photo' })] })] }))] })] }), (0, jsx_runtime_1.jsxs)("details", { style: { marginTop: 12 }, children: [(0, jsx_runtime_1.jsx)("summary", { children: "Debug: Raw author JSON" }), (0, jsx_runtime_1.jsx)("pre", { style: { whiteSpace: 'pre-wrap', fontSize: 12, color: '#444', background: '#f7f7f7', padding: 8, borderRadius: 4 }, children: JSON.stringify(author, null, 2) })] })] }));
+                                                        }, className: "cancel-button", children: "Cancel" })] })] })) : ((0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("p", { className: "biography-text", children: author.biography || 'No biography available yet.' }), isAdmin && ((0, jsx_runtime_1.jsx)("button", { onClick: () => setEditingBio(true), children: "Edit Biography" }))] }))] }), isAdmin && ((0, jsx_runtime_1.jsxs)("div", { className: "image-upload image-upload-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Update Author Photo" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { type: "file", accept: "image/*", onChange: onSelectImage, className: "file-input", disabled: uploading }), imageFile && ((0, jsx_runtime_1.jsxs)("div", { style: { fontSize: 12, color: '#666', marginTop: 4 }, children: ["Selected: ", imageFile.name] })), (0, jsx_runtime_1.jsx)("button", { onClick: () => handleUploadImageClick(), disabled: !imageFile || uploading, children: uploading ? 'Uploading...' : 'Upload Photo' })] })] }))] })] })] }));
 };
 exports.default = AuthorDetail;

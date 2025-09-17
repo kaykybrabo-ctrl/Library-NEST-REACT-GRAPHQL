@@ -21,8 +21,6 @@ const Books: React.FC = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log('[Books] bundle v2025-09-15T15:02')
-    try { alert('Books bundle v2025-09-15T15:02 loaded'); } catch {}
     fetchAuthors();
   }, []);
 
@@ -101,15 +99,11 @@ const Books: React.FC = () => {
   const handleDeleteBook = async (bookId: number) => {
     if (!confirm('Are you sure you want to delete this book?')) return
     try {
-      console.log('[Books] Deleting book id=', bookId)
-      alert(`Deleting book id= ${bookId}`)
       await api.delete(`/api/books/${bookId}`)
-      console.log('[Books] Deleted OK id=', bookId)
       alert('Book deleted successfully')
       await fetchBooks()
       setError('')
     } catch (err) {
-      console.error('[Books] Delete failed id=', bookId, err)
       setError('Failed to delete book')
       alert('Failed to delete book')
     }
@@ -135,9 +129,6 @@ const Books: React.FC = () => {
 
   return (
     <Layout title="Books">
-      <div style={{backgroundColor: 'red', color: 'white', padding: '10px'}}>
-        DEBUG: totalPages = {totalPages} | books count = {books.length}
-      </div>
       {error && <div className="error-message">{error}</div>}
       
       {isAdmin && (

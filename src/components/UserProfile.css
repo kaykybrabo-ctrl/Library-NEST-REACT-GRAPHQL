@@ -28,14 +28,16 @@
   margin-bottom: 15px;
   border-radius: 8px;
   background-color: #fff;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 12px;
 }
 
 .loan-book-image {
-  margin-right: 15px;
+  margin: 0;
   border-radius: 4px;
+  display: block;
 }
 
 .return-button {
@@ -45,6 +47,23 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.loan-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 560px) {
+  .loan-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .loan-actions {
+    justify-content: flex-start;
+  }
 }
 
 .return-button:hover {
