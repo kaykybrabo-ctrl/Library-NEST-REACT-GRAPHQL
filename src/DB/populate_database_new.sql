@@ -122,8 +122,8 @@ CREATE TABLE users (
 );
 
 INSERT INTO users VALUES
-  (1, 'kayky', '123', 'admin', NULL, NULL, NULL, '2025-08-04 17:36:45'),
-  (2, 'kaue', '123', 'user', NULL, NULL, NULL, '2025-08-04 17:36:45');
+  (1, 'kayky@gmail.com', '123', 'admin', NULL, NULL, NULL, '2025-08-04 17:36:45'),
+  (2, 'kaue@gmail.com', '123', 'user', NULL, NULL, NULL, '2025-08-04 17:36:45');
 
 DROP TABLE IF EXISTS loans;
 CREATE TABLE loans (

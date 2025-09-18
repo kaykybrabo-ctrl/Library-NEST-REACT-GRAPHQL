@@ -23,7 +23,7 @@ const Login: React.FC = () => {
       if (success) {
         navigate('/books')
       } else {
-        setError('Invalid username or password')
+        setError('Invalid email or password')
       }
     } catch (err) {
       setError('Login failed. Please try again.')
@@ -34,7 +34,7 @@ const Login: React.FC = () => {
 
   const handleForgotPassword = async () => {
     if (!username.trim()) {
-      setError('Please enter your username (email) to receive the reset link')
+      setError('Please enter your email to receive the reset link')
       return
     }
     setError('')
@@ -59,14 +59,15 @@ const Login: React.FC = () => {
       <h1>Library System</h1>
       {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
-          type="text"
-          id="username"
+          type="email"
+          id="email"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
           disabled={loading}
+          placeholder="you@example.com"
         />
 
         <label htmlFor="password">Password:</label>

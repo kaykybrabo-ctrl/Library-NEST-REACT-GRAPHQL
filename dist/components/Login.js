@@ -27,7 +27,7 @@ const Login = () => {
                 navigate('/books');
             }
             else {
-                setError('Invalid username or password');
+                setError('Invalid email or password');
             }
         }
         catch (err) {
@@ -39,7 +39,7 @@ const Login = () => {
     };
     const handleForgotPassword = async () => {
         if (!username.trim()) {
-            setError('Please enter your username (email) to receive the reset link');
+            setError('Please enter your email to receive the reset link');
             return;
         }
         setError('');
@@ -66,6 +66,6 @@ const Login = () => {
             setLoading(false);
         }
     };
-    return ((0, jsx_runtime_1.jsxs)("div", { className: "login-container", children: [(0, jsx_runtime_1.jsx)("h1", { children: "Library System" }), error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), (0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmit, children: [(0, jsx_runtime_1.jsx)("label", { htmlFor: "username", children: "Username:" }), (0, jsx_runtime_1.jsx)("input", { type: "text", id: "username", value: username, onChange: (e) => setUsername(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "password", children: "Password:" }), (0, jsx_runtime_1.jsx)("input", { type: "password", id: "password", value: password, onChange: (e) => setPassword(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("button", { type: "submit", disabled: loading, children: loading ? 'Logging in...' : 'Login' }), (0, jsx_runtime_1.jsx)("button", { type: "button", className: "link-button", onClick: handleForgotPassword, disabled: loading, style: { marginTop: 10 }, children: "Forgot password?" }), preview && ((0, jsx_runtime_1.jsxs)("div", { style: { marginTop: 12 }, children: [(0, jsx_runtime_1.jsx)("div", { children: "Preview your reset email (Ethereal):" }), (0, jsx_runtime_1.jsx)("a", { href: preview, target: "_blank", rel: "noopener noreferrer", children: preview })] }))] }), (0, jsx_runtime_1.jsxs)("p", { className: "auth-link", children: ["Don't have an account? ", (0, jsx_runtime_1.jsx)(react_router_dom_1.Link, { to: "/register", children: "Register here" })] })] }));
+    return ((0, jsx_runtime_1.jsxs)("div", { className: "login-container", children: [(0, jsx_runtime_1.jsx)("h1", { children: "Library System" }), error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), (0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmit, children: [(0, jsx_runtime_1.jsx)("label", { htmlFor: "email", children: "Email:" }), (0, jsx_runtime_1.jsx)("input", { type: "email", id: "email", value: username, onChange: (e) => setUsername(e.target.value), required: true, disabled: loading, placeholder: "you@example.com" }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "password", children: "Password:" }), (0, jsx_runtime_1.jsx)("input", { type: "password", id: "password", value: password, onChange: (e) => setPassword(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("button", { type: "submit", disabled: loading, children: loading ? 'Logging in...' : 'Login' }), (0, jsx_runtime_1.jsx)("button", { type: "button", className: "link-button", onClick: handleForgotPassword, disabled: loading, style: { marginTop: 10 }, children: "Forgot password?" }), preview && ((0, jsx_runtime_1.jsxs)("div", { style: { marginTop: 12 }, children: [(0, jsx_runtime_1.jsx)("div", { children: "Preview your reset email (Ethereal):" }), (0, jsx_runtime_1.jsx)("a", { href: preview, target: "_blank", rel: "noopener noreferrer", children: preview })] }))] }), (0, jsx_runtime_1.jsxs)("p", { className: "auth-link", children: ["Don't have an account? ", (0, jsx_runtime_1.jsx)(react_router_dom_1.Link, { to: "/register", children: "Register here" })] })] }));
 };
 exports.default = Login;

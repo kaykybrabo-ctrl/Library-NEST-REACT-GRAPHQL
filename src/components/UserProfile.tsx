@@ -174,7 +174,7 @@ const UserProfile: React.FC = () => {
         {activeTab === 'profile' && (
           <section className="profile-section">
             <h2>Profile Information</h2>
-            <p><strong>Username:</strong> {user?.username || 'Unknown'}</p>
+            <p><strong>Email:</strong> {user?.username || 'Unknown'}</p>
             <p><strong>Role:</strong> {user?.role || 'User'}</p>
 
             <div className="profile-image-container">

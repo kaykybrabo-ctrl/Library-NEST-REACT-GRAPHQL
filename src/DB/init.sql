@@ -375,8 +375,8 @@ LOCK TABLES `users` WRITE;
 INSERT INTO `
 users`
 VALUES
-    (1, 'kayky', '123', 'admin', '2025-08-04 17:36:45'),
-    (2, 'kaue', '123', 'user', '2025-08-04 17:36:45');
+    (1, 'kayky@gmail.com', '123', 'admin', '2025-08-04 17:36:45'),
+    (2, 'kaue@gmail.com', '123', 'user', '2025-08-04 17:36:45');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
