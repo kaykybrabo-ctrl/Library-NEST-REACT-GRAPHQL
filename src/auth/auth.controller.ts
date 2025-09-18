@@ -4,10 +4,16 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UsersService } from '../users/users.service';
+import { MailService } from '../mail/mail.service';
 
 @Controller()
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+    private mailService: MailService,
+  ) {}
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
@@ -75,5 +81,25 @@ export class AuthController {
       role: req.user.role,
       isAdmin: req.user.role === 'admin',
     };
+  }
+
+  @Post('api/forgot-password')
+  async forgotPassword(@Body() body: { username: string }) {
+    const username = (body?.username || '').trim();
+    if (!username) {
+      return { message: 'Username (email) is required' };
+    }
+
+    const genericResponse: any = { message: 'If the account exists, a reset email has been sent' };
+
+    const resetUrl = `${process.env.PUBLIC_WEB_URL || 'http://localhost:3001'}/reset?u=${encodeURIComponent(username)}`;
+    try {
+      const res = await this.mailService.sendPasswordResetEmail(username, { username, resetUrl });
+      if (res?.preview) {
+        genericResponse.preview = res.preview;
+        genericResponse.messageId = res.messageId;
+      }
+    } catch {}
+    return genericResponse;
   }
 }

@@ -257,7 +257,6 @@ nav a.active {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Compact variant for detail pages to avoid large visual border around images */
 .profile-section.image-tight {
     padding: 0;
     margin-bottom: 20px;
@@ -273,7 +272,6 @@ nav a.active {
     margin: 10px 0;
 }
 
-/* Constrain rented book images in My Borrowed Books */
 .loan-book-image {
     width: 80px;
     height: 100px;
@@ -282,7 +280,6 @@ nav a.active {
     display: block;
 }
 
-/* Thumbnail sizes for list/table views only */
 table .book-image, table .author-image,
 .book-list .book-image, .author-list .author-image {
     width: 60px;

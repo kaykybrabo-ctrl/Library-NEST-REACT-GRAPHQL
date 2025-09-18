@@ -19,10 +19,16 @@ const local_auth_guard_1 = require("./local-auth.guard");
 const jwt_auth_guard_1 = require("./jwt-auth.guard");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
+const users_service_1 = require("../users/users.service");
+const mail_service_1 = require("../mail/mail.service");
 let AuthController = class AuthController {
     authService;
-    constructor(authService) {
+    usersService;
+    mailService;
+    constructor(authService, usersService, mailService) {
         this.authService = authService;
+        this.usersService = usersService;
+        this.mailService = mailService;
     }
     async login(req, loginDto) {
         const loginData = await this.authService.login(req.user);
@@ -69,6 +75,23 @@ let AuthController = class AuthController {
             role: req.user.role,
             isAdmin: req.user.role === 'admin',
         };
+    }
+    async forgotPassword(body) {
+        const username = (body?.username || '').trim();
+        if (!username) {
+            return { message: 'Username (email) is required' };
+        }
+        const genericResponse = { message: 'If the account exists, a reset email has been sent' };
+        const resetUrl = `${process.env.PUBLIC_WEB_URL || 'http://localhost:3001'}/reset?u=${encodeURIComponent(username)}`;
+        try {
+            const res = await this.mailService.sendPasswordResetEmail(username, { username, resetUrl });
+            if (res?.preview) {
+                genericResponse.preview = res.preview;
+                genericResponse.messageId = res.messageId;
+            }
+        }
+        catch { }
+        return genericResponse;
     }
 };
 exports.AuthController = AuthController;
@@ -136,7 +159,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "getUserRoleApi", null);
+__decorate([
+    (0, common_1.Post)('api/forgot-password'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassword", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)(),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService,
+        users_service_1.UsersService,
+        mail_service_1.MailService])
 ], AuthController);

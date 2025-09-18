@@ -23,5 +23,9 @@ COPY FRONTEND/ ./FRONTEND/
 RUN npx prisma generate
 RUN npm run build
 
+# Ensure email templates are present in the runtime image
+RUN mkdir -p dist/mail/templates \
+ && cp -R src/mail/templates/* dist/mail/templates/ || true
+
 EXPOSE 8080
 CMD ["node", "dist/main.js"]
