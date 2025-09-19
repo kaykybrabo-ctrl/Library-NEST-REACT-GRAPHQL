@@ -46,9 +46,9 @@ const Login: React.FC = () => {
       if (data.preview) {
         setPreview(data.preview)
       }
-      try { alert('If the account exists, a reset email has been sent.') } catch {}
+      alert('If the account exists, a reset email has been sent.')
     } catch (e) {
-      try { alert('If the account exists, a reset email has been sent.') } catch {}
+      alert('If the account exists, a reset email has been sent.')
     } finally {
       setLoading(false)
     }
@@ -87,9 +87,11 @@ const Login: React.FC = () => {
           Forgot password?
         </button>
         {preview && (
-          <div style={{ marginTop: 12 }}>
-            <div>Preview your reset email (Ethereal):</div>
-            <a href={preview} target="_blank" rel="noopener noreferrer">{preview}</a>
+          <div className="email-preview">
+            <div className="email-preview-title">Preview your reset email (Ethereal):</div>
+            <a className="email-preview-link" href={preview} target="_blank" rel="noopener noreferrer">
+              {preview}
+            </a>
           </div>
         )}
       </form>

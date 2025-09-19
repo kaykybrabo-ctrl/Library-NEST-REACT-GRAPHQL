@@ -36,7 +36,7 @@ const Register: React.FC = () => {
         setSuccess('Registration successful! You can now login.')
         setTimeout(() => navigate('/'), 2000)
       } else {
-        setError('Registration failed. Username may already exist.')
+        setError('Registration failed. Email may already exist.')
       }
     } catch (err) {
       setError('Registration failed. Please try again.')
@@ -51,10 +51,10 @@ const Register: React.FC = () => {
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
       <form onSubmit={handleSubmit}>
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="email">Email:</label>
         <input
-          type="text"
-          id="username"
+          type="email"
+          id="email"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required

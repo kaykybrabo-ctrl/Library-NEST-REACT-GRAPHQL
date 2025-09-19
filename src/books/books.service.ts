@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateBookDto } from "./dto/create-book.dto";
+import { UpdateBookDto } from "./dto/update-book.dto";
 
 @Injectable()
 export class BooksService {
@@ -25,13 +25,15 @@ export class BooksService {
     const pageNum = page || 1;
     const limitNum = limit || 5;
     const offset = (pageNum - 1) * limitNum;
-    
-    const whereClause = search ? {
-      title: {
-        contains: search
-      }
-    } : {};
-    
+
+    const whereClause = search
+      ? {
+          title: {
+            contains: search,
+          },
+        }
+      : {};
+
     const books = await this.prisma.book.findMany({
       where: whereClause,
       skip: offset,
@@ -40,13 +42,13 @@ export class BooksService {
         author: true,
       },
       orderBy: {
-        book_id: 'asc',
+        book_id: "asc",
       },
     });
 
     const totalBooks = await this.prisma.book.count({ where: whereClause });
 
-    const transformedBooks = books.map(book => ({
+    const transformedBooks = books.map((book) => ({
       book_id: book.book_id,
       title: book.title,
       description: book.description,

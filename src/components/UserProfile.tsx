@@ -99,7 +99,7 @@ const UserProfile: React.FC = () => {
       setImgVersion((v) => v + 1)
       setImageFile(null)
       setError('')
-      try { alert('Profile image updated successfully!'); } catch {}
+      alert('Profile image updated successfully!')
     } catch (e) {
       setError('Failed to upload image')
     } finally {

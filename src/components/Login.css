@@ -13,3 +13,29 @@
   font: inherit;
   display: inline-block;
 }
+
+.email-preview {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f7f9fc;
+  border: 1px solid #e3e8f2;
+  border-radius: 6px;
+}
+
+.email-preview-title {
+  font-size: 0.95rem;
+  color: #1f2a44;
+  margin-bottom: 6px;
+}
+
+.email-preview-link {
+  display: inline-block;
+  color: #0b5cab;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.email-preview-link:hover {
+  text-decoration: underline;
+}

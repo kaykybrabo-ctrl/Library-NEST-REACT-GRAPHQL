@@ -1,25 +1,26 @@
-import { Module } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
-import { PrismaModule } from '../prisma/prisma.module';
+import { Module } from "@nestjs/common";
+import { MulterModule } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { extname, join } from "path";
+import { UsersService } from "./users.service";
+import { UsersController } from "./users.controller";
+import { PrismaModule } from "../prisma/prisma.module";
 
 @Module({
   imports: [
     PrismaModule,
     MulterModule.register({
       storage: diskStorage({
-        destination: join(__dirname, '..', '..', 'FRONTEND', 'uploads'),
+        destination: join(__dirname, "..", "..", "FRONTEND", "uploads"),
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
           callback(null, uniqueSuffix + extname(file.originalname));
         },
       }),
       fileFilter: (req, file, callback) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-          return callback(new Error('Only image files are allowed!'), false);
+          return callback(new Error("Only image files are allowed!"), false);
         }
         callback(null, true);
       },
@@ -32,4 +33,4 @@ import { PrismaModule } from '../prisma/prisma.module';
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

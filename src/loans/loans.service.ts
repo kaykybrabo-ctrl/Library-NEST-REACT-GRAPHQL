@@ -1,6 +1,10 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateLoanDto } from './dto/create-loan.dto';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateLoanDto } from "./dto/create-loan.dto";
 
 @Injectable()
 export class LoansService {
@@ -15,7 +19,7 @@ export class LoansService {
     });
 
     if (existingLoan) {
-      throw new ConflictException('Book already rented by you');
+      throw new ConflictException("Book already rented by you");
     }
 
     return this.prisma.loan.create({
@@ -39,11 +43,11 @@ export class LoansService {
         user: true,
       },
       orderBy: {
-        loan_date: 'desc',
+        loan_date: "desc",
       },
     });
 
-    return loans.map(loan => ({
+    return loans.map((loan) => ({
       loans_id: loan.loans_id,
       loan_date: loan.loan_date,
       book_id: loan.book.book_id,
@@ -59,7 +63,7 @@ export class LoansService {
         where: { loans_id: loanId },
       });
     } catch (error) {
-      throw new NotFoundException('Loan not found');
+      throw new NotFoundException("Loan not found");
     }
   }
 }

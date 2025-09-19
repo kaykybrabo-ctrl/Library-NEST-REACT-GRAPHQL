@@ -65,12 +65,10 @@ const BookDetail: React.FC = () => {
       setPreviewUrl('')
       setImgVersion(v => v + 1)
       setUploadStatus('Image updated successfully!')
-      try { alert('Book image updated successfully!') } catch {}
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Failed to upload image'
       setError(msg)
       setUploadStatus(`Error: ${msg}`)
-      try { alert(`Error: ${msg}`) } catch {}
     } finally {
       setUploading(false)
     }
@@ -143,11 +141,11 @@ const BookDetail: React.FC = () => {
       fetchBook()
       setImageFile(null)
       setImgVersion(v => v + 1)
-      try { alert('Book image updated successfully!') } catch {}
+      alert('Book image updated successfully!')
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Failed to upload image'
       setError(msg)
-      try { alert(`Error: ${msg}`) } catch {}
+      alert(`Error: ${msg}`)
     } finally {
       setUploading(false)
     }

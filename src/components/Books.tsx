@@ -251,7 +251,6 @@ const Books: React.FC = () => {
 
           {totalPages > 1 && (
             <div className="pagination">
-              <p>Total Pages: {totalPages} | Current Page: {currentPage + 1}</p>
               {Array.from({ length: totalPages }, (_, i) => (
                 <button
                   key={i}

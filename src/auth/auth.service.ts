@@ -1,8 +1,12 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { UsersService } from "../users/users.service";
+import { LoginDto } from "./dto/login.dto";
+import { RegisterDto } from "./dto/register.dto";
 
 @Injectable()
 export class AuthService {
@@ -31,17 +35,19 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.usersService.findByUsername(registerDto.username);
+    const existingUser = await this.usersService.findByUsername(
+      registerDto.username,
+    );
     if (existingUser) {
-      throw new ConflictException('Username already exists');
+      throw new ConflictException("Username already exists");
     }
 
     const user = await this.usersService.create({
       username: registerDto.username.trim().toLowerCase(),
       password: registerDto.password,
-      role: 'user',
+      role: "user",
     });
 
-    return { message: 'User created successfully' };
+    return { message: "User created successfully" };
   }
 }

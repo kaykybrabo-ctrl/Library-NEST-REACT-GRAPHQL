@@ -9,6 +9,7 @@ import Authors from './components/Authors'
 import BookDetail from './components/BookDetail'
 import AuthorDetail from './components/AuthorDetail'
 import UserProfile from './components/UserProfile'
+import ResetPassword from './components/ResetPassword'
 import './index.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Root />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/reset" element={<ResetPassword />} />
           <Route path="/books" element={
             <ProtectedRoute>
               <Books />

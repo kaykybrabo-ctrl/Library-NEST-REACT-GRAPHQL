@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateReviewDto } from './dto/create-review.dto';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateReviewDto } from "./dto/create-review.dto";
 
 @Injectable()
 export class ReviewsService {
@@ -11,11 +15,11 @@ export class ReviewsService {
     const userExists = await this.checkUserExists(createReviewDto.user_id);
 
     if (!bookExists) {
-      throw new NotFoundException('Book not found');
+      throw new NotFoundException("Book not found");
     }
 
     if (!userExists) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     return this.prisma.review.create({
@@ -34,11 +38,11 @@ export class ReviewsService {
         book: true,
       },
       orderBy: {
-        review_date: 'desc',
+        review_date: "desc",
       },
     });
 
-    return reviews.map(review => ({
+    return reviews.map((review) => ({
       review_id: review.review_id,
       book_id: review.book_id,
       user_id: review.user_id,

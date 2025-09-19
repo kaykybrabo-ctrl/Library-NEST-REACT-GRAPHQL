@@ -1,5 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from "@nestjs/common";
+import { JwtAuthGuard } from "./jwt-auth.guard";
 
 @Injectable()
 export class AdminGuard extends JwtAuthGuard implements CanActivate {
@@ -12,8 +17,8 @@ export class AdminGuard extends JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (user?.role !== 'admin') {
-      throw new ForbiddenException('Admin access required');
+    if (user?.role !== "admin") {
+      throw new ForbiddenException("Admin access required");
     }
 
     return true;

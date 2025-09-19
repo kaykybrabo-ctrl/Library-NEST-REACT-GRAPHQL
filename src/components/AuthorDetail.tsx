@@ -56,11 +56,11 @@ const AuthorDetail: React.FC = () => {
       setImageFile(null)
       setImgVersion(v => v + 1)
       setError('')
-      try { alert('Author image updated successfully!') } catch {}
+      alert('Author image updated successfully!')
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Failed to upload author image'
       setError(msg)
-      try { alert(`Error: ${msg}`) } catch {}
+      alert(`Error: ${msg}`)
     } finally {
       setUploading(false)
     }
@@ -105,7 +105,7 @@ const AuthorDetail: React.FC = () => {
       setImageFile(null)
       setError('')
       setImgVersion(v => v + 1)
-      try { alert('Author image updated successfully!') } catch {}
+      alert('Author image updated successfully!')
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to upload author image')
     } finally {
