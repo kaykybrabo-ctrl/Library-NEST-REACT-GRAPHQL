@@ -49,7 +49,6 @@ const multer_1 = require("multer");
 const mailer_1 = require("@nestjs-modules/mailer");
 const pug_adapter_1 = require("@nestjs-modules/mailer/dist/adapters/pug.adapter");
 const nodemailer = __importStar(require("nodemailer"));
-const fs = __importStar(require("fs"));
 const books_module_1 = require("./books/books.module");
 const authors_module_1 = require("./authors/authors.module");
 const users_module_1 = require("./users/users.module");
@@ -70,24 +69,20 @@ exports.AppModule = AppModule = __decorate([
             }),
             mailer_1.MailerModule.forRootAsync({
                 useFactory: async () => {
-                    let host = process.env.SMTP_HOST || 'smtp.ethereal.email';
+                    let host = process.env.SMTP_HOST || "smtp.ethereal.email";
                     let port = Number(process.env.SMTP_PORT || 587);
-                    let secure = process.env.SMTP_SECURE === 'true' ? true : false;
-                    let user = process.env.SMTP_USER || '';
-                    let pass = process.env.SMTP_PASS || '';
+                    let secure = process.env.SMTP_SECURE === "true" ? true : false;
+                    let user = process.env.SMTP_USER || "";
+                    let pass = process.env.SMTP_PASS || "";
                     if (!user || !pass) {
                         const testAccount = await nodemailer.createTestAccount();
                         user = testAccount.user;
                         pass = testAccount.pass;
-                        host = 'smtp.ethereal.email';
+                        host = "smtp.ethereal.email";
                         port = 587;
                         secure = false;
-                        console.log('[Mail] Using Ethereal test account:', { user, pass, web: 'https://ethereal.email' });
                     }
-                    const templateDir = (0, path_1.join)(process.cwd(), 'src', 'mail', 'templates');
-                    if (!fs.existsSync(templateDir)) {
-                        console.warn('[Mail] WARNING: mail templates directory not found at', templateDir);
-                    }
+                    const templateDir = (0, path_1.join)(process.cwd(), "src", "mail", "templates");
                     return {
                         transport: {
                             host,
@@ -109,23 +104,33 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             mail_module_1.MailModule,
             serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '..', 'FRONTEND', 'uploads'),
-                serveRoot: '/api/uploads',
-                serveStaticOptions: { cacheControl: false, etag: false, lastModified: false, maxAge: 0 },
+                rootPath: (0, path_1.join)(__dirname, "..", "FRONTEND", "uploads"),
+                serveRoot: "/api/uploads",
+                serveStaticOptions: {
+                    cacheControl: false,
+                    etag: false,
+                    lastModified: false,
+                    maxAge: 0,
+                },
             }),
             serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '..', 'FRONTEND', 'react-dist'),
-                exclude: ['/api*', '/api/*'],
-                serveStaticOptions: { cacheControl: false, etag: false, lastModified: false, maxAge: 0 },
+                rootPath: (0, path_1.join)(__dirname, "..", "FRONTEND", "react-dist"),
+                exclude: ["/api*", "/api/*"],
+                serveStaticOptions: {
+                    cacheControl: false,
+                    etag: false,
+                    lastModified: false,
+                    maxAge: 0,
+                },
             }),
             platform_express_1.MulterModule.register({
                 storage: (0, multer_1.diskStorage)({
                     destination: (req, file, cb) => {
-                        const uploadPath = (0, path_1.join)(__dirname, '..', 'FRONTEND', 'uploads');
+                        const uploadPath = (0, path_1.join)(__dirname, "..", "FRONTEND", "uploads");
                         cb(null, uploadPath);
                     },
                     filename: (req, file, cb) => {
-                        const filename = `${Date.now()}-${Math.floor(Math.random() * 1000000000)}.${file.originalname.split('.').pop()}`;
+                        const filename = `${Date.now()}-${Math.floor(Math.random() * 1000000000)}.${file.originalname.split(".").pop()}`;
                         cb(null, filename);
                     },
                 }),

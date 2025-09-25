@@ -29,35 +29,35 @@ let ReviewsController = class ReviewsController {
     }
     async create(createReviewDto) {
         await this.reviewsService.create(createReviewDto);
-        return { message: 'Review created successfully' };
+        return { message: "Review created successfully" };
     }
     async createApi(createReviewDto) {
         await this.reviewsService.create(createReviewDto);
-        return { message: 'Review created successfully' };
+        return { message: "Review created successfully" };
     }
 };
 exports.ReviewsController = ReviewsController;
 __decorate([
-    (0, common_1.Get)('reviews'),
+    (0, common_1.Get)("reviews"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ReviewsController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('api/reviews'),
+    (0, common_1.Get)("api/reviews"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ReviewsController.prototype, "findAllApi", null);
 __decorate([
-    (0, common_1.Post)('reviews'),
+    (0, common_1.Post)("reviews"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_review_dto_1.CreateReviewDto]),
     __metadata("design:returntype", Promise)
 ], ReviewsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Post)('api/reviews'),
+    (0, common_1.Post)("api/reviews"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_review_dto_1.CreateReviewDto]),

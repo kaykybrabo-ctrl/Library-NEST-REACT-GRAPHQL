@@ -12,7 +12,7 @@ export class MailService {
     try {
       const info = await this.mailer.sendMail({
         to,
-        subject: "Welcome to PedBook",
+        subject: "Bem-vindo(a) ao PedBook",
         template: "welcome",
         context,
       });
@@ -58,17 +58,17 @@ export class MailService {
       const html = pug.compileFile(templatePath)(context);
       const info = await this.mailer.sendMail({
         to,
-        subject: "Reset your PedBook password",
+        subject: "Redefina sua senha do PedBook",
         html,
-        text: `We received a request to reset your PedBook password. Open this link to proceed: ${context.resetUrl}`,
+        text: `Recebemos uma solicitação para redefinir sua senha do PedBook. Abra este link para continuar: ${context.resetUrl}`,
       });
       const preview = nodemailer.getTestMessageUrl(info);
       return { messageId: info?.messageId, preview };
     } catch (err) {
       const info2 = await this.mailer.sendMail({
         to,
-        subject: "Reset your PedBook password",
-        text: `We received a request to reset your PedBook password. Open this link to proceed: ${context.resetUrl}`,
+        subject: "Redefina sua senha do PedBook",
+        text: `Recebemos uma solicitação para redefinir sua senha do PedBook. Abra este link para continuar: ${context.resetUrl}`,
       });
       const preview2 = nodemailer.getTestMessageUrl(info2);
       return { messageId: info2?.messageId, preview: preview2 };

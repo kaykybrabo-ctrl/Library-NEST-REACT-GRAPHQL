@@ -21,14 +21,18 @@ const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
 const users_service_1 = require("../users/users.service");
 const mail_service_1 = require("../mail/mail.service");
+const reset_password_dto_1 = require("./dto/reset-password.dto");
+const jwt_1 = require("@nestjs/jwt");
 let AuthController = class AuthController {
     authService;
     usersService;
     mailService;
-    constructor(authService, usersService, mailService) {
+    jwtService;
+    constructor(authService, usersService, mailService, jwtService) {
         this.authService = authService;
         this.usersService = usersService;
         this.mailService = mailService;
+        this.jwtService = jwtService;
     }
     async login(req, loginDto) {
         const loginData = await this.authService.login(req.user);
@@ -67,24 +71,30 @@ let AuthController = class AuthController {
     getUserRole(req) {
         return {
             role: req.user.role,
-            isAdmin: req.user.role === 'admin',
+            isAdmin: req.user.role === "admin",
         };
     }
     getUserRoleApi(req) {
         return {
             role: req.user.role,
-            isAdmin: req.user.role === 'admin',
+            isAdmin: req.user.role === "admin",
         };
     }
     async forgotPassword(body) {
-        const username = (body?.username || '').trim();
+        const username = (body?.username || "").trim();
         if (!username) {
-            return { message: 'Username (email) is required' };
+            return { message: "Nome de usuário (e-mail) é obrigatório" };
         }
-        const genericResponse = { message: 'If the account exists, a reset email has been sent' };
-        const resetUrl = `${process.env.PUBLIC_WEB_URL || 'http://localhost:3001'}/reset?u=${encodeURIComponent(username)}`;
+        const genericResponse = {
+            message: "Se a conta existir, um e-mail de redefinição foi enviado",
+        };
+        const token = this.jwtService.sign({ username, purpose: "pwd_reset" }, { expiresIn: "15m" });
+        const resetUrl = `${process.env.PUBLIC_WEB_URL || "http://localhost:3001"}/reset?u=${encodeURIComponent(username)}&t=${encodeURIComponent(token)}`;
         try {
-            const res = await this.mailService.sendPasswordResetEmail(username, { username, resetUrl });
+            const res = await this.mailService.sendPasswordResetEmail(username, {
+                username,
+                resetUrl,
+            });
             if (res?.preview) {
                 genericResponse.preview = res.preview;
                 genericResponse.messageId = res.messageId;
@@ -93,10 +103,47 @@ let AuthController = class AuthController {
         catch { }
         return genericResponse;
     }
+    async resetPassword(dto, req) {
+        const newPassword = (dto?.newPassword || "").trim();
+        if (!newPassword) {
+            return { ok: false, message: "Nova senha é obrigatória" };
+        }
+        let username = (dto?.username || "").trim().toLowerCase();
+        const token = (dto?.token || "").trim();
+        if (token) {
+            try {
+                const payload = this.jwtService.verify(token);
+                if (payload?.purpose !== "pwd_reset") {
+                    return { ok: false, message: "Token inválido" };
+                }
+                username = (payload?.username || "").toLowerCase();
+            }
+            catch {
+                return { ok: false, message: "Token inválido ou expirado" };
+            }
+        }
+        if (!username) {
+            return { ok: false, message: "Usuário ou token é obrigatório" };
+        }
+        try {
+            const user = await this.usersService.findByUsername(username);
+            if (!user) {
+                return {
+                    ok: true,
+                    message: "A senha foi atualizada caso a conta exista",
+                };
+            }
+            await this.usersService.updatePasswordByUsername(username, newPassword);
+            return { ok: true, message: "Senha atualizada com sucesso" };
+        }
+        catch (e) {
+            return { ok: false, message: "Falha ao redefinir a senha" };
+        }
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
-    (0, common_1.Post)('login'),
+    (0, common_1.Post)("login"),
     (0, common_1.UseGuards)(local_auth_guard_1.LocalAuthGuard),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -105,7 +152,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    (0, common_1.Post)('api/login'),
+    (0, common_1.Post)("api/login"),
     (0, common_1.UseGuards)(local_auth_guard_1.LocalAuthGuard),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -114,14 +161,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginApi", null);
 __decorate([
-    (0, common_1.Post)('register'),
+    (0, common_1.Post)("register"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 __decorate([
-    (0, common_1.Post)('api/register'),
+    (0, common_1.Post)("api/register"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
@@ -129,7 +176,7 @@ __decorate([
 ], AuthController.prototype, "registerApi", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('user/me'),
+    (0, common_1.Get)("user/me"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -137,7 +184,7 @@ __decorate([
 ], AuthController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('api/user/me'),
+    (0, common_1.Get)("api/user/me"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -145,7 +192,7 @@ __decorate([
 ], AuthController.prototype, "getProfileApi", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('user/role'),
+    (0, common_1.Get)("user/role"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -153,22 +200,31 @@ __decorate([
 ], AuthController.prototype, "getUserRole", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('api/user/role'),
+    (0, common_1.Get)("api/user/role"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "getUserRoleApi", null);
 __decorate([
-    (0, common_1.Post)('api/forgot-password'),
+    (0, common_1.Post)("api/forgot-password"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)("api/reset-password"),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         users_service_1.UsersService,
-        mail_service_1.MailService])
+        mail_service_1.MailService,
+        jwt_1.JwtService])
 ], AuthController);

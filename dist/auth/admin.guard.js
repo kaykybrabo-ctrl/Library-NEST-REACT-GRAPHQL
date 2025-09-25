@@ -17,8 +17,8 @@ let AdminGuard = class AdminGuard extends jwt_auth_guard_1.JwtAuthGuard {
         }
         const request = context.switchToHttp().getRequest();
         const user = request.user;
-        if (user?.role !== 'admin') {
-            throw new common_1.ForbiddenException('Admin access required');
+        if (user?.role !== "admin") {
+            throw new common_1.ForbiddenException("Admin access required");
         }
         return true;
     }

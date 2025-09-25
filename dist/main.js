@@ -18,16 +18,16 @@ async function bootstrap() {
     app.enableCors({
         origin: true,
         credentials: true,
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-        allowedHeaders: 'Authorization,Content-Type',
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+        allowedHeaders: "Authorization,Content-Type",
     });
     app.use((0, express_session_1.default)({
-        secret: process.env.SESSION_SECRET || 'your-secret-key',
+        secret: process.env.SESSION_SECRET || "your-secret-key",
         resave: false,
         saveUninitialized: false,
         cookie: { secure: false },
     }));
     const port = process.env.PORT || 3001;
-    await app.listen(port, '0.0.0.0');
+    await app.listen(port, "0.0.0.0");
 }
 bootstrap();

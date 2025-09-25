@@ -34,11 +34,11 @@ let UsersController = class UsersController {
     }
     async addToFavorites(bookId, req) {
         await this.usersService.updateFavoriteBook(req.user.username, +bookId);
-        return { message: 'Book added to favorites' };
+        return { message: "Book added to favorites" };
     }
     async addToFavoritesApi(bookId, req) {
         await this.usersService.updateFavoriteBook(req.user.username, +bookId);
-        return { message: 'Book added to favorites' };
+        return { message: "Book added to favorites" };
     }
     async updateProfile(req, updateUserDto, file) {
         if (file) {
@@ -50,7 +50,7 @@ let UsersController = class UsersController {
     }
     async uploadImage(req, file, body) {
         if (!file) {
-            throw new Error('No file provided');
+            throw new Error("No file provided");
         }
         const currentUser = await this.usersService.findByIdRaw(req.user.id);
         await this.usersService.updateProfileImage(req.user.id, file.filename);
@@ -65,7 +65,9 @@ let UsersController = class UsersController {
         if (file) {
             updateData.profile_image = file.filename;
         }
-        if (updateUserDto.description !== undefined && updateUserDto.description !== null && updateUserDto.description.trim() !== '') {
+        if (updateUserDto.description !== undefined &&
+            updateUserDto.description !== null &&
+            updateUserDto.description.trim() !== "") {
             updateData.description = updateUserDto.description;
         }
         const result = await this.usersService.update(req.user.id, updateData);
@@ -82,9 +84,11 @@ let UsersController = class UsersController {
     async debugUpdateProfile(req, updateUserDto, file) {
         if (file) {
             updateUserDto.profile_image = file.filename;
-            const filePath = (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads', file.filename);
+            const filePath = (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads", file.filename);
         }
-        const result = await this.usersService.update(req.user?.id || 0, updateUserDto).catch(e => {
+        const result = await this.usersService
+            .update(req.user?.id || 0, updateUserDto)
+            .catch((e) => {
             return null;
         });
         const profile = await this.usersService.findOne(req.user?.id || 0);
@@ -94,7 +98,7 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('users/favorite'),
+    (0, common_1.Get)("users/favorite"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -102,7 +106,7 @@ __decorate([
 ], UsersController.prototype, "getFavoriteBook", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('api/users/favorite'),
+    (0, common_1.Get)("api/users/favorite"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -110,8 +114,8 @@ __decorate([
 ], UsersController.prototype, "getFavoriteBookApi", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)('favorite/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)("favorite/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
@@ -119,8 +123,8 @@ __decorate([
 ], UsersController.prototype, "addToFavorites", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)('api/favorite/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)("api/favorite/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
@@ -128,8 +132,8 @@ __decorate([
 ], UsersController.prototype, "addToFavoritesApi", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('profile_image')),
-    (0, common_1.Post)('update-profile'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("profile_image")),
+    (0, common_1.Post)("update-profile"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.UploadedFile)()),
@@ -139,8 +143,8 @@ __decorate([
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('image')),
-    (0, common_1.Post)('api/upload-image'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("image")),
+    (0, common_1.Post)("api/upload-image"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.UploadedFile)()),
     __param(2, (0, common_1.Body)()),
@@ -150,7 +154,7 @@ __decorate([
 ], UsersController.prototype, "uploadImage", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)('api/save-description'),
+    (0, common_1.Post)("api/save-description"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -159,8 +163,8 @@ __decorate([
 ], UsersController.prototype, "saveDescription", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('profile_image')),
-    (0, common_1.Post)('api/update-profile'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("profile_image")),
+    (0, common_1.Post)("api/update-profile"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.UploadedFile)()),
@@ -170,7 +174,7 @@ __decorate([
 ], UsersController.prototype, "updateProfileApi", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('get-profile'),
+    (0, common_1.Get)("get-profile"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -178,15 +182,15 @@ __decorate([
 ], UsersController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Get)('api/get-profile'),
+    (0, common_1.Get)("api/get-profile"),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getProfileApi", null);
 __decorate([
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('profile_image')),
-    (0, common_1.Post)('api/debug/update-profile'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("profile_image")),
+    (0, common_1.Post)("api/debug/update-profile"),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.UploadedFile)()),

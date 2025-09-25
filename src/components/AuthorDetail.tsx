@@ -31,7 +31,7 @@ const AuthorDetail: React.FC = () => {
     const file = event.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file (JPG, PNG, GIF, WebP)')
+      setError('Selecione um arquivo de imagem válido (JPG, PNG, GIF, WebP)')
       event.currentTarget.value = ''
       return
     }
@@ -56,11 +56,11 @@ const AuthorDetail: React.FC = () => {
       setImageFile(null)
       setImgVersion(v => v + 1)
       setError('')
-      alert('Author image updated successfully!')
+      alert('Imagem do autor atualizada com sucesso!')
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.message || 'Failed to upload author image'
+      const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem do autor'
       setError(msg)
-      alert(`Error: ${msg}`)
+      alert(`Erro: ${msg}`)
     } finally {
       setUploading(false)
     }
@@ -82,7 +82,7 @@ const AuthorDetail: React.FC = () => {
       setBiography(response.data.biography || '')
       setLoading(false)
     } catch (err) {
-      setError('Failed to fetch author details')
+      setError('Falha ao buscar detalhes do autor')
       setLoading(false)
     }
   }
@@ -105,9 +105,9 @@ const AuthorDetail: React.FC = () => {
       setImageFile(null)
       setError('')
       setImgVersion(v => v + 1)
-      alert('Author image updated successfully!')
+      alert('Imagem do autor atualizada com sucesso!')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to upload author image')
+      setError(err.response?.data?.error || 'Falha ao enviar a imagem do autor')
     } finally {
       setUploading(false)
     }
@@ -123,9 +123,9 @@ const AuthorDetail: React.FC = () => {
       setAuthor(prev => prev ? { ...prev, biography: biography } : null)
       setEditingBio(false)
       setError('')
-      alert('Biography updated successfully!')
+      alert('Biografia atualizada com sucesso!')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update biography')
+      setError(err.response?.data?.error || 'Falha ao atualizar a biografia')
     } finally {
       setUploading(false)
     }
@@ -133,35 +133,35 @@ const AuthorDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout title="Author Details">
-        <div className="loading">Loading author details...</div>
+      <Layout title="Detalhes do Autor">
+        <div className="loading">Carregando detalhes do autor...</div>
       </Layout>
     )
   }
 
   if (!author) {
     return (
-      <Layout title="Author Details">
-        <div className="error-message">Author not found</div>
-        <button onClick={() => navigate('/authors')}>Back to Authors</button>
+      <Layout title="Detalhes do Autor">
+        <div className="error-message">Autor não encontrado</div>
+        <button onClick={() => navigate('/authors')}>Voltar para Autores</button>
       </Layout>
     )
   }
 
   return (
-    <Layout title={`Author: ${author.name_author}`}>
+    <Layout title={`Autor: ${author.name_author}`}>
       {error && <div className="error-message">{error}</div>}
 
       <section className="profile-section image-tight">
         <button onClick={() => navigate('/authors')} className="back-button">
-          ← Back to Authors
+          ← Voltar para Autores
         </button>
 
         <h2>{author.name_author}</h2>
 
         <div className="author-info">
           {previewUrl ? (
-            <img src={previewUrl} alt="Selected preview" className="author-image" />
+            <img src={previewUrl} alt="Pré-visualização selecionada" className="author-image" />
           ) : author.photo ? (
             <img
               src={buildImageSrc(author.photo)}
@@ -174,29 +174,29 @@ const AuthorDetail: React.FC = () => {
               }}
             />
           ) : (
-            <div className="image-placeholder">No photo set yet. Select a file below to upload.</div>
+            <div className="image-placeholder">Nenhuma foto definida ainda. Selecione um arquivo abaixo para enviar.</div>
           )}
           
           {!author.photo && (
             <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-              No photo set for this author yet.
+              Nenhuma foto definida para este autor ainda.
             </div>
           )}
 
           <div className="biography-section">
-            <h3>Biography</h3>
+            <h3>Biografia</h3>
             {editingBio ? (
               <div>
                 <textarea
                   value={biography}
                   onChange={(e) => setBiography(e.target.value)}
-                  placeholder="Enter author biography..."
+                  placeholder="Digite a biografia do autor..."
                   rows={6}
                   className="biography-textarea"
                 />
                 <div>
                   <button onClick={handleUpdateBiography} disabled={uploading}>
-                    {uploading ? 'Saving...' : 'Save Biography'}
+                    {uploading ? 'Salvando...' : 'Salvar Biografia'}
                   </button>
                   <button
                     onClick={() => {
@@ -205,18 +205,18 @@ const AuthorDetail: React.FC = () => {
                     }}
                     className="cancel-button"
                   >
-                    Cancel
+                    Cancelar
                   </button>
                 </div>
               </div>
             ) : (
               <div>
                 <p className="biography-text">
-                  {author.biography || 'No biography available yet.'}
+                  {author.biography || 'Nenhuma biografia disponível ainda.'}
                 </p>
                 {isAdmin && (
                   <button onClick={() => setEditingBio(true)}>
-                    Edit Biography
+                    Editar Biografia
                   </button>
                 )}
               </div>
@@ -225,7 +225,7 @@ const AuthorDetail: React.FC = () => {
 
           {isAdmin && (
             <div className="image-upload image-upload-section">
-              <h3>Update Author Photo</h3>
+              <h3>Atualizar Foto do Autor</h3>
               <div>
                 <input
                   type="file"
@@ -235,10 +235,10 @@ const AuthorDetail: React.FC = () => {
                   disabled={uploading}
                 />
                 {imageFile && (
-                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selected: {imageFile.name}</div>
+                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selecionado: {imageFile.name}</div>
                 )}
                 <button onClick={() => handleUploadImageClick()} disabled={!imageFile || uploading}>
-                  {uploading ? 'Uploading...' : 'Upload Photo'}
+                  {uploading ? 'Enviando...' : 'Enviar Foto'}
                 </button>
               </div>
             </div>

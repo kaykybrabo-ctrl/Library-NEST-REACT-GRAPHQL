@@ -19,31 +19,31 @@ const Register = () => {
         setError('');
         setSuccess('');
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError('As senhas não coincidem');
             return;
         }
         if (password.length < 3) {
-            setError('Password must be at least 3 characters long');
+            setError('A senha deve ter pelo menos 3 caracteres');
             return;
         }
         setLoading(true);
         try {
             const success = await register(username, password);
             if (success) {
-                setSuccess('Registration successful! You can now login.');
+                setSuccess('Registro realizado com sucesso! Você já pode entrar.');
                 setTimeout(() => navigate('/'), 2000);
             }
             else {
-                setError('Registration failed. Username may already exist.');
+                setError('Falha no registro. O e-mail pode já estar em uso.');
             }
         }
         catch (err) {
-            setError('Registration failed. Please try again.');
+            setError('Falha no registro. Tente novamente.');
         }
         finally {
             setLoading(false);
         }
     };
-    return ((0, jsx_runtime_1.jsxs)("div", { className: "login-container", children: [(0, jsx_runtime_1.jsx)("h1", { children: "Register - Library System" }), error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), success && (0, jsx_runtime_1.jsx)("div", { className: "success-message", children: success }), (0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmit, children: [(0, jsx_runtime_1.jsx)("label", { htmlFor: "username", children: "Username:" }), (0, jsx_runtime_1.jsx)("input", { type: "text", id: "username", value: username, onChange: (e) => setUsername(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "password", children: "Password:" }), (0, jsx_runtime_1.jsx)("input", { type: "password", id: "password", value: password, onChange: (e) => setPassword(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "confirmPassword", children: "Confirm Password:" }), (0, jsx_runtime_1.jsx)("input", { type: "password", id: "confirmPassword", value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("button", { type: "submit", disabled: loading, children: loading ? 'Registering...' : 'Register' })] }), (0, jsx_runtime_1.jsxs)("p", { className: "auth-link", children: ["Already have an account? ", (0, jsx_runtime_1.jsx)(react_router_dom_1.Link, { to: "/", children: "Login here" })] })] }));
+    return ((0, jsx_runtime_1.jsxs)("div", { className: "login-container", children: [(0, jsx_runtime_1.jsx)("h1", { children: "Cadastro - PedBook" }), error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), success && (0, jsx_runtime_1.jsx)("div", { className: "success-message", children: success }), (0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmit, children: [(0, jsx_runtime_1.jsx)("label", { htmlFor: "email", children: "E-mail:" }), (0, jsx_runtime_1.jsx)("input", { type: "email", id: "email", value: username, onChange: (e) => setUsername(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "password", children: "Senha:" }), (0, jsx_runtime_1.jsx)("input", { type: "password", id: "password", value: password, onChange: (e) => setPassword(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "confirmPassword", children: "Confirmar senha:" }), (0, jsx_runtime_1.jsx)("input", { type: "password", id: "confirmPassword", value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value), required: true, disabled: loading }), (0, jsx_runtime_1.jsx)("button", { type: "submit", disabled: loading, children: loading ? 'Cadastrando...' : 'Cadastrar' })] }), (0, jsx_runtime_1.jsxs)("p", { className: "auth-link", children: ["J\u00E1 tem uma conta? ", (0, jsx_runtime_1.jsx)(react_router_dom_1.Link, { to: "/", children: "Entre aqui" })] })] }));
 };
 exports.default = Register;

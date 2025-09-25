@@ -18,23 +18,23 @@ const path_1 = require("path");
 const fs_1 = require("fs");
 let UploadsController = class UploadsController {
     getUpload(filename, res) {
-        const filePath = (0, path_1.join)(__dirname, '..', 'FRONTEND', 'uploads', filename);
+        const filePath = (0, path_1.join)(__dirname, "..", "FRONTEND", "uploads", filename);
         if (!(0, fs_1.existsSync)(filePath)) {
-            return res.status(404).send('Not found');
+            return res.status(404).send("Not found");
         }
-        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader("Cache-Control", "no-store");
         return res.sendFile(filePath);
     }
 };
 exports.UploadsController = UploadsController;
 __decorate([
-    (0, common_1.Get)(':filename'),
-    __param(0, (0, common_1.Param)('filename')),
+    (0, common_1.Get)(":filename"),
+    __param(0, (0, common_1.Param)("filename")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], UploadsController.prototype, "getUpload", null);
 exports.UploadsController = UploadsController = __decorate([
-    (0, common_1.Controller)('api/uploads')
+    (0, common_1.Controller)("api/uploads")
 ], UploadsController);

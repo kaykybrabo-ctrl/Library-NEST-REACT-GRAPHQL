@@ -18,14 +18,14 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+            secretOrKey: process.env.JWT_SECRET || "your-secret-key",
         });
     }
     async validate(payload) {
         return {
             id: payload.sub,
             username: payload.username,
-            role: payload.role
+            role: payload.role,
         };
     }
 };

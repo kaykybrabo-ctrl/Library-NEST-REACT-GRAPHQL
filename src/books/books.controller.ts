@@ -114,20 +114,20 @@ export class BooksController {
   @Delete("books/:id")
   async remove(@Param("id") id: string) {
     await this.booksService.remove(+id);
-    return { message: "Book deleted successfully" };
+    return { message: "Livro excluído com sucesso" };
   }
 
   @Delete("api/books/:id")
   async removeApi(@Param("id") id: string) {
     try {
       await this.booksService.remove(+id);
-      return { message: "Book deleted successfully" };
+      return { message: "Livro excluído com sucesso" };
     } catch (error) {
       if (error.message.includes("not found")) {
         return {
           statusCode: 404,
-          message: `Book with ID ${id} not found`,
-          error: "Not Found",
+          message: `Livro com ID ${id} não encontrado`,
+          error: "Não encontrado",
         };
       }
       throw error;
@@ -148,7 +148,7 @@ export class BooksController {
       }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-          return cb(new Error("Only image files are allowed!"), false);
+          return cb(new Error("Apenas arquivos de imagem são permitidos!"), false);
         }
         cb(null, true);
       },
@@ -160,7 +160,7 @@ export class BooksController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {
-      throw new Error("No file uploaded");
+      throw new Error("Nenhum arquivo enviado");
     }
 
     await this.booksService.updatePhoto(+id, file.filename);
@@ -181,7 +181,7 @@ export class BooksController {
       }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-          return cb(new Error("Only image files are allowed!"), false);
+          return cb(new Error("Apenas arquivos de imagem são permitidos!"), false);
         }
         cb(null, true);
       },
@@ -193,7 +193,7 @@ export class BooksController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {
-      throw new Error("No file uploaded");
+      throw new Error("Nenhum arquivo enviado");
     }
     try {
       await this.booksService.updatePhoto(+id, file.filename);

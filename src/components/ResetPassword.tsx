@@ -27,15 +27,15 @@ const ResetPassword: React.FC = () => {
     setSuccess('')
 
     if (!email) {
-      setError('Invalid or missing email link. Please request a new reset email.')
+      setError('Link de e-mail inválido ou ausente. Solicite um novo e-mail de redefinição.')
       return
     }
     if (!newPassword || newPassword.length < 3) {
-      setError('Please enter a new password with at least 3 characters')
+      setError('Por favor, informe uma nova senha com pelo menos 3 caracteres')
       return
     }
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('As senhas não coincidem')
       return
     }
 
@@ -46,34 +46,34 @@ const ResetPassword: React.FC = () => {
       else payload.username = email
       const res = await api.post('/api/reset-password', payload)
       if (res?.data?.ok) {
-        setSuccess('Password updated successfully. You can now log in.')
-        alert('Password updated successfully!')
+        setSuccess('Senha atualizada com sucesso. Você já pode entrar.')
+        alert('Senha atualizada com sucesso!')
         setTimeout(() => navigate('/'), 1200)
       } else {
-        setError(res?.data?.message || 'Failed to reset password')
+        setError(res?.data?.message || 'Falha ao redefinir a senha')
       }
     } catch (e: any) {
-      setError('Failed to reset password')
+      setError('Falha ao redefinir a senha')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Layout title="Reset Password">
+    <Layout title="Redefinir Senha">
       <section className="form-section" style={{ maxWidth: 480, margin: '40px auto' }}>
-        <h2>Choose a new password</h2>
+        <h2>Escolha uma nova senha</h2>
         {email ? (
-          <p style={{ color: '#555' }}>Resetting password for: <strong>{email}</strong></p>
+          <p style={{ color: '#555' }}>Redefinindo a senha para: <strong>{email}</strong></p>
         ) : (
-          <p style={{ color: '#a00' }}>No email in link. Please go back to Login and click "Forgot password?" again.</p>
+          <p style={{ color: '#a00' }}>Nenhum e-mail no link. Volte para o Login e clique novamente em "Esqueceu a senha?".</p>
         )}
 
         {error && <div className="error-message" style={{ marginTop: 12 }}>{error}</div>}
         {success && <div className="success-message" style={{ marginTop: 12 }}>{success}</div>}
 
         <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
-          <label htmlFor="newPassword">New password:</label>
+          <label htmlFor="newPassword">Nova senha:</label>
           <input
             id="newPassword"
             type="password"
@@ -83,7 +83,7 @@ const ResetPassword: React.FC = () => {
             disabled={loading}
           />
 
-          <label htmlFor="confirmPassword">Confirm new password:</label>
+          <label htmlFor="confirmPassword">Confirmar nova senha:</label>
           <input
             id="confirmPassword"
             type="password"
@@ -94,10 +94,10 @@ const ResetPassword: React.FC = () => {
           />
 
           <button type="submit" disabled={loading}>
-            {loading ? 'Saving...' : 'Reset Password'}
+            {loading ? 'Salvando...' : 'Redefinir Senha'}
           </button>
           <div style={{ marginTop: 10 }}>
-            <Link to="/">Back to Login</Link>
+            <Link to="/">Voltar ao Login</Link>
           </div>
         </form>
       </section>

@@ -19,12 +19,12 @@ const Register: React.FC = () => {
     setSuccess('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('As senhas não coincidem')
       return
     }
 
     if (password.length < 3) {
-      setError('Password must be at least 3 characters long')
+      setError('A senha deve ter pelo menos 3 caracteres')
       return
     }
 
@@ -33,13 +33,13 @@ const Register: React.FC = () => {
     try {
       const success = await register(username, password)
       if (success) {
-        setSuccess('Registration successful! You can now login.')
+        setSuccess('Registro realizado com sucesso! Você já pode entrar.')
         setTimeout(() => navigate('/'), 2000)
       } else {
-        setError('Registration failed. Email may already exist.')
+        setError('Falha no registro. O e-mail pode já estar em uso.')
       }
     } catch (err) {
-      setError('Registration failed. Please try again.')
+      setError('Falha no registro. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -47,11 +47,11 @@ const Register: React.FC = () => {
 
   return (
     <div className="login-container">
-      <h1>Register - Library System</h1>
+      <h1>Cadastro - PedBook</h1>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email:</label>
+        <label htmlFor="email">E-mail:</label>
         <input
           type="email"
           id="email"
@@ -61,7 +61,7 @@ const Register: React.FC = () => {
           disabled={loading}
         />
 
-        <label htmlFor="password">Password:</label>
+        <label htmlFor="password">Senha:</label>
         <input
           type="password"
           id="password"
@@ -71,7 +71,7 @@ const Register: React.FC = () => {
           disabled={loading}
         />
 
-        <label htmlFor="confirmPassword">Confirm Password:</label>
+        <label htmlFor="confirmPassword">Confirmar senha:</label>
         <input
           type="password"
           id="confirmPassword"
@@ -82,12 +82,12 @@ const Register: React.FC = () => {
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
+          {loading ? 'Cadastrando...' : 'Cadastrar'}
         </button>
       </form>
 
       <p className="auth-link">
-        Already have an account? <Link to="/">Login here</Link>
+        Já tem uma conta? <Link to="/">Entre aqui</Link>
       </p>
     </div>
   )

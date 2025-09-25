@@ -22,7 +22,7 @@ export class LoansController {
       user_id: req.user.id,
       book_id: +bookId,
     });
-    return { message: "Book rented successfully" };
+    return { message: "Livro alugado com sucesso" };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -32,13 +32,13 @@ export class LoansController {
       user_id: req.user.id,
       book_id: +bookId,
     });
-    return { message: "Book rented successfully" };
+    return { message: "Livro alugado com sucesso" };
   }
 
   @Get("loans")
   async findLoans(@Query("username") username: string) {
     if (!username) {
-      throw new Error("Username required");
+      throw new Error("Nome de usuário obrigatório");
     }
     return this.loansService.findByUser(username);
   }
@@ -46,7 +46,7 @@ export class LoansController {
   @Get("api/loans")
   async findLoansApi(@Query("username") username: string) {
     if (!username) {
-      throw new Error("Username required");
+      throw new Error("Nome de usuário obrigatório");
     }
     return this.loansService.findByUser(username);
   }
@@ -54,12 +54,12 @@ export class LoansController {
   @Post("return/:loanId")
   async returnBook(@Param("loanId") loanId: string) {
     await this.loansService.remove(+loanId);
-    return { message: "Book returned successfully" };
+    return { message: "Livro devolvido com sucesso" };
   }
 
   @Post("api/return/:loanId")
   async returnBookApi(@Param("loanId") loanId: string) {
     await this.loansService.remove(+loanId);
-    return { message: "Book returned successfully" };
+    return { message: "Livro devolvido com sucesso" };
   }
 }

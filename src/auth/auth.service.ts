@@ -39,7 +39,7 @@ export class AuthService {
       registerDto.username,
     );
     if (existingUser) {
-      throw new ConflictException("Username already exists");
+      throw new ConflictException("Nome de usuário já existe");
     }
 
     const user = await this.usersService.create({
@@ -48,6 +48,6 @@ export class AuthService {
       role: "user",
     });
 
-    return { message: "User created successfully" };
+    return { message: "Usuário criado com sucesso" };
   }
 }

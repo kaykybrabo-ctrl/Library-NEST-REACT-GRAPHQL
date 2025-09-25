@@ -54,7 +54,7 @@ const UserProfile: React.FC = () => {
       setProfile(response.data)
       setError('')
     } catch (e) {
-      setError('Failed to load profile. Please login again.')
+      setError('Falha ao carregar o perfil. Faça login novamente.')
     } finally {
       setLoading(false)
     }
@@ -99,9 +99,9 @@ const UserProfile: React.FC = () => {
       setImgVersion((v) => v + 1)
       setImageFile(null)
       setError('')
-      alert('Profile image updated successfully!')
+      alert('Imagem de perfil atualizada com sucesso!')
     } catch (e) {
-      setError('Failed to upload image')
+      setError('Falha ao enviar a imagem')
     } finally {
       setUploading(false)
     }
@@ -121,7 +121,7 @@ const UserProfile: React.FC = () => {
     
     setEditingDescription(false)
     setError('')
-    alert('Description updated successfully!')
+    alert('Descrição atualizada com sucesso!')
     setUploading(false)
   }
 
@@ -133,20 +133,20 @@ const UserProfile: React.FC = () => {
     })
 
     fetchLoans()
-    alert('Book returned successfully!')
+    alert('Livro devolvido com sucesso!')
     setError('')
   }
 
   if (loading) {
     return (
-      <Layout title="User Profile">
-        <div className="loading">Loading profile...</div>
+      <Layout title="Perfil do Usuário">
+        <div className="loading">Carregando perfil...</div>
       </Layout>
     )
   }
 
   return (
-    <Layout title="User Profile">
+    <Layout title="Perfil do Usuário">
       {error && <div className="error-message">{error}</div>}
 
       <div className="tabs">
@@ -154,37 +154,37 @@ const UserProfile: React.FC = () => {
           className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveTab('profile')}
         >
-          Profile
+          Perfil
         </button>
         <button
           className={`tab ${activeTab === 'loans' ? 'active' : ''}`}
           onClick={() => setActiveTab('loans')}
         >
-          My Loans
+          Meus Empréstimos
         </button>
         <button
           className={`tab ${activeTab === 'favorite' ? 'active' : ''}`}
           onClick={() => setActiveTab('favorite')}
         >
-          Favorite Book
+          Livro Favorito
         </button>
       </div>
 
       <div className="tab-content">
         {activeTab === 'profile' && (
           <section className="profile-section">
-            <h2>Profile Information</h2>
-            <p><strong>Email:</strong> {user?.username || 'Unknown'}</p>
-            <p><strong>Role:</strong> {user?.role || 'User'}</p>
+            <h2>Informações do Perfil</h2>
+            <p><strong>E-mail:</strong> {user?.username || 'Desconhecido'}</p>
+            <p><strong>Função:</strong> {user?.role || 'Usuário'}</p>
 
             <div className="profile-image-container">
-              <h3>Profile Image</h3>
+              <h3>Imagem de Perfil</h3>
               <div className="profile-image-display">
                 {profile?.profile_image ? (
                   <img
                     src={buildImageSrc(profile.profile_image)}
                     key={`${profile?.profile_image}-${imgVersion}`}
-                    alt="Profile"
+                    alt="Perfil"
                     className="profile-image"
                     style={{
                       maxWidth: '200px', 
@@ -211,26 +211,26 @@ const UserProfile: React.FC = () => {
                     backgroundColor: '#f9f9f9',
                     color: '#666'
                   }}>
-                    No profile image uploaded yet
+                    Nenhuma imagem de perfil enviada ainda
                   </div>
                 )}
               </div>
             </div>
 
             <div className="description-section">
-              <h3>Description</h3>
+              <h3>Descrição</h3>
               {editingDescription ? (
                 <div>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Tell us about yourself..."
+                    placeholder="Conte-nos sobre você..."
                     rows={4}
                     className="description-textarea"
                   />
                   <div>
                     <button onClick={handleUpdateDescription} disabled={uploading}>
-                      {uploading ? 'Saving...' : 'Save Description'}
+                      {uploading ? 'Salvando...' : 'Salvar Descrição'}
                     </button>
                     <button 
                       onClick={() => {
@@ -239,22 +239,22 @@ const UserProfile: React.FC = () => {
                       }}
                       className="cancel-button"
                     >
-                      Cancel
+                      Cancelar
                     </button>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <p>{profile?.description || 'No description added yet.'}</p>
+                  <p>{profile?.description || 'Nenhuma descrição adicionada ainda.'}</p>
                   <button onClick={() => setEditingDescription(true)}>
-                    Edit Description
+                    Editar Descrição
                   </button>
                 </div>
               )}
             </div>
 
             <div className="image-upload">
-              <h3>Update Profile Image</h3>
+              <h3>Atualizar Imagem de Perfil</h3>
                 <div>
                   <input
                     type="file"
@@ -263,7 +263,7 @@ const UserProfile: React.FC = () => {
                     disabled={uploading}
                   />
                   <button onClick={handleUploadImage} disabled={!imageFile || uploading}>
-                    {uploading ? 'Uploading...' : 'Upload'}
+                    {uploading ? 'Enviando...' : 'Enviar'}
                   </button>
                 </div>
             </div>
@@ -272,16 +272,16 @@ const UserProfile: React.FC = () => {
 
         {activeTab === 'loans' && (
           <section className="profile-section">
-            <h2>My Borrowed Books</h2>
+            <h2>Meus Livros Emprestados</h2>
             {loans.length === 0 ? (
-              <p>You haven't borrowed any books yet.</p>
+              <p>Você ainda não emprestou nenhum livro.</p>
             ) : (
               <div>
                 {loans.map(loan => (
                   <div key={loan.loans_id} className="loan-card">
                     <div>
                       <h4>{loan.title}</h4>
-                      <p><strong>Loan Date:</strong> {new Date(loan.loan_date).toLocaleDateString()}</p>
+                      <p><strong>Data do Empréstimo:</strong> {new Date(loan.loan_date).toLocaleDateString('pt-BR')}</p>
                       {loan.description && <p>{loan.description}</p>}
                     </div>
                     <div className="loan-actions">
@@ -299,7 +299,7 @@ const UserProfile: React.FC = () => {
                         }}
                         className="return-button"
                       >
-                        Return Book
+                        Devolver Livro
                       </button>
                     </div>
                   </div>
@@ -311,9 +311,9 @@ const UserProfile: React.FC = () => {
 
         {activeTab === 'favorite' && (
           <section className="profile-section">
-            <h2>My Favorite Book</h2>
+            <h2>Meu Livro Favorito</h2>
             {!favoriteBook ? (
-              <p>You haven't set a favorite book yet.</p>
+              <p>Você ainda não definiu um livro favorito.</p>
             ) : (
               <div className="favorite-book-card">
                 {favoriteBook.photo && (
@@ -325,9 +325,9 @@ const UserProfile: React.FC = () => {
                 )}
                 <div>
                   <h3>{favoriteBook.title}</h3>
-                  <p><strong>Author:</strong> {favoriteBook.author_name || 'Unknown'}</p>
+                  <p><strong>Autor:</strong> {favoriteBook.author_name || 'Desconhecido'}</p>
                   {favoriteBook.description && (
-                    <p><strong>Description:</strong> {favoriteBook.description}</p>
+                    <p><strong>Descrição:</strong> {favoriteBook.description}</p>
                   )}
                 </div>
               </div>

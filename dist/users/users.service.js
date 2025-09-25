@@ -27,13 +27,13 @@ let UsersService = class UsersService {
     }
     async findOne(id) {
         const user = await this.prisma.user.findUnique({
-            where: { id }
+            where: { id },
         });
         if (!user)
             return null;
         const result = {
             ...user,
-            profile_image: user.profile_image && user.profile_image.trim() !== ''
+            profile_image: user.profile_image && user.profile_image.trim() !== ""
                 ? user.profile_image
                 : null,
         };
@@ -41,18 +41,18 @@ let UsersService = class UsersService {
     }
     async findByUsername(username) {
         return this.prisma.user.findUnique({
-            where: { username }
+            where: { username },
         });
     }
     async findByIdRaw(id) {
         return this.prisma.user.findUnique({
-            where: { id }
+            where: { id },
         });
     }
     async update(id, updateUserDto) {
         const currentUser = await this.prisma.user.findUnique({ where: { id } });
         if (!currentUser) {
-            throw new Error('User not found');
+            throw new Error("User not found");
         }
         const updateData = {};
         if (updateUserDto.profile_image !== undefined) {
@@ -85,6 +85,12 @@ let UsersService = class UsersService {
         await this.prisma.user.update({
             where: { username },
             data: { favorite_book_id: bookId },
+        });
+    }
+    async updatePasswordByUsername(username, newPassword) {
+        return this.prisma.user.update({
+            where: { username },
+            data: { password: newPassword },
         });
     }
     async getFavoriteBook(username) {

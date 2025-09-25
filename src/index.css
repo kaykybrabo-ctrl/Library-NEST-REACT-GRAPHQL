@@ -249,6 +249,27 @@ nav a.active {
     font-size: 12px;
 }
 
+/* Icon-only action buttons */
+.icon-button {
+    background: transparent;
+    border: none;
+    color: #162c74;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-button:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.action-buttons .icon-button + .icon-button {
+    margin-left: 6px;
+}
+
 .profile-section {
     background-color: white;
     padding: 25px;

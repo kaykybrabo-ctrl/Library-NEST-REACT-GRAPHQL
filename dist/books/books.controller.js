@@ -34,9 +34,9 @@ let BooksController = class BooksController {
         return { count };
     }
     async findOne(id, res) {
-        const acceptHeader = res.req.headers.accept || '';
-        if (acceptHeader.includes('text/html')) {
-            return res.sendFile((0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'react-dist', 'index.html'));
+        const acceptHeader = res.req.headers.accept || "";
+        if (acceptHeader.includes("text/html")) {
+            return res.sendFile((0, path_1.join)(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"));
         }
         else {
             const book = await this.booksService.findOne(+id);
@@ -44,9 +44,9 @@ let BooksController = class BooksController {
         }
     }
     async findAll(res, page, limit, search) {
-        const acceptHeader = res.req.headers.accept || '';
-        if (acceptHeader.includes('text/html')) {
-            return res.sendFile((0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'react-dist', 'index.html'));
+        const acceptHeader = res.req.headers.accept || "";
+        if (acceptHeader.includes("text/html")) {
+            return res.sendFile((0, path_1.join)(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"));
         }
         else {
             const pageNum = page ? Number(page) : 1;
@@ -55,7 +55,7 @@ let BooksController = class BooksController {
             return res.json(books);
         }
     }
-    async findAllApi(page = '1', limit = '5', search) {
+    async findAllApi(page = "1", limit = "5", search) {
         const pageNum = Number(page);
         const limitNum = Number(limit);
         const result = await this.booksService.findAll(pageNum, limitNum, search);
@@ -78,19 +78,19 @@ let BooksController = class BooksController {
     }
     async remove(id) {
         await this.booksService.remove(+id);
-        return { message: 'Book deleted successfully' };
+        return { message: "Livro excluído com sucesso" };
     }
     async removeApi(id) {
         try {
             await this.booksService.remove(+id);
-            return { message: 'Book deleted successfully' };
+            return { message: "Livro excluído com sucesso" };
         }
         catch (error) {
-            if (error.message.includes('not found')) {
+            if (error.message.includes("not found")) {
                 return {
                     statusCode: 404,
-                    message: `Book with ID ${id} not found`,
-                    error: 'Not Found'
+                    message: `Livro com ID ${id} não encontrado`,
+                    error: "Não encontrado",
                 };
             }
             throw error;
@@ -98,14 +98,14 @@ let BooksController = class BooksController {
     }
     async updateImage(id, file) {
         if (!file) {
-            throw new Error('No file uploaded');
+            throw new Error("Nenhum arquivo enviado");
         }
         await this.booksService.updatePhoto(+id, file.filename);
         return { photo: file.filename };
     }
     async updateImageApi(id, file) {
         if (!file) {
-            throw new Error('No file uploaded');
+            throw new Error("Nenhum arquivo enviado");
         }
         try {
             await this.booksService.updatePhoto(+id, file.filename);
@@ -118,132 +118,132 @@ let BooksController = class BooksController {
 };
 exports.BooksController = BooksController;
 __decorate([
-    (0, common_1.Get)('books/count'),
+    (0, common_1.Get)("books/count"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "count", null);
 __decorate([
-    (0, common_1.Get)('api/books/count'),
+    (0, common_1.Get)("api/books/count"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "countApi", null);
 __decorate([
-    (0, common_1.Get)('books/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)("books/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Get)('books'),
+    (0, common_1.Get)("books"),
     __param(0, (0, common_1.Res)()),
-    __param(1, (0, common_1.Query)('page')),
-    __param(2, (0, common_1.Query)('limit')),
-    __param(3, (0, common_1.Query)('search')),
+    __param(1, (0, common_1.Query)("page")),
+    __param(2, (0, common_1.Query)("limit")),
+    __param(3, (0, common_1.Query)("search")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('api/books'),
-    __param(0, (0, common_1.Query)('page')),
-    __param(1, (0, common_1.Query)('limit')),
-    __param(2, (0, common_1.Query)('search')),
+    (0, common_1.Get)("api/books"),
+    __param(0, (0, common_1.Query)("page")),
+    __param(1, (0, common_1.Query)("limit")),
+    __param(2, (0, common_1.Query)("search")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findAllApi", null);
 __decorate([
-    (0, common_1.Get)('api/books/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)("api/books/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findOneApi", null);
 __decorate([
-    (0, common_1.Post)('books'),
+    (0, common_1.Post)("books"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_book_dto_1.CreateBookDto]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "create", null);
 __decorate([
-    (0, common_1.Post)('api/books'),
+    (0, common_1.Post)("api/books"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_book_dto_1.CreateBookDto]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "createApi", null);
 __decorate([
-    (0, common_1.Patch)('books/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)("books/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_book_dto_1.UpdateBookDto]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "update", null);
 __decorate([
-    (0, common_1.Patch)('api/books/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)("api/books/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_book_dto_1.UpdateBookDto]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "updateApi", null);
 __decorate([
-    (0, common_1.Delete)('books/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)("books/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Delete)('api/books/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)("api/books/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "removeApi", null);
 __decorate([
-    (0, common_1.Post)('books/:id/image'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)("books/:id/image"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads")),
             filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
         }),
         fileFilter: (req, file, cb) => {
             if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                return cb(new Error('Only image files are allowed!'), false);
+                return cb(new Error("Apenas arquivos de imagem são permitidos!"), false);
             }
             cb(null, true);
         },
         limits: { fileSize: 5 * 1024 * 1024 },
     })),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "updateImage", null);
 __decorate([
-    (0, common_1.Post)('api/books/:id/image'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)("api/books/:id/image"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads")),
             filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
         }),
         fileFilter: (req, file, cb) => {
             if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                return cb(new Error('Only image files are allowed!'), false);
+                return cb(new Error("Apenas arquivos de imagem são permitidos!"), false);
             }
             cb(null, true);
         },
         limits: { fileSize: 5 * 1024 * 1024 },
     })),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),

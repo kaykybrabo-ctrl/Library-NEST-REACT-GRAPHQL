@@ -23,15 +23,15 @@ exports.UsersModule = UsersModule = __decorate([
             prisma_module_1.PrismaModule,
             platform_express_1.MulterModule.register({
                 storage: (0, multer_1.diskStorage)({
-                    destination: (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads'),
+                    destination: (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads"),
                     filename: (req, file, callback) => {
-                        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
                         callback(null, uniqueSuffix + (0, path_1.extname)(file.originalname));
                     },
                 }),
                 fileFilter: (req, file, callback) => {
                     if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                        return callback(new Error('Only image files are allowed!'), false);
+                        return callback(new Error("Only image files are allowed!"), false);
                     }
                     callback(null, true);
                 },

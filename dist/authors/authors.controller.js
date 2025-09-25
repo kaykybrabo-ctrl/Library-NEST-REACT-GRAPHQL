@@ -34,9 +34,9 @@ let AuthorsController = class AuthorsController {
         return { count };
     }
     async findOne(id, res) {
-        const acceptHeader = res.req.headers.accept || '';
-        if (acceptHeader.includes('text/html')) {
-            return res.sendFile((0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'react-dist', 'index.html'));
+        const acceptHeader = res.req.headers.accept || "";
+        if (acceptHeader.includes("text/html")) {
+            return res.sendFile((0, path_1.join)(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"));
         }
         else {
             const author = await this.authorsService.findOne(+id);
@@ -47,16 +47,16 @@ let AuthorsController = class AuthorsController {
         return this.authorsService.findOne(+id);
     }
     async findAll(res) {
-        const acceptHeader = res.req.headers.accept || '';
-        if (acceptHeader.includes('text/html')) {
-            return res.sendFile((0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'react-dist', 'index.html'));
+        const acceptHeader = res.req.headers.accept || "";
+        if (acceptHeader.includes("text/html")) {
+            return res.sendFile((0, path_1.join)(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"));
         }
         else {
             const authors = await this.authorsService.findAll();
             return res.json(authors);
         }
     }
-    async findAllApi(page = '1', limit = '1000') {
+    async findAllApi(page = "1", limit = "1000") {
         const pageNum = Number(page);
         const limitNum = Number(limit);
         return this.authorsService.findAll(pageNum, limitNum);
@@ -75,22 +75,22 @@ let AuthorsController = class AuthorsController {
     }
     async remove(id) {
         await this.authorsService.remove(+id);
-        return { message: 'Author deleted successfully' };
+        return { message: "Author deleted successfully" };
     }
     async removeApi(id) {
         await this.authorsService.remove(+id);
-        return { message: 'Author deleted successfully' };
+        return { message: "Author deleted successfully" };
     }
     async updateImage(id, file) {
         if (!file) {
-            throw new Error('No file uploaded');
+            throw new Error("No file uploaded");
         }
         await this.authorsService.updatePhoto(+id, file.filename);
         return { photo: file.filename };
     }
     async updateImageApi(id, file) {
         if (!file) {
-            throw new Error('No file uploaded');
+            throw new Error("No file uploaded");
         }
         try {
             await this.authorsService.updatePhoto(+id, file.filename);
@@ -103,128 +103,128 @@ let AuthorsController = class AuthorsController {
 };
 exports.AuthorsController = AuthorsController;
 __decorate([
-    (0, common_1.Get)('authors/count'),
+    (0, common_1.Get)("authors/count"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "count", null);
 __decorate([
-    (0, common_1.Get)('api/authors/count'),
+    (0, common_1.Get)("api/authors/count"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "countApi", null);
 __decorate([
-    (0, common_1.Get)('authors/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)("authors/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Get)('api/authors/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)("api/authors/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "findOneApi", null);
 __decorate([
-    (0, common_1.Get)('authors'),
+    (0, common_1.Get)("authors"),
     __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('api/authors'),
-    __param(0, (0, common_1.Query)('page')),
-    __param(1, (0, common_1.Query)('limit')),
+    (0, common_1.Get)("api/authors"),
+    __param(0, (0, common_1.Query)("page")),
+    __param(1, (0, common_1.Query)("limit")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "findAllApi", null);
 __decorate([
-    (0, common_1.Post)('authors'),
+    (0, common_1.Post)("authors"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_author_dto_1.CreateAuthorDto]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "create", null);
 __decorate([
-    (0, common_1.Post)('api/authors'),
+    (0, common_1.Post)("api/authors"),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_author_dto_1.CreateAuthorDto]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "createApi", null);
 __decorate([
-    (0, common_1.Patch)('authors/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)("authors/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_author_dto_1.UpdateAuthorDto]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "update", null);
 __decorate([
-    (0, common_1.Patch)('api/authors/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)("api/authors/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_author_dto_1.UpdateAuthorDto]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "updateApi", null);
 __decorate([
-    (0, common_1.Delete)('authors/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)("authors/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Delete)('api/authors/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)("api/authors/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "removeApi", null);
 __decorate([
-    (0, common_1.Post)('authors/:id/image'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)("authors/:id/image"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads")),
             filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
         }),
         fileFilter: (req, file, cb) => {
             if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                return cb(new Error('Only image files are allowed!'), false);
+                return cb(new Error("Only image files are allowed!"), false);
             }
             cb(null, true);
         },
         limits: { fileSize: 5 * 1024 * 1024 },
     })),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "updateImage", null);
 __decorate([
-    (0, common_1.Post)('api/authors/:id/image'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, common_1.Post)("api/authors/:id/image"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, '..', '..', 'FRONTEND', 'uploads')),
+            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads")),
             filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
         }),
         fileFilter: (req, file, cb) => {
             if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                return cb(new Error('Only image files are allowed!'), false);
+                return cb(new Error("Only image files are allowed!"), false);
             }
             cb(null, true);
         },
         limits: { fileSize: 5 * 1024 * 1024 },
     })),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),

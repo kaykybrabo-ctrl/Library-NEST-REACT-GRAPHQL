@@ -40,14 +40,14 @@ let AuthService = class AuthService {
     async register(registerDto) {
         const existingUser = await this.usersService.findByUsername(registerDto.username);
         if (existingUser) {
-            throw new common_1.ConflictException('Username already exists');
+            throw new common_1.ConflictException("Nome de usuário já existe");
         }
         const user = await this.usersService.create({
             username: registerDto.username.trim().toLowerCase(),
             password: registerDto.password,
-            role: 'user',
+            role: "user",
         });
-        return { message: 'User created successfully' };
+        return { message: "Usuário criado com sucesso" };
     }
 };
 exports.AuthService = AuthService;

@@ -26,41 +26,41 @@ let LoansController = class LoansController {
             user_id: req.user.id,
             book_id: +bookId,
         });
-        return { message: 'Book rented successfully' };
+        return { message: "Livro alugado com sucesso" };
     }
     async rentBookApi(bookId, req) {
         const loan = await this.loansService.create({
             user_id: req.user.id,
             book_id: +bookId,
         });
-        return { message: 'Book rented successfully' };
+        return { message: "Livro alugado com sucesso" };
     }
     async findLoans(username) {
         if (!username) {
-            throw new Error('Username required');
+            throw new Error("Nome de usuário obrigatório");
         }
         return this.loansService.findByUser(username);
     }
     async findLoansApi(username) {
         if (!username) {
-            throw new Error('Username required');
+            throw new Error("Nome de usuário obrigatório");
         }
         return this.loansService.findByUser(username);
     }
     async returnBook(loanId) {
         await this.loansService.remove(+loanId);
-        return { message: 'Book returned successfully' };
+        return { message: "Livro devolvido com sucesso" };
     }
     async returnBookApi(loanId) {
         await this.loansService.remove(+loanId);
-        return { message: 'Book returned successfully' };
+        return { message: "Livro devolvido com sucesso" };
     }
 };
 exports.LoansController = LoansController;
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)('rent/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)("rent/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
@@ -68,37 +68,37 @@ __decorate([
 ], LoansController.prototype, "rentBook", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Post)('api/rent/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)("api/rent/:id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], LoansController.prototype, "rentBookApi", null);
 __decorate([
-    (0, common_1.Get)('loans'),
-    __param(0, (0, common_1.Query)('username')),
+    (0, common_1.Get)("loans"),
+    __param(0, (0, common_1.Query)("username")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], LoansController.prototype, "findLoans", null);
 __decorate([
-    (0, common_1.Get)('api/loans'),
-    __param(0, (0, common_1.Query)('username')),
+    (0, common_1.Get)("api/loans"),
+    __param(0, (0, common_1.Query)("username")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], LoansController.prototype, "findLoansApi", null);
 __decorate([
-    (0, common_1.Post)('return/:loanId'),
-    __param(0, (0, common_1.Param)('loanId')),
+    (0, common_1.Post)("return/:loanId"),
+    __param(0, (0, common_1.Param)("loanId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], LoansController.prototype, "returnBook", null);
 __decorate([
-    (0, common_1.Post)('api/return/:loanId'),
-    __param(0, (0, common_1.Param)('loanId')),
+    (0, common_1.Post)("api/return/:loanId"),
+    __param(0, (0, common_1.Param)("loanId")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

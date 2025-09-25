@@ -34,7 +34,7 @@ const BookDetail: React.FC = () => {
     const file = event.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file (JPG, PNG, GIF, WebP)')
+      setError('Selecione um arquivo de imagem válido (JPG, PNG, GIF, WebP)')
       event.currentTarget.value = ''
       return
     }
@@ -48,7 +48,7 @@ const BookDetail: React.FC = () => {
   const uploadImage = async (file: File) => {
     if (!file || !id) return
     setUploading(true)
-    setUploadStatus('Uploading image...')
+    setUploadStatus('Enviando imagem...')
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -64,11 +64,11 @@ const BookDetail: React.FC = () => {
       setImageFile(null)
       setPreviewUrl('')
       setImgVersion(v => v + 1)
-      setUploadStatus('Image updated successfully!')
+      setUploadStatus('Imagem atualizada com sucesso!')
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.message || 'Failed to upload image'
+      const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem'
       setError(msg)
-      setUploadStatus(`Error: ${msg}`)
+      setUploadStatus(`Erro: ${msg}`)
     } finally {
       setUploading(false)
     }
@@ -110,7 +110,7 @@ const BookDetail: React.FC = () => {
       })
       setLoading(false)
     } catch (err) {
-      setError('Failed to fetch book details')
+      setError('Falha ao buscar detalhes do livro')
       setLoading(false)
     }
   }
@@ -141,11 +141,11 @@ const BookDetail: React.FC = () => {
       fetchBook()
       setImageFile(null)
       setImgVersion(v => v + 1)
-      alert('Book image updated successfully!')
+      alert('Imagem do livro atualizada com sucesso!')
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.message || 'Failed to upload image'
+      const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem'
       setError(msg)
-      alert(`Error: ${msg}`)
+      alert(`Erro: ${msg}`)
     } finally {
       setUploading(false)
     }
@@ -154,24 +154,24 @@ const BookDetail: React.FC = () => {
   const handleRentBook = async () => {
     try {
       await api.post(`/api/rent/${id}`)
-      alert('Book rented successfully!')
+      alert('Livro alugado com sucesso!')
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to rent book. You may not be logged in or book is already rented.'
+      const errorMsg = err.response?.data?.error || 'Falha ao alugar o livro. Você pode não estar logado ou o livro já está alugado.'
       setError(errorMsg)
-      alert(`Error: ${errorMsg}`)
+      alert(`Erro: ${errorMsg}`)
     }
   }
 
   const handleFavoriteBook = async () => {
     try {
       await api.post(`/api/favorite/${id}`)
-      alert('Book added to favorites!')
+      alert('Livro adicionado aos favoritos!')
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to add book to favorites'
+      const errorMsg = err.response?.data?.error || 'Falha ao adicionar o livro aos favoritos'
       setError(errorMsg)
-      alert(`Error: ${errorMsg}`)
+      alert(`Erro: ${errorMsg}`)
     }
   }
 
@@ -179,7 +179,7 @@ const BookDetail: React.FC = () => {
     e.preventDefault()
 
     if (!currentUser) {
-      setError('Please log in to submit a review')
+      setError('Faça login para enviar uma avaliação')
       return
     }
 
@@ -193,47 +193,47 @@ const BookDetail: React.FC = () => {
       
       setNewReview({ rating: 5, comment: '' })
       fetchReviews()
-      alert('Review submitted successfully!')
+      alert('Avaliação enviada com sucesso!')
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to submit review'
+      const errorMsg = err.response?.data?.error || 'Falha ao enviar a avaliação'
       setError(errorMsg)
-      alert(`Error: ${errorMsg}`)
+      alert(`Erro: ${errorMsg}`)
     }
   }
 
   if (loading) {
     return (
-      <Layout title="Book Details">
-        <div className="loading">Loading book details...</div>
+      <Layout title="Detalhes do Livro">
+        <div className="loading">Carregando detalhes do livro...</div>
       </Layout>
     )
   }
 
   if (!book) {
     return (
-      <Layout title="Book Details">
-        <div className="error-message">Book not found</div>
-        <button onClick={() => navigate('/books')}>Back to Books</button>
+      <Layout title="Detalhes do Livro">
+        <div className="error-message">Livro não encontrado</div>
+        <button onClick={() => navigate('/books')}>Voltar para Livros</button>
       </Layout>
     )
   }
 
   return (
-    <Layout title={`Book: ${book.title}`}>
+    <Layout title={`Livro: ${book.title}`}>
       {error && <div className="error-message">{error}</div>}
       
       <section className="profile-section image-tight">
         <button onClick={() => navigate('/books')} className="back-button">
-          ← Back to Books
+          ← Voltar para Livros
         </button>
         
         <h2>{book.title}</h2>
-        <p><strong>Author:</strong> {book.author_name || 'Unknown'}</p>
-        <p><strong>Description:</strong> {book.description || 'No description available'}</p>
+        <p><strong>Autor:</strong> {book.author_name || 'Desconhecido'}</p>
+        <p><strong>Descrição:</strong> {book.description || 'Sem descrição disponível'}</p>
 
         {previewUrl ? (
-          <img src={previewUrl} alt="Selected preview" className="book-image" />
+          <img src={previewUrl} alt="Pré-visualização selecionada" className="book-image" />
         ) : book.photo ? (
           <img
             src={buildImageSrc(book.photo)}
@@ -257,19 +257,19 @@ const BookDetail: React.FC = () => {
         ) : null}
         
         {!previewUrl && !book.photo && (
-          <div className="image-placeholder">No image set yet. Select a file below to upload.</div>
+          <div className="image-placeholder">Nenhuma imagem definida ainda. Selecione um arquivo abaixo para enviar.</div>
         )}
 
         
         {!book.photo && (
           <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-            No image set for this book yet.
+            Nenhuma imagem definida para este livro ainda.
           </div>
         )}
 
         {isAdmin && (
           <div className="image-upload">
-            <h3>Update Book Image</h3>
+            <h3>Atualizar Imagem do Livro</h3>
             <div>
               <input
                 type="file"
@@ -278,37 +278,37 @@ const BookDetail: React.FC = () => {
                 disabled={uploading}
               />
               {imageFile && (
-                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selected: {imageFile.name}</div>
+                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selecionado: {imageFile.name}</div>
               )}
               <button onClick={handleUploadImageClick} disabled={!imageFile || uploading}>
-                {uploading ? 'Uploading...' : 'Update Image'}
+                {uploading ? 'Enviando...' : 'Atualizar Imagem'}
               </button>
             </div>
           </div>
         )}
         {uploadStatus && (
-          <div style={{ marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Error') ? '#c00' : '#0a0' }}>
+          <div style={{ marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Erro') ? '#c00' : '#0a0' }}>
             {uploadStatus}
           </div>
         )}
       </section>
 
       <section className="form-section">
-        <h3>Book Actions</h3>
+        <h3>Ações do Livro</h3>
         <div className="book-actions">
-          <button onClick={handleRentBook}>Rent Book</button>
-          <button onClick={handleFavoriteBook}>Add to Favorites</button>
+          <button onClick={handleRentBook}>Alugar Livro</button>
+          <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
         </div>
       </section>
 
       <section className="form-section">
-        <h3>Write a Review</h3>
+        <h3>Escreva uma Avaliação</h3>
         {!currentUser ? (
-          <p>Please log in to write a review.</p>
+          <p>Faça login para escrever uma avaliação.</p>
         ) : (
           <form onSubmit={handleSubmitReview}>
             <Box sx={{ mb: 2 }}>
-              <Typography component="legend" sx={{ mb: 1 }}>Rating:</Typography>
+              <Typography component="legend" sx={{ mb: 1 }}>Nota:</Typography>
               <Rating
                 name="book-rating"
                 value={newReview.rating}
@@ -320,7 +320,7 @@ const BookDetail: React.FC = () => {
               />
             </Box>
 
-            <label htmlFor="comment">Comment:</label>
+            <label htmlFor="comment">Comentário:</label>
             <textarea
               id="comment"
               value={newReview.comment}
@@ -329,15 +329,15 @@ const BookDetail: React.FC = () => {
               className="review-textarea"
             />
 
-            <button type="submit">Submit Review</button>
+            <button type="submit">Enviar Avaliação</button>
           </form>
         )}
       </section>
 
       <section className="form-section">
-        <h3>Reviews</h3>
+        <h3>Avaliações</h3>
         {reviews.length === 0 ? (
-          <p>No reviews yet.</p>
+          <p>Sem avaliações ainda.</p>
         ) : (
           <div>
             {reviews.map(review => (
@@ -348,7 +348,7 @@ const BookDetail: React.FC = () => {
                 </div>
                 <p>{review.comment}</p>
                 <small className="review-date">
-                  {new Date(review.review_date).toLocaleDateString()}
+                  {new Date(review.review_date).toLocaleDateString('pt-BR')}
                 </small>
               </div>
             ))}

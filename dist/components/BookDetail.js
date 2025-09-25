@@ -40,7 +40,7 @@ const BookDetail = () => {
         if (!file)
             return;
         if (!file.type.startsWith('image/')) {
-            setError('Please select a valid image file (JPG, PNG, GIF, WebP)');
+            setError('Selecione um arquivo de imagem válido (JPG, PNG, GIF, WebP)');
             event.currentTarget.value = '';
             return;
         }
@@ -54,7 +54,7 @@ const BookDetail = () => {
         if (!file || !id)
             return;
         setUploading(true);
-        setUploadStatus('Uploading image...');
+        setUploadStatus('Enviando imagem...');
         try {
             const formData = new FormData();
             formData.append('file', file);
@@ -71,20 +71,12 @@ const BookDetail = () => {
             setImageFile(null);
             setPreviewUrl('');
             setImgVersion(v => v + 1);
-            setUploadStatus('Image updated successfully!');
-            try {
-                alert('Book image updated successfully!');
-            }
-            catch { }
+            setUploadStatus('Imagem atualizada com sucesso!');
         }
         catch (err) {
-            const msg = err?.response?.data?.error || err?.message || 'Failed to upload image';
+            const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem';
             setError(msg);
-            setUploadStatus(`Error: ${msg}`);
-            try {
-                alert(`Error: ${msg}`);
-            }
-            catch { }
+            setUploadStatus(`Erro: ${msg}`);
         }
         finally {
             setUploading(false);
@@ -128,7 +120,7 @@ const BookDetail = () => {
             setLoading(false);
         }
         catch (err) {
-            setError('Failed to fetch book details');
+            setError('Falha ao buscar detalhes do livro');
             setLoading(false);
         }
     };
@@ -155,18 +147,12 @@ const BookDetail = () => {
             fetchBook();
             setImageFile(null);
             setImgVersion(v => v + 1);
-            try {
-                alert('Book image updated successfully!');
-            }
-            catch { }
+            alert('Imagem do livro atualizada com sucesso!');
         }
         catch (err) {
-            const msg = err?.response?.data?.error || err?.message || 'Failed to upload image';
+            const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem';
             setError(msg);
-            try {
-                alert(`Error: ${msg}`);
-            }
-            catch { }
+            alert(`Erro: ${msg}`);
         }
         finally {
             setUploading(false);
@@ -175,31 +161,31 @@ const BookDetail = () => {
     const handleRentBook = async () => {
         try {
             await api_1.default.post(`/api/rent/${id}`);
-            alert('Book rented successfully!');
+            alert('Livro alugado com sucesso!');
             setError('');
         }
         catch (err) {
-            const errorMsg = err.response?.data?.error || 'Failed to rent book. You may not be logged in or book is already rented.';
+            const errorMsg = err.response?.data?.error || 'Falha ao alugar o livro. Você pode não estar logado ou o livro já está alugado.';
             setError(errorMsg);
-            alert(`Error: ${errorMsg}`);
+            alert(`Erro: ${errorMsg}`);
         }
     };
     const handleFavoriteBook = async () => {
         try {
             await api_1.default.post(`/api/favorite/${id}`);
-            alert('Book added to favorites!');
+            alert('Livro adicionado aos favoritos!');
             setError('');
         }
         catch (err) {
-            const errorMsg = err.response?.data?.error || 'Failed to add book to favorites';
+            const errorMsg = err.response?.data?.error || 'Falha ao adicionar o livro aos favoritos';
             setError(errorMsg);
-            alert(`Error: ${errorMsg}`);
+            alert(`Erro: ${errorMsg}`);
         }
     };
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         if (!currentUser) {
-            setError('Please log in to submit a review');
+            setError('Faça login para enviar uma avaliação');
             return;
         }
         try {
@@ -211,22 +197,22 @@ const BookDetail = () => {
             });
             setNewReview({ rating: 5, comment: '' });
             fetchReviews();
-            alert('Review submitted successfully!');
+            alert('Avaliação enviada com sucesso!');
             setError('');
         }
         catch (err) {
-            const errorMsg = err.response?.data?.error || 'Failed to submit review';
+            const errorMsg = err.response?.data?.error || 'Falha ao enviar a avaliação';
             setError(errorMsg);
-            alert(`Error: ${errorMsg}`);
+            alert(`Erro: ${errorMsg}`);
         }
     };
     if (loading) {
-        return ((0, jsx_runtime_1.jsx)(Layout_1.default, { title: "Book Details", children: (0, jsx_runtime_1.jsx)("div", { className: "loading", children: "Loading book details..." }) }));
+        return ((0, jsx_runtime_1.jsx)(Layout_1.default, { title: "Detalhes do Livro", children: (0, jsx_runtime_1.jsx)("div", { className: "loading", children: "Carregando detalhes do livro..." }) }));
     }
     if (!book) {
-        return ((0, jsx_runtime_1.jsxs)(Layout_1.default, { title: "Book Details", children: [(0, jsx_runtime_1.jsx)("div", { className: "error-message", children: "Book not found" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => navigate('/books'), children: "Back to Books" })] }));
+        return ((0, jsx_runtime_1.jsxs)(Layout_1.default, { title: "Detalhes do Livro", children: [(0, jsx_runtime_1.jsx)("div", { className: "error-message", children: "Livro n\u00E3o encontrado" }), (0, jsx_runtime_1.jsx)("button", { onClick: () => navigate('/books'), children: "Voltar para Livros" })] }));
     }
-    return ((0, jsx_runtime_1.jsxs)(Layout_1.default, { title: `Book: ${book.title}`, children: [error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), (0, jsx_runtime_1.jsxs)("section", { className: "profile-section image-tight", children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => navigate('/books'), className: "back-button", children: "\u2190 Back to Books" }), (0, jsx_runtime_1.jsx)("h2", { children: book.title }), (0, jsx_runtime_1.jsxs)("p", { children: [(0, jsx_runtime_1.jsx)("strong", { children: "Author:" }), " ", book.author_name || 'Unknown'] }), (0, jsx_runtime_1.jsxs)("p", { children: [(0, jsx_runtime_1.jsx)("strong", { children: "Description:" }), " ", book.description || 'No description available'] }), previewUrl ? ((0, jsx_runtime_1.jsx)("img", { src: previewUrl, alt: "Selected preview", className: "book-image" })) : book.photo ? ((0, jsx_runtime_1.jsx)("img", { src: buildImageSrc(book.photo), alt: book.title, className: "book-image", onError: (e) => {
+    return ((0, jsx_runtime_1.jsxs)(Layout_1.default, { title: `Livro: ${book.title}`, children: [error && (0, jsx_runtime_1.jsx)("div", { className: "error-message", children: error }), (0, jsx_runtime_1.jsxs)("section", { className: "profile-section image-tight", children: [(0, jsx_runtime_1.jsx)("button", { onClick: () => navigate('/books'), className: "back-button", children: "\u2190 Voltar para Livros" }), (0, jsx_runtime_1.jsx)("h2", { children: book.title }), (0, jsx_runtime_1.jsxs)("p", { children: [(0, jsx_runtime_1.jsx)("strong", { children: "Autor:" }), " ", book.author_name || 'Desconhecido'] }), (0, jsx_runtime_1.jsxs)("p", { children: [(0, jsx_runtime_1.jsx)("strong", { children: "Descri\u00E7\u00E3o:" }), " ", book.description || 'Sem descrição disponível'] }), previewUrl ? ((0, jsx_runtime_1.jsx)("img", { src: previewUrl, alt: "Pr\u00E9-visualiza\u00E7\u00E3o selecionada", className: "book-image" })) : book.photo ? ((0, jsx_runtime_1.jsx)("img", { src: buildImageSrc(book.photo), alt: book.title, className: "book-image", onError: (e) => {
                             try {
                                 const current = e.currentTarget.getAttribute('src') || '';
                                 const file = (current.split('?')[0].split('/').pop() || '').trim();
@@ -239,8 +225,8 @@ const BookDetail = () => {
                             catch { }
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = '/api/uploads/default-user.png';
-                        } }, `${book.photo}-${imgVersion}`)) : null, !previewUrl && !book.photo && ((0, jsx_runtime_1.jsx)("div", { className: "image-placeholder", children: "No image set yet. Select a file below to upload." })), !book.photo && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: "No image set for this book yet." })), isAdmin && ((0, jsx_runtime_1.jsxs)("div", { className: "image-upload", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Update Book Image" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { type: "file", accept: "image/*", onChange: onSelectImage, disabled: uploading }), imageFile && ((0, jsx_runtime_1.jsxs)("div", { style: { fontSize: 12, color: '#666', marginTop: 4 }, children: ["Selected: ", imageFile.name] })), (0, jsx_runtime_1.jsx)("button", { onClick: handleUploadImageClick, disabled: !imageFile || uploading, children: uploading ? 'Uploading...' : 'Update Image' })] })] })), uploadStatus && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Error') ? '#c00' : '#0a0' }, children: uploadStatus }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Book Actions" }), (0, jsx_runtime_1.jsxs)("div", { className: "book-actions", children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleRentBook, children: "Rent Book" }), (0, jsx_runtime_1.jsx)("button", { onClick: handleFavoriteBook, children: "Add to Favorites" })] })] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Write a Review" }), !currentUser ? ((0, jsx_runtime_1.jsx)("p", { children: "Please log in to write a review." })) : ((0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmitReview, children: [(0, jsx_runtime_1.jsxs)(material_1.Box, { sx: { mb: 2 }, children: [(0, jsx_runtime_1.jsx)(material_1.Typography, { component: "legend", sx: { mb: 1 }, children: "Rating:" }), (0, jsx_runtime_1.jsx)(material_1.Rating, { name: "book-rating", value: newReview.rating, onChange: (_, newValue) => {
+                        } }, `${book.photo}-${imgVersion}`)) : null, !previewUrl && !book.photo && ((0, jsx_runtime_1.jsx)("div", { className: "image-placeholder", children: "Nenhuma imagem definida ainda. Selecione um arquivo abaixo para enviar." })), !book.photo && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: "Nenhuma imagem definida para este livro ainda." })), isAdmin && ((0, jsx_runtime_1.jsxs)("div", { className: "image-upload", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Atualizar Imagem do Livro" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { type: "file", accept: "image/*", onChange: onSelectImage, disabled: uploading }), imageFile && ((0, jsx_runtime_1.jsxs)("div", { style: { fontSize: 12, color: '#666', marginTop: 4 }, children: ["Selecionado: ", imageFile.name] })), (0, jsx_runtime_1.jsx)("button", { onClick: handleUploadImageClick, disabled: !imageFile || uploading, children: uploading ? 'Enviando...' : 'Atualizar Imagem' })] })] })), uploadStatus && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Erro') ? '#c00' : '#0a0' }, children: uploadStatus }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "A\u00E7\u00F5es do Livro" }), (0, jsx_runtime_1.jsxs)("div", { className: "book-actions", children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleRentBook, children: "Alugar Livro" }), (0, jsx_runtime_1.jsx)("button", { onClick: handleFavoriteBook, children: "Adicionar aos Favoritos" })] })] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Escreva uma Avalia\u00E7\u00E3o" }), !currentUser ? ((0, jsx_runtime_1.jsx)("p", { children: "Fa\u00E7a login para escrever uma avalia\u00E7\u00E3o." })) : ((0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmitReview, children: [(0, jsx_runtime_1.jsxs)(material_1.Box, { sx: { mb: 2 }, children: [(0, jsx_runtime_1.jsx)(material_1.Typography, { component: "legend", sx: { mb: 1 }, children: "Nota:" }), (0, jsx_runtime_1.jsx)(material_1.Rating, { name: "book-rating", value: newReview.rating, onChange: (_, newValue) => {
                                             setNewReview({ ...newReview, rating: newValue || 1 });
-                                        }, max: 5, size: "large" })] }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "comment", children: "Comment:" }), (0, jsx_runtime_1.jsx)("textarea", { id: "comment", value: newReview.comment, onChange: (e) => setNewReview({ ...newReview, comment: e.target.value }), rows: 4, className: "review-textarea" }), (0, jsx_runtime_1.jsx)("button", { type: "submit", children: "Submit Review" })] }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Reviews" }), reviews.length === 0 ? ((0, jsx_runtime_1.jsx)("p", { children: "No reviews yet." })) : ((0, jsx_runtime_1.jsx)("div", { children: reviews.map(review => ((0, jsx_runtime_1.jsxs)("div", { className: "review-card", children: [(0, jsx_runtime_1.jsxs)("div", { className: "review-header", children: [(0, jsx_runtime_1.jsx)("strong", { children: review.username }), (0, jsx_runtime_1.jsxs)("span", { children: ['★'.repeat(review.rating), '☆'.repeat(5 - review.rating)] })] }), (0, jsx_runtime_1.jsx)("p", { children: review.comment }), (0, jsx_runtime_1.jsx)("small", { className: "review-date", children: new Date(review.review_date).toLocaleDateString() })] }, review.review_id))) }))] })] }));
+                                        }, max: 5, size: "large" })] }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "comment", children: "Coment\u00E1rio:" }), (0, jsx_runtime_1.jsx)("textarea", { id: "comment", value: newReview.comment, onChange: (e) => setNewReview({ ...newReview, comment: e.target.value }), rows: 4, className: "review-textarea" }), (0, jsx_runtime_1.jsx)("button", { type: "submit", children: "Enviar Avalia\u00E7\u00E3o" })] }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Avalia\u00E7\u00F5es" }), reviews.length === 0 ? ((0, jsx_runtime_1.jsx)("p", { children: "Sem avalia\u00E7\u00F5es ainda." })) : ((0, jsx_runtime_1.jsx)("div", { children: reviews.map(review => ((0, jsx_runtime_1.jsxs)("div", { className: "review-card", children: [(0, jsx_runtime_1.jsxs)("div", { className: "review-header", children: [(0, jsx_runtime_1.jsx)("strong", { children: review.username }), (0, jsx_runtime_1.jsxs)("span", { children: ['★'.repeat(review.rating), '☆'.repeat(5 - review.rating)] })] }), (0, jsx_runtime_1.jsx)("p", { children: review.comment }), (0, jsx_runtime_1.jsx)("small", { className: "review-date", children: new Date(review.review_date).toLocaleDateString('pt-BR') })] }, review.review_id))) }))] })] }));
 };
 exports.default = BookDetail;

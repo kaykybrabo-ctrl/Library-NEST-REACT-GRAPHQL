@@ -29,7 +29,7 @@ let AuthorsService = class AuthorsService {
                 this.prisma.author.findMany({
                     skip: offset,
                     take: limit,
-                    orderBy: { author_id: 'asc' }
+                    orderBy: { author_id: "asc" },
                 }),
                 this.prisma.author.count(),
             ]);
@@ -38,23 +38,23 @@ let AuthorsService = class AuthorsService {
                 total,
                 page: Number(page),
                 limit: Number(limit),
-                totalPages: Math.ceil(total / limit)
+                totalPages: Math.ceil(total / limit),
             };
         }
         const authors = await this.prisma.author.findMany({
-            orderBy: { author_id: 'asc' }
+            orderBy: { author_id: "asc" },
         });
         return {
             authors: authors,
             total: authors.length,
             page: 1,
             limit: authors.length,
-            totalPages: 1
+            totalPages: 1,
         };
     }
     async findOne(id) {
         return this.prisma.author.findUnique({
-            where: { author_id: id }
+            where: { author_id: id },
         });
     }
     async update(id, updateAuthorDto) {
@@ -64,11 +64,18 @@ let AuthorsService = class AuthorsService {
         });
     }
     async remove(id) {
-        const books = await this.prisma.book.findMany({ where: { author_id: id }, select: { book_id: true } });
-        const bookIds = books.map(b => b.book_id);
+        const books = await this.prisma.book.findMany({
+            where: { author_id: id },
+            select: { book_id: true },
+        });
+        const bookIds = books.map((b) => b.book_id);
         await this.prisma.$transaction([
-            this.prisma.review.deleteMany({ where: { book_id: { in: bookIds.length ? bookIds : [-1] } } }),
-            this.prisma.loan.deleteMany({ where: { book_id: { in: bookIds.length ? bookIds : [-1] } } }),
+            this.prisma.review.deleteMany({
+                where: { book_id: { in: bookIds.length ? bookIds : [-1] } },
+            }),
+            this.prisma.loan.deleteMany({
+                where: { book_id: { in: bookIds.length ? bookIds : [-1] } },
+            }),
             this.prisma.book.deleteMany({ where: { author_id: id } }),
             this.prisma.author.delete({ where: { author_id: id } }),
         ]);

@@ -25,7 +25,7 @@ let LoansService = class LoansService {
             },
         });
         if (existingLoan) {
-            throw new common_1.ConflictException('Book already rented by you');
+            throw new common_1.ConflictException("Book already rented by you");
         }
         return this.prisma.loan.create({
             data: createLoanDto,
@@ -47,10 +47,10 @@ let LoansService = class LoansService {
                 user: true,
             },
             orderBy: {
-                loan_date: 'desc',
+                loan_date: "desc",
             },
         });
-        return loans.map(loan => ({
+        return loans.map((loan) => ({
             loans_id: loan.loans_id,
             loan_date: loan.loan_date,
             book_id: loan.book.book_id,
@@ -66,7 +66,7 @@ let LoansService = class LoansService {
             });
         }
         catch (error) {
-            throw new common_1.NotFoundException('Loan not found');
+            throw new common_1.NotFoundException("Loan not found");
         }
     }
 };

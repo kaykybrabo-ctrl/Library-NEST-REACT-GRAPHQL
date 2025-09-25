@@ -57,55 +57,52 @@ let MailService = class MailService {
         try {
             const info = await this.mailer.sendMail({
                 to,
-                subject: 'Welcome to PedBook',
-                template: 'welcome',
+                subject: "Bem-vindo(a) ao PedBook",
+                template: "welcome",
                 context,
             });
             const preview = nodemailer.getTestMessageUrl(info);
-            console.log('[Mail] Welcome sent:', { messageId: info?.messageId, preview });
             return { messageId: info?.messageId, preview };
         }
         catch (err) {
-            console.error('[Mail] Failed to send Welcome email:', err);
             throw err;
         }
     }
     async sendGeneric(to, subject, template, context) {
         try {
-            const info = await this.mailer.sendMail({ to, subject, template, context });
+            const info = await this.mailer.sendMail({
+                to,
+                subject,
+                template,
+                context,
+            });
             const preview = nodemailer.getTestMessageUrl(info);
-            console.log('[Mail] Generic sent:', { to, subject, messageId: info?.messageId, preview });
             return { messageId: info?.messageId, preview };
         }
         catch (err) {
-            console.error('[Mail] Failed to send Generic email:', { to, subject, err });
             throw err;
         }
     }
     async sendPasswordResetEmail(to, context) {
-        const templatePath = (0, path_1.join)(process.cwd(), 'src', 'mail', 'templates', 'reset-password.pug');
+        const templatePath = (0, path_1.join)(process.cwd(), "src", "mail", "templates", "reset-password.pug");
         try {
             const html = pug.compileFile(templatePath)(context);
             const info = await this.mailer.sendMail({
                 to,
-                subject: 'Reset your PedBook password',
+                subject: "Redefina sua senha do PedBook",
                 html,
-                text: `We received a request to reset your PedBook password. Open this link to proceed: ${context.resetUrl}`,
+                text: `Recebemos uma solicitação para redefinir sua senha do PedBook. Abra este link para continuar: ${context.resetUrl}`,
             });
             const preview = nodemailer.getTestMessageUrl(info);
-            const sample = (html || '').replace(/\s+/g, ' ').slice(0, 120);
-            console.log('[Mail] Password reset sent (manual HTML):', { to, messageId: info?.messageId, preview, sample });
             return { messageId: info?.messageId, preview };
         }
         catch (err) {
-            console.error('[Mail] Failed to render/send Password Reset email:', { to, templatePath, err });
             const info2 = await this.mailer.sendMail({
                 to,
-                subject: 'Reset your PedBook password',
-                text: `We received a request to reset your PedBook password. Open this link to proceed: ${context.resetUrl}`,
+                subject: "Redefina sua senha do PedBook",
+                text: `Recebemos uma solicitação para redefinir sua senha do PedBook. Abra este link para continuar: ${context.resetUrl}`,
             });
             const preview2 = nodemailer.getTestMessageUrl(info2);
-            console.log('[Mail] Password reset (plain) sent:', { to, messageId: info2?.messageId, preview: preview2 });
             return { messageId: info2?.messageId, preview: preview2 };
         }
     }

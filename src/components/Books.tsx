@@ -97,15 +97,15 @@ const Books: React.FC = () => {
   }
 
   const handleDeleteBook = async (bookId: number) => {
-    if (!confirm('Are you sure you want to delete this book?')) return
+    if (!confirm('Tem certeza de que deseja excluir este livro?')) return
     try {
       await api.delete(`/api/books/${bookId}`)
-      alert('Book deleted successfully')
+      alert('Livro excluído com sucesso')
       await fetchBooks()
       setError('')
     } catch (err) {
-      setError('Failed to delete book')
-      alert('Failed to delete book')
+      setError('Falha ao excluir livro')
+      alert('Falha ao excluir livro')
     }
   }
 
@@ -121,28 +121,28 @@ const Books: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout title="Books">
-        <div className="loading">Loading books...</div>
+      <Layout title="Livros">
+        <div className="loading">Carregando livros...</div>
       </Layout>
     )
   }
 
   return (
-    <Layout title="Books">
+    <Layout title="Livros">
       {error && <div className="error-message">{error}</div>}
       
       {isAdmin && (
         <section className="form-section">
-          <h2>Add Book</h2>
+          <h2>Adicionar Livro</h2>
           <form onSubmit={handleCreateBook}>
-            <label htmlFor="author-select">Author:</label>
+            <label htmlFor="author-select">Autor:</label>
             <select
               id="author-select"
               value={newBook.author_id}
               onChange={(e) => setNewBook({ ...newBook, author_id: e.target.value })}
               required
             >
-              <option value="">Select an Author</option>
+              <option value="">Selecione um autor</option>
               {authors.map(author => (
                 <option key={author.author_id} value={author.author_id}>
                   {author.name_author}
@@ -150,7 +150,7 @@ const Books: React.FC = () => {
               ))}
             </select>
             
-            <label htmlFor="book-title">Title:</label>
+            <label htmlFor="book-title">Título:</label>
             <input
               type="text"
               id="book-title"
@@ -159,37 +159,37 @@ const Books: React.FC = () => {
               required
             />
             
-            <button type="submit">Add</button>
+            <button type="submit">Adicionar</button>
           </form>
         </section>
       )}
 
       <section className="search-section">
-        <h2>Search Books</h2>
+        <h2>Buscar Livros</h2>
         <form onSubmit={handleSearch}>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title"
+            placeholder="Buscar por título"
           />
-          <button type="submit">Search</button>
+          <button type="submit">Buscar</button>
         </form>
       </section>
 
       {books.length === 0 && searchQuery ? (
-        <div className="no-results">No results found for your search.</div>
+        <div className="no-results">Nenhum resultado encontrado para sua busca.</div>
       ) : (
         <section className="book-list">
-          <h2>Books</h2>
+          <h2>Livros</h2>
           <table>
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Author ID</th>
-                <th>Name</th>
-                <th>Title</th>
-                <th>Actions</th>
+                <th>ID do Autor</th>
+                <th>Autor</th>
+                <th>Título</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -228,16 +228,49 @@ const Books: React.FC = () => {
                     <div className="action-buttons">
                       {editingBook === book.book_id ? (
                         <>
-                          <button onClick={handleSaveEdit}>Save</button>
-                          <button onClick={handleCancelEdit}>Cancel</button>
+                          <button onClick={handleSaveEdit}>Salvar</button>
+                          <button onClick={handleCancelEdit}>Cancelar</button>
                         </>
                       ) : (
                         <>
-                          <button type="button" onClick={() => navigate(`/books/${book.book_id}`)}>View</button>
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/books/${book.book_id}`)}
+                            aria-label="Ver"
+                            title="Ver"
+                            className="icon-button"
+                          >
+                            {/* Eye icon */}
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor"/>
+                            </svg>
+                          </button>
                           {isAdmin && (
                             <>
-                              <button type="button" onClick={() => handleEditBook(book)}>Edit</button>
-                              <button type="button" onClick={() => handleDeleteBook(book.book_id)}>Delete</button>
+                              <button
+                                type="button"
+                                onClick={() => handleEditBook(book)}
+                                aria-label="Editar"
+                                title="Editar"
+                                className="icon-button"
+                              >
+                                {/* Pencil icon */}
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm18-11.5a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75L21 5.75Z" fill="currentColor"/>
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteBook(book.book_id)}
+                                aria-label="Excluir"
+                                title="Excluir"
+                                className="icon-button"
+                              >
+                                {/* Trash icon */}
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor"/>
+                                </svg>
+                              </button>
                             </>
                           )}
                         </>

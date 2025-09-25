@@ -21,10 +21,10 @@ let ReviewsService = class ReviewsService {
         const bookExists = await this.checkBookExists(createReviewDto.book_id);
         const userExists = await this.checkUserExists(createReviewDto.user_id);
         if (!bookExists) {
-            throw new common_1.NotFoundException('Book not found');
+            throw new common_1.NotFoundException("Book not found");
         }
         if (!userExists) {
-            throw new common_1.NotFoundException('User not found');
+            throw new common_1.NotFoundException("User not found");
         }
         return this.prisma.review.create({
             data: createReviewDto,
@@ -41,10 +41,10 @@ let ReviewsService = class ReviewsService {
                 book: true,
             },
             orderBy: {
-                review_date: 'desc',
+                review_date: "desc",
             },
         });
-        return reviews.map(review => ({
+        return reviews.map((review) => ({
             review_id: review.review_id,
             book_id: review.book_id,
             user_id: review.user_id,

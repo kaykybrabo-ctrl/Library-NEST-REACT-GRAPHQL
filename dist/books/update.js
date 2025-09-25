@@ -6,15 +6,24 @@ async function update(req, res) {
     const id = Number(req.params.id);
     const { author_id } = req.body;
     let { title } = req.body;
-    if (!author_id || !title || typeof title !== 'string' || title.trim() === '') {
+    if (!author_id ||
+        !title ||
+        typeof title !== "string" ||
+        title.trim() === "") {
         return res.sendStatus(400);
     }
-    if (isNaN(id) || id <= 0 || isNaN(Number(author_id)) || Number(author_id) <= 0) {
+    if (isNaN(id) ||
+        id <= 0 ||
+        isNaN(Number(author_id)) ||
+        Number(author_id) <= 0) {
         return res.sendStatus(400);
     }
-    title = title.trim().toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+    title = title
+        .trim()
+        .toLowerCase()
+        .replace(/\b\w/g, (char) => char.toUpperCase());
     try {
-        const result = await (0, connection_1.executeQuery)('UPDATE books SET author_id = ?, title = ? WHERE book_id = ?', [Number(author_id), title, id]);
+        const result = await (0, connection_1.executeQuery)("UPDATE books SET author_id = ?, title = ? WHERE book_id = ?", [Number(author_id), title, id]);
         if (result.affectedRows === 0) {
             return res.sendStatus(404);
         }

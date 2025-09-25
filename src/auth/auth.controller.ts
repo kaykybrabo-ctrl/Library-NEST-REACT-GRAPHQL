@@ -97,11 +97,11 @@ export class AuthController {
   async forgotPassword(@Body() body: { username: string }) {
     const username = (body?.username || "").trim();
     if (!username) {
-      return { message: "Username (email) is required" };
+      return { message: "Nome de usuário (e-mail) é obrigatório" };
     }
 
     const genericResponse: any = {
-      message: "If the account exists, a reset email has been sent",
+      message: "Se a conta existir, um e-mail de redefinição foi enviado",
     };
 
     const token = this.jwtService.sign(
@@ -126,7 +126,7 @@ export class AuthController {
   async resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
     const newPassword = (dto?.newPassword || "").trim();
     if (!newPassword) {
-      return { ok: false, message: "newPassword is required" };
+      return { ok: false, message: "Nova senha é obrigatória" };
     }
 
     let username = (dto?.username || "").trim().toLowerCase();
@@ -136,16 +136,16 @@ export class AuthController {
       try {
         const payload: any = this.jwtService.verify(token);
         if (payload?.purpose !== "pwd_reset") {
-          return { ok: false, message: "Invalid token" };
+          return { ok: false, message: "Token inválido" };
         }
         username = (payload?.username || "").toLowerCase();
       } catch {
-        return { ok: false, message: "Invalid or expired token" };
+        return { ok: false, message: "Token inválido ou expirado" };
       }
     }
 
     if (!username) {
-      return { ok: false, message: "username or token is required" };
+      return { ok: false, message: "Usuário ou token é obrigatório" };
     }
 
     try {
@@ -153,13 +153,13 @@ export class AuthController {
       if (!user) {
         return {
           ok: true,
-          message: "Password has been updated if the account exists",
+          message: "A senha foi atualizada caso a conta exista",
         };
       }
       await this.usersService.updatePasswordByUsername(username, newPassword);
-      return { ok: true, message: "Password updated successfully" };
+      return { ok: true, message: "Senha atualizada com sucesso" };
     } catch (e) {
-      return { ok: false, message: "Failed to reset password" };
+      return { ok: false, message: "Falha ao redefinir a senha" };
     }
   }
 }
