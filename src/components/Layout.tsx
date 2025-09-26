@@ -19,8 +19,17 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     <>
       <header>
         <h1>{title}</h1>
-        <button id="logout-button" onClick={handleLogout}>
-          Sair
+        <button id="logout-button" onClick={handleLogout} aria-label="Sair da conta">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            aria-hidden="true"
+          >
+            <path fill="currentColor" d="M10 3a1 1 0 0 1 1 1v4h-2V5H6v14h3v-3h2v4a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5Zm6.293 6.293 1.414 1.414L15.414 13H21v2h-5.586l2.293 2.293-1.414 1.414L12 14l4.293-4.293Z" />
+          </svg>
+          <span>Sair</span>
         </button>
       </header>
 
