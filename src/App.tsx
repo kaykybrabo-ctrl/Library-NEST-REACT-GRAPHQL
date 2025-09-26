@@ -4,13 +4,12 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Root from './components/Root';
 import Login from './components/Login'
 import Register from './components/Register'
-import Books from './components/Books'
-import Authors from './components/Authors'
-import BookDetail from './components/BookDetail'
-import AuthorDetail from './components/AuthorDetail'
-import UserProfile from './components/UserProfile'
+import Books from '@/pages/Books/Books'
+import Authors from '@/pages/Authors/Authors'
+import BookDetail from '@/pages/Books/BookDetail'
+import AuthorDetail from '@/pages/Authors/AuthorDetail'
+import UserProfile from '@/pages/User/UserProfile'
 import ResetPassword from './components/ResetPassword'
-import './index.css'
 
 function App() {
   return (

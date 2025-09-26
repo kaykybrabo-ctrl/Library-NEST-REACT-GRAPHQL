@@ -49,15 +49,15 @@ const multer_1 = require("multer");
 const mailer_1 = require("@nestjs-modules/mailer");
 const pug_adapter_1 = require("@nestjs-modules/mailer/dist/adapters/pug.adapter");
 const nodemailer = __importStar(require("nodemailer"));
-const books_module_1 = require("./books/books.module");
-const authors_module_1 = require("./authors/authors.module");
-const users_module_1 = require("./users/users.module");
-const loans_module_1 = require("./loans/loans.module");
-const reviews_module_1 = require("./reviews/reviews.module");
-const auth_module_1 = require("./auth/auth.module");
-const prisma_module_1 = require("./prisma/prisma.module");
-const uploads_controller_1 = require("./uploads.controller");
-const mail_module_1 = require("./mail/mail.module");
+const books_module_1 = require("./modules/books/books.module");
+const authors_module_1 = require("./modules/authors/authors.module");
+const users_module_1 = require("./modules/users/users.module");
+const loans_module_1 = require("./modules/loans/loans.module");
+const reviews_module_1 = require("./modules/reviews/reviews.module");
+const auth_module_1 = require("./modules/auth/auth.module");
+const prisma_module_1 = require("./infrastructure/prisma/prisma.module");
+const uploads_controller_1 = require("./infrastructure/uploads.controller");
+const mail_module_1 = require("./infrastructure/mail/mail.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -82,7 +82,7 @@ exports.AppModule = AppModule = __decorate([
                         port = 587;
                         secure = false;
                     }
-                    const templateDir = (0, path_1.join)(process.cwd(), "src", "mail", "templates");
+                    const templateDir = (0, path_1.join)(process.cwd(), "src", "infrastructure", "mail", "templates");
                     return {
                         transport: {
                             host,

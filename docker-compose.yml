@@ -5,7 +5,7 @@ services:
     build: .
     volumes:
       - ./FRONTEND:/usr/src/app/FRONTEND
-      - ./src/mail/templates:/usr/src/app/dist/mail/templates:ro
+      - ./src/infrastructure/mail/templates:/usr/src/app/dist/infrastructure/mail/templates:ro
     ports:
       - "8080:8082"
     environment:

@@ -24,8 +24,8 @@ RUN npx prisma generate
 RUN npm run build
 
 # Ensure email templates are present in the runtime image
-RUN mkdir -p dist/mail/templates \
- && cp -R src/mail/templates/* dist/mail/templates/ || true
+RUN mkdir -p dist/infrastructure/mail/templates \
+ && cp -R src/infrastructure/mail/templates/* dist/infrastructure/mail/templates/ || true
 
-EXPOSE 8080
+EXPOSE 8082
 CMD ["node", "dist/main.js"]
