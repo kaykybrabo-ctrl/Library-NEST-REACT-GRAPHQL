@@ -15,17 +15,18 @@ const Authors: React.FC = () => {
   const [editingAuthor, setEditingAuthor] = useState<number | null>(null)
   const [editData, setEditData] = useState({ name: '' })
   const [error, setError] = useState('')
+  const [includeDeleted, setIncludeDeleted] = useState(false)
   const limit = 5
   const navigate = useNavigate()
 
   useEffect(() => {
     fetchAuthors()
-  }, [currentPage])
+  }, [currentPage, includeDeleted])
 
   const fetchAuthors = async () => {
     try {
       setLoading(true)
-      const response = await api.get(`/api/authors?page=${currentPage + 1}&limit=${limit}`)
+      const response = await api.get(`/api/authors?page=${currentPage + 1}&limit=${limit}${includeDeleted ? '&includeDeleted=1' : ''}`)
       
       
       if (response.data.authors) {
@@ -40,6 +41,17 @@ const Authors: React.FC = () => {
       setAuthors([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRestoreAuthor = async (authorId: number) => {
+    try {
+      await api.patch(`/api/authors/${authorId}/restore`)
+      alert('Autor restaurado com sucesso')
+      fetchAuthors()
+    } catch (err) {
+      setError('Falha ao restaurar autor')
+      alert('Falha ao restaurar autor')
     }
   }
 
@@ -143,6 +155,18 @@ const Authors: React.FC = () => {
 
       <section className="author-list">
         <h2>Autores</h2>
+        {isAdmin && (
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                checked={includeDeleted}
+                onChange={(e) => { setIncludeDeleted(e.target.checked); setCurrentPage(0); }}
+              />
+              Mostrar excluídos
+            </label>
+          </div>
+        )}
         <table>
           <thead>
             <tr>
@@ -208,6 +232,17 @@ const Authors: React.FC = () => {
                             >
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor"/>
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRestoreAuthor(author.author_id)}
+                              aria-label="Restaurar"
+                              title="Restaurar"
+                              className="icon-button"
+                            >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor"/>
                               </svg>
                             </button>
                           </>

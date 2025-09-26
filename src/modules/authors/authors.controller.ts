@@ -55,7 +55,7 @@ export class AuthorsController {
   }
 
   @Get("authors")
-  async findAll(@Res() res: Response) {
+  async findAll(@Res() res: Response, @Query("includeDeleted") includeDeleted?: string) {
     const acceptHeader = res.req.headers.accept || "";
 
     if (acceptHeader.includes("text/html")) {
@@ -63,7 +63,7 @@ export class AuthorsController {
         join(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"),
       );
     } else {
-      const authors = await this.authorsService.findAll();
+      const authors = await this.authorsService.findAll(undefined, undefined, includeDeleted === '1' || includeDeleted === 'true');
       return res.json(authors);
     }
   }
@@ -72,11 +72,12 @@ export class AuthorsController {
   async findAllApi(
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "1000",
+    @Query("includeDeleted") includeDeleted?: string,
   ) {
     const pageNum = Number(page);
     const limitNum = Number(limit);
 
-    return this.authorsService.findAll(pageNum, limitNum);
+    return this.authorsService.findAll(pageNum, limitNum, includeDeleted === '1' || includeDeleted === 'true');
   }
 
   @Post("authors")
@@ -115,6 +116,18 @@ export class AuthorsController {
   async removeApi(@Param("id") id: string) {
     await this.authorsService.remove(+id);
     return { message: "Author deleted successfully" };
+  }
+
+  @Patch('authors/:id/restore')
+  async restore(@Param('id') id: string) {
+    await this.authorsService.restore(+id);
+    return { message: 'Author restored successfully' };
+  }
+
+  @Patch('api/authors/:id/restore')
+  async restoreApi(@Param('id') id: string) {
+    await this.authorsService.restore(+id);
+    return { message: 'Author restored successfully' };
   }
 
   @Post("authors/:id/image")

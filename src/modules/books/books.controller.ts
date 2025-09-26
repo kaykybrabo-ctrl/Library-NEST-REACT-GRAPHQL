@@ -49,12 +49,25 @@ export class BooksController {
     }
   }
 
+  @Patch('books/:id/restore')
+  async restore(@Param('id') id: string) {
+    await this.booksService.restore(+id);
+    return { message: 'Livro restaurado com sucesso' };
+  }
+
+  @Patch('api/books/:id/restore')
+  async restoreApi(@Param('id') id: string) {
+    await this.booksService.restore(+id);
+    return { message: 'Livro restaurado com sucesso' };
+  }
+
   @Get("books")
   async findAll(
     @Res() res: Response,
     @Query("page") page?: string,
     @Query("limit") limit?: string,
     @Query("search") search?: string,
+    @Query("includeDeleted") includeDeleted?: string,
   ) {
     const acceptHeader = res.req.headers.accept || "";
 
@@ -65,7 +78,7 @@ export class BooksController {
     } else {
       const pageNum = page ? Number(page) : 1;
       const limitNum = limit ? Number(limit) : 5;
-      const books = await this.booksService.findAll(pageNum, limitNum, search);
+      const books = await this.booksService.findAll(pageNum, limitNum, search, includeDeleted === '1' || includeDeleted === 'true');
       return res.json(books);
     }
   }
@@ -75,11 +88,12 @@ export class BooksController {
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "5",
     @Query("search") search?: string,
+    @Query("includeDeleted") includeDeleted?: string,
   ) {
     const pageNum = Number(page);
     const limitNum = Number(limit);
 
-    const result = await this.booksService.findAll(pageNum, limitNum, search);
+    const result = await this.booksService.findAll(pageNum, limitNum, search, includeDeleted === '1' || includeDeleted === 'true');
     return result;
   }
 

@@ -10,11 +10,11 @@ export async function read(req: Request, res: Response) {
   if (isNaN(offset) || offset < 0) offset = 0;
 
   try {
-    let query = "SELECT * FROM books";
+    let query = "SELECT * FROM books WHERE deleted_at IS NULL";
     const params: any[] = [];
 
     if (search) {
-      query += " WHERE title LIKE ?";
+      query += " AND title LIKE ?";
       params.push(`%${search}%`);
     }
 

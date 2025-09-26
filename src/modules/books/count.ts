@@ -5,11 +5,11 @@ export async function count(req: Request, res: Response) {
   const search = req.query.search as string | undefined;
 
   try {
-    let query = "SELECT COUNT(*) AS total FROM books";
+    let query = "SELECT COUNT(*) AS total FROM books WHERE deleted_at IS NULL";
     const params: any[] = [];
 
     if (search) {
-      query += " WHERE title LIKE ?";
+      query += " AND title LIKE ?";
       params.push(`%${search}%`);
     }
 

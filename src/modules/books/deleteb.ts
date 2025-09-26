@@ -7,9 +7,10 @@ export async function deleteb(req: Request, res: Response) {
   if (isNaN(id) || id <= 0) return res.sendStatus(400);
 
   try {
-    const result = await executeQuery("DELETE FROM books WHERE book_id = ?", [
-      id,
-    ]);
+    const result = await executeQuery(
+      "UPDATE books SET deleted_at = NOW() WHERE book_id = ? AND deleted_at IS NULL",
+      [id],
+    );
 
     if ((result as any).affectedRows === 0) return res.sendStatus(404);
 

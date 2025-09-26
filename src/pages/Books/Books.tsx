@@ -17,6 +17,7 @@ const Books: React.FC = () => {
   const [editingBook, setEditingBook] = useState<number | null>(null)
   const [editData, setEditData] = useState({ title: '', author_id: '' })
   const [error, setError] = useState('')
+  const [includeDeleted, setIncludeDeleted] = useState(false)
   const limit = 5
   const navigate = useNavigate()
 
@@ -28,12 +29,24 @@ const Books: React.FC = () => {
     if (authors.length > 0) {
       fetchBooks();
     }
-  }, [currentPage, searchQuery, authors]);
+  }, [currentPage, searchQuery, authors, includeDeleted]);
+
+  const handleRestoreBook = async (bookId: number) => {
+    try {
+      await api.patch(`/api/books/${bookId}/restore`)
+      alert('Livro restaurado com sucesso')
+      await fetchBooks()
+      setError('')
+    } catch (err) {
+      setError('Falha ao restaurar livro')
+      alert('Falha ao restaurar livro')
+    }
+  }
 
   const fetchBooks = async () => {
     setLoading(true)
     const page = currentPage + 1
-    const response = await api.get(`/api/books?limit=${limit}&page=${page}&search=${searchQuery}`)
+    const response = await api.get(`/api/books?limit=${limit}&page=${page}&search=${searchQuery}${includeDeleted ? '&includeDeleted=1' : ''}`)
 
     if (response.data && Array.isArray(response.data.books)) {
       setBooks(response.data.books)
@@ -183,6 +196,16 @@ const Books: React.FC = () => {
               <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z" fill="currentColor"/>
             </svg>
           </button>
+          {isAdmin && (
+            <label style={{ marginLeft: 12, display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                checked={includeDeleted}
+                onChange={(e) => { setIncludeDeleted(e.target.checked); setCurrentPage(0); }}
+              />
+              Mostrar excluídos
+            </label>
+          )}
         </form>
       </section>
 
@@ -277,6 +300,17 @@ const Books: React.FC = () => {
                                   <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor"/>
                                 </svg>
                               </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRestoreBook(book.book_id)}
+                                aria-label="Restaurar"
+                                title="Restaurar"
+                                className="icon-button"
+                              >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor"/>
+                                </svg>
+                              </button>
                             </>
                           )}
                         </>
@@ -287,7 +321,6 @@ const Books: React.FC = () => {
               ))}
             </tbody>
           </table>
-
           {totalPages > 1 && (
             <div className="pagination">
               {Array.from({ length: totalPages }, (_, i) => (

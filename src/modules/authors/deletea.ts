@@ -8,7 +8,7 @@ export async function deletea(req: Request, res: Response) {
 
   try {
     const result = await executeQuery(
-      "DELETE FROM authors WHERE author_id = ?",
+      "UPDATE authors SET deleted_at = NOW() WHERE author_id = ? AND deleted_at IS NULL",
       [id],
     );
 

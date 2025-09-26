@@ -13,17 +13,19 @@ export class AuthorsService {
     });
   }
 
-  async findAll(page?: number, limit?: number): Promise<any> {
+  async findAll(page?: number, limit?: number, includeDeleted: boolean = false): Promise<any> {
+    const whereClause = includeDeleted ? {} : { deletedAt: null };
     if (page !== undefined && limit !== undefined && page > 0 && limit > 0) {
       const offset = (page - 1) * limit;
 
       const [authors, total] = await Promise.all([
         this.prisma.author.findMany({
+          where: whereClause,
           skip: offset,
           take: limit,
           orderBy: { author_id: "asc" },
         }),
-        this.prisma.author.count(),
+        this.prisma.author.count({ where: whereClause }),
       ]);
 
       return {
@@ -36,6 +38,7 @@ export class AuthorsService {
     }
 
     const authors = await this.prisma.author.findMany({
+      where: whereClause,
       orderBy: { author_id: "asc" },
     });
     return {
@@ -48,12 +51,16 @@ export class AuthorsService {
   }
 
   async findOne(id: number) {
-    return this.prisma.author.findUnique({
-      where: { author_id: id },
+    return this.prisma.author.findFirst({
+      where: { author_id: id, deletedAt: null },
     });
   }
 
   async update(id: number, updateAuthorDto: UpdateAuthorDto) {
+    const exists = await this.prisma.author.findFirst({ where: { author_id: id, deletedAt: null } });
+    if (!exists) {
+      throw new Error("Author not found");
+    }
     return this.prisma.author.update({
       where: { author_id: id },
       data: updateAuthorDto,
@@ -62,10 +69,9 @@ export class AuthorsService {
 
   async remove(id: number): Promise<void> {
     const books = await this.prisma.book.findMany({
-      where: { author_id: id },
+      where: { author_id: id, deletedAt: null },
       select: { book_id: true },
     });
-
     const bookIds = books.map((b) => b.book_id);
 
     await this.prisma.$transaction([
@@ -75,13 +81,13 @@ export class AuthorsService {
       this.prisma.loan.deleteMany({
         where: { book_id: { in: bookIds.length ? bookIds : [-1] } },
       }),
-      this.prisma.book.deleteMany({ where: { author_id: id } }),
-      this.prisma.author.delete({ where: { author_id: id } }),
+      this.prisma.book.updateMany({ where: { author_id: id }, data: { deletedAt: new Date() } }),
+      this.prisma.author.update({ where: { author_id: id }, data: { deletedAt: new Date() } }),
     ]);
   }
 
   async count(): Promise<number> {
-    return this.prisma.author.count();
+    return this.prisma.author.count({ where: { deletedAt: null } });
   }
 
   async updatePhoto(id: number, photo: string): Promise<void> {
@@ -89,5 +95,12 @@ export class AuthorsService {
       where: { author_id: id },
       data: { photo },
     });
+  }
+
+  async restore(id: number): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.author.update({ where: { author_id: id }, data: { deletedAt: null } }),
+      this.prisma.book.updateMany({ where: { author_id: id }, data: { deletedAt: null } }),
+    ]);
   }
 }

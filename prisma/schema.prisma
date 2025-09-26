@@ -12,6 +12,7 @@ model Author {
   name_author String
   biography  String   @db.Text
   photo      String?
+  deletedAt  DateTime? @db.Timestamp(0) @map("deleted_at")
   books      Book[]
 
   @@map("authors")
@@ -23,6 +24,7 @@ model Book {
   description String?  @db.Text
   author_id   Int
   photo       String?
+  deletedAt   DateTime? @db.Timestamp(0) @map("deleted_at")
   
   author      Author   @relation(fields: [author_id], references: [author_id])
   loans       Loan[]

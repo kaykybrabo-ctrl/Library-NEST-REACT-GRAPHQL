@@ -9,7 +9,7 @@ export async function read(req: Request, res: Response) {
 
   try {
     const authors = await executeQuery(
-      `SELECT * FROM authors LIMIT ${limit} OFFSET ${offset}`,
+      `SELECT * FROM authors WHERE deleted_at IS NULL LIMIT ${limit} OFFSET ${offset}`,
     );
     res.json(authors);
   } catch {
