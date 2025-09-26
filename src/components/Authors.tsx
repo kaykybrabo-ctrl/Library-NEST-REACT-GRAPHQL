@@ -182,7 +182,6 @@ const Authors: React.FC = () => {
                           title="Ver"
                           className="icon-button"
                         >
-                          {/* Eye icon */}
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor"/>
                           </svg>
@@ -196,7 +195,6 @@ const Authors: React.FC = () => {
                               title="Editar"
                               className="icon-button"
                             >
-                              {/* Pencil icon */}
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm18-11.5a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75L21 5.75Z" fill="currentColor"/>
                               </svg>
@@ -208,7 +206,6 @@ const Authors: React.FC = () => {
                               title="Excluir"
                               className="icon-button"
                             >
-                              {/* Trash icon */}
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor"/>
                               </svg>

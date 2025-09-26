@@ -192,12 +192,33 @@ nav a.active {
 .search-section form {
     display: flex;
     gap: 10px;
-    align-items: end;
+    align-items: center;
 }
 
 .search-section input {
     flex: 1;
     margin: 0;
+    height: 40px;
+}
+
+.search-section .icon-button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #162c74;
+    box-sizing: border-box;
+}
+
+.search-section .icon-button:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.search-section .icon-button svg {
+    width: 18px;
+    height: 18px;
 }
 
 .login-container {
@@ -248,8 +269,6 @@ nav a.active {
     padding: 6px 12px;
     font-size: 12px;
 }
-
-/* Icon-only action buttons */
 .icon-button {
     background: transparent;
     border: none;

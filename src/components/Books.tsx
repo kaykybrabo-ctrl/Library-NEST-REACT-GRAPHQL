@@ -173,7 +173,16 @@ const Books: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por título"
           />
-          <button type="submit">Buscar</button>
+          <button
+            type="submit"
+            aria-label="Buscar"
+            title="Buscar"
+            className="icon-button"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z" fill="currentColor"/>
+            </svg>
+          </button>
         </form>
       </section>
 
@@ -240,7 +249,6 @@ const Books: React.FC = () => {
                             title="Ver"
                             className="icon-button"
                           >
-                            {/* Eye icon */}
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor"/>
                             </svg>
@@ -254,7 +262,6 @@ const Books: React.FC = () => {
                                 title="Editar"
                                 className="icon-button"
                               >
-                                {/* Pencil icon */}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm18-11.5a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75L21 5.75Z" fill="currentColor"/>
                                 </svg>
@@ -266,7 +273,6 @@ const Books: React.FC = () => {
                                 title="Excluir"
                                 className="icon-button"
                               >
-                                {/* Trash icon */}
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor"/>
                                 </svg>

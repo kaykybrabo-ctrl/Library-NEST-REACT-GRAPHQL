@@ -21,7 +21,6 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: mysql-container2
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
