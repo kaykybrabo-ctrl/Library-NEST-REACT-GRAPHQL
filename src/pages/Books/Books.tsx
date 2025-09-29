@@ -21,6 +21,8 @@ const Books: React.FC = () => {
   const limit = 5
   const navigate = useNavigate()
 
+  const capitalizeFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
+
   useEffect(() => {
     fetchAuthors();
   }, []);
@@ -77,7 +79,7 @@ const Books: React.FC = () => {
     if (!newBook.title.trim() || !newBook.author_id) return
 
     await api.post('/api/books', {
-      title: newBook.title.trim(),
+      title: capitalizeFirst(newBook.title.trim()),
       author_id: Number(newBook.author_id)
     })
     setNewBook({ title: '', author_id: '' })
@@ -93,7 +95,7 @@ const Books: React.FC = () => {
     if (!editData.title.trim() || !editData.author_id || !editingBook) return
 
     const payload = {
-      title: editData.title.trim(),
+      title: capitalizeFirst(editData.title.trim()),
       author_id: Number(editData.author_id)
     }
     
@@ -217,19 +219,19 @@ const Books: React.FC = () => {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>ID do Autor</th>
-                <th>Autor</th>
-                <th>Título</th>
-                <th>Ações</th>
+                <th style={{ textAlign: 'center' }}>ID</th>
+                <th style={{ textAlign: 'center' }}>ID do Autor</th>
+                <th style={{ textAlign: 'center' }}>Autor</th>
+                <th style={{ textAlign: 'center' }}>Título</th>
+                <th style={{ textAlign: 'center' }}>Ações</th>
               </tr>
             </thead>
             <tbody>
               {books.map(book => (
                 <tr key={book.book_id}>
-                  <td>{book.book_id}</td>
-                  <td>{book.author_id}</td>
-                  <td>
+                  <td style={{ textAlign: 'center' }}>{book.book_id}</td>
+                  <td style={{ textAlign: 'center' }}>{book.author_id}</td>
+                  <td style={{ textAlign: 'center' }}>
                     {editingBook === book.book_id ? (
                       <select
                         value={editData.author_id}
@@ -245,7 +247,7 @@ const Books: React.FC = () => {
                       getAuthorName(book.author_id)
                     )}
                   </td>
-                  <td>
+                  <td style={{ textAlign: 'center' }}>
                     {editingBook === book.book_id ? (
                       <input
                         type="text"
@@ -256,7 +258,7 @@ const Books: React.FC = () => {
                       book.title
                     )}
                   </td>
-                  <td>
+                  <td style={{ textAlign: 'center' }}>
                     <div className="action-buttons">
                       {editingBook === book.book_id ? (
                         <>

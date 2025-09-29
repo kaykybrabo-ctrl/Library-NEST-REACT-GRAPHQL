@@ -19,6 +19,8 @@ const Authors: React.FC = () => {
   const limit = 5
   const navigate = useNavigate()
 
+  const capitalizeFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
+
   useEffect(() => {
     fetchAuthors()
   }, [currentPage, includeDeleted])
@@ -61,8 +63,8 @@ const Authors: React.FC = () => {
 
     try {
       await api.post('/api/authors', {
-        name_author: newAuthor.name.trim(),
-        biography: newAuthor.biography.trim()
+        name_author: capitalizeFirst(newAuthor.name.trim()),
+        biography: capitalizeFirst(newAuthor.biography.trim())
       })
       setNewAuthor({ name: '', biography: '' })
       fetchAuthors()
@@ -81,7 +83,7 @@ const Authors: React.FC = () => {
 
     try {
       await api.patch(`/api/authors/${editingAuthor}`, {
-        name_author: editData.name.trim()
+        name_author: capitalizeFirst(editData.name.trim())
       })
       alert('Autor atualizado com sucesso')
       setEditingAuthor(null)
@@ -170,15 +172,15 @@ const Authors: React.FC = () => {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Ações</th>
+              <th style={{ textAlign: 'center' }}>ID</th>
+              <th style={{ textAlign: 'center' }}>Nome</th>
+              <th style={{ textAlign: 'center' }}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {authors.map(author => (
               <tr key={author.author_id}>
-                <td>{author.author_id}</td>
+                <td style={{ textAlign: 'center' }}>{author.author_id}</td>
                 <td>
                   {editingAuthor === author.author_id ? (
                     <input
@@ -190,7 +192,7 @@ const Authors: React.FC = () => {
                     author.name_author
                   )}
                 </td>
-                <td>
+                <td style={{ textAlign: 'center' }}>
                   <div className="action-buttons">
                     {editingAuthor === author.author_id ? (
                       <>
