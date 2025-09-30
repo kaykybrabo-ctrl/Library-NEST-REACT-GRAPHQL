@@ -4,7 +4,8 @@ services:
   app:
     build: .
     volumes:
-      - ./FRONTEND:/usr/src/app/FRONTEND
+      # Mount only uploads to persist user-uploaded files, do not override the built React bundle
+      - ./FRONTEND/uploads:/usr/src/app/FRONTEND/uploads
       - ./src/infrastructure/mail/templates:/usr/src/app/dist/infrastructure/mail/templates:ro
     ports:
       - "8080:8082"

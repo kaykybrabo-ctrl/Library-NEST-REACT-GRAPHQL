@@ -8,6 +8,8 @@ COPY src/ ./src/
 COPY tsconfig.json ./
 COPY tsconfig.backend.json ./
 COPY prisma/ ./prisma/
+COPY index.html ./
+COPY vite.config.ts ./
 
 ENV DB_HOST=db
 ENV DB_PORT=3306
@@ -21,7 +23,13 @@ ENV DATABASE_URL=mysql://root:12345678@db:3306/library1
 COPY FRONTEND/ ./FRONTEND/
 
 RUN npx prisma generate
+RUN npm run react-build
 RUN npm run build
+
+# Copy built React app into the dist folder where Nest ServeStatic serves from
+RUN mkdir -p dist/FRONTEND/react-dist \
+ && cp -R FRONTEND/react-dist/* dist/FRONTEND/react-dist/ \
+ && mkdir -p dist/FRONTEND/uploads
 
 # Ensure email templates are present in the runtime image
 RUN mkdir -p dist/infrastructure/mail/templates \
