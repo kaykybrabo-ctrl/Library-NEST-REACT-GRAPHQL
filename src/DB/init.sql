@@ -113,7 +113,6 @@ CREATE TABLE `users` (
   `username` VARCHAR(50) NOT NULL,
   `password` VARCHAR(100) NOT NULL,
   `role` ENUM('admin','user') NOT NULL DEFAULT 'user',
-  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   `photo` VARCHAR(255) DEFAULT NULL,
   `description` TEXT DEFAULT NULL,
   `favorite_book_id` INT DEFAULT NULL,
@@ -121,18 +120,15 @@ CREATE TABLE `users` (
   UNIQUE KEY `username` (`username`),
   CONSTRAINT `fk_favorite_book` FOREIGN KEY (`favorite_book_id`) REFERENCES `books` (`book_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`, `photo`, `description`, `favorite_book_id`) VALUES
-(1, 'kayky', '123', 'admin', '2025-08-04 17:36:45', NULL, NULL, NULL),
-(2, 'kaue', '123', 'user',  '2025-08-04 17:36:45', NULL, NULL, NULL);
-
+(1, 'kayky@gmail.com', '123', 'admin', '2025-08-04 17:36:45', NULL, NULL, NULL),
+(2, 'kaue@gmail.com', '123', 'user',  '2025-08-04 17:36:45', NULL, NULL, NULL);
 CREATE TABLE `loans` (
   `loans_id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT DEFAULT NULL,
   `book_id` INT DEFAULT NULL,
   `loan_date` DATETIME NOT NULL,
   PRIMARY KEY (`loans_id`),
-  KEY `user_id` (`user_id`),
   KEY `book_id` (`book_id`),
   CONSTRAINT `loans_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `loans_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`)
