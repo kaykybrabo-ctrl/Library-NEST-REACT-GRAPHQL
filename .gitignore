@@ -2,3 +2,5 @@
 rest/api/db/data/
 /src/generated/prisma
 /home/kayky/Documentos/NEST/LibraryNest/FRONTEND/uploads
+node_modules
+dist

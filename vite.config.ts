@@ -18,6 +18,12 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'FRONTEND/react-dist'
+    outDir: 'FRONTEND/react-dist',
+    minify: 'terser',
+    terserOptions: {
+      format: {
+        comments: false,
+      },
+    },
   },
 })

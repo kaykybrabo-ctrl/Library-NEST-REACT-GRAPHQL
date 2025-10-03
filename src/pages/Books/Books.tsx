@@ -73,7 +73,7 @@ const Books: React.FC = () => {
         prevFeaturedCount.current = next.length
         featuredInitialized.current = true
       }
-    } catch { /* silencioso */ }
+    } catch { }
   }
 
   const handleRestoreBook = async (bookId: number) => {
@@ -131,9 +131,9 @@ const Books: React.FC = () => {
   const fetchAuthors = async () => {
     const response = await api.get('/api/authors?limit=9999&page=1')
     if (response.data && Array.isArray(response.data.authors)) {
-      setAuthors(response.data.authors);
+      setAuthors(response.data.authors)
     } else {
-      setAuthors([]);
+      setAuthors([])
     }
   }
 
@@ -250,8 +250,8 @@ const Books: React.FC = () => {
             style={{ position: 'relative', overflow: 'hidden', borderRadius: 10, border: '2px solid #1976d2', background: '#fff', height: 240 }}
           >
             {(() => {
-              const bk = displayedItems[currentSlide];
-              if (!bk) return null;
+              const bk = displayedItems[currentSlide]
+              if (!bk) return null
               return (
                 <div key={bk.book_id} style={{ position: 'absolute', top: '50%', left: 0, right: 0, transform: 'translateY(calc(-50% + 8px))', padding: '0 72px', background: '#fff' }}>
                   <div onClick={() => navigate(`/books/${bk.book_id}`)}
@@ -272,15 +272,15 @@ const Books: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              );
+              )
             })()}
 
-            { slidesLength > 0 && (
-                  <>
-                    <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 64, background: 'linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)', pointerEvents: 'none', zIndex: 1 }} />
-                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 64, background: 'linear-gradient(270deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)', pointerEvents: 'none', zIndex: 1 }} />
-                  </>
-                )}
+            {slidesLength > 0 && (
+              <>
+                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 64, background: 'linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)', pointerEvents: 'none', zIndex: 1 }} />
+                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 64, background: 'linear-gradient(270deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)', pointerEvents: 'none', zIndex: 1 }} />
+              </>
+            )}
 
             {slidesLength > 1 && (
               <>
@@ -303,15 +303,14 @@ const Books: React.FC = () => {
                   <span style={{ color: '#1976d2', fontSize: 24, lineHeight: 1 }}>&gt;</span>
                 </button>
 
-                  {/* Pontinhos */}
-                  <div style={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
-                    {displayedItems.map((_, i) => (
-                      <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i === currentSlide ? '#333' : '#bbb' }} />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+                <div style={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
+                  {displayedItems.map((_, i) => (
+                    <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i === currentSlide ? '#333' : '#bbb' }} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         )}
         
       </section>
