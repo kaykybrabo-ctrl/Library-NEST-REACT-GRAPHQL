@@ -18,12 +18,49 @@ const path_1 = require("path");
 const fs_1 = require("fs");
 let UploadsController = class UploadsController {
     getUpload(filename, res) {
-        const filePath = (0, path_1.join)(__dirname, "..", "FRONTEND", "uploads", filename);
-        if (!(0, fs_1.existsSync)(filePath)) {
-            return res.status(404).send("Not found");
+        const baseDir = (0, path_1.join)(process.cwd(), "FRONTEND", "uploads");
+        const tryPaths = [];
+        tryPaths.push((0, path_1.join)(baseDir, filename));
+        const lower = filename.toLowerCase();
+        if (lower.endsWith('.jpg')) {
+            tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpg$/i, '.jpeg')));
+            tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpg$/i, '.JPG')));
+            tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpg$/i, '.JPEG')));
         }
+        else if (lower.endsWith('.jpeg')) {
+            tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpeg$/i, '.jpg')));
+            tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpeg$/i, '.JPG')));
+            tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpeg$/i, '.JPEG')));
+        }
+        let found = tryPaths.find(p => (0, fs_1.existsSync)(p));
+        // As a last resort, try to find a close match in the uploads dir ignoring case/diacritics/spaces
+        if (!found) {
+            try {
+                const norm = (s) => (s || "")
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                const reqBase = norm(filename.replace(/\.(jpg|jpeg)$/i, ''));
+                const files = (0, fs_1.readdirSync)(baseDir);
+                const candidate = files.find(f => {
+                    const base = norm(f.replace(/\.(jpg|jpeg|png|webp)$/i, ''));
+                    return base === reqBase;
+                }) || files.find(f => {
+                    const base = norm(f.replace(/\.(jpg|jpeg|png|webp)$/i, ''));
+                    return base.includes(reqBase) || reqBase.includes(base);
+                });
+                if (candidate) {
+                    found = (0, path_1.join)(baseDir, candidate);
+                }
+            }
+            catch { }
+        }
+        if (!found)
+            return res.status(404).send("Not found");
         res.setHeader("Cache-Control", "no-store");
-        return res.sendFile(filePath);
+        return res.sendFile(found);
     }
 };
 exports.UploadsController = UploadsController;

@@ -43,7 +43,15 @@ let BooksController = class BooksController {
             return res.json(book);
         }
     }
-    async findAll(res, page, limit, search) {
+    async restore(id) {
+        await this.booksService.restore(+id);
+        return { message: 'Livro restaurado com sucesso' };
+    }
+    async restoreApi(id) {
+        await this.booksService.restore(+id);
+        return { message: 'Livro restaurado com sucesso' };
+    }
+    async findAll(res, page, limit, search, includeDeleted) {
         const acceptHeader = res.req.headers.accept || "";
         if (acceptHeader.includes("text/html")) {
             return res.sendFile((0, path_1.join)(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"));
@@ -51,14 +59,14 @@ let BooksController = class BooksController {
         else {
             const pageNum = page ? Number(page) : 1;
             const limitNum = limit ? Number(limit) : 5;
-            const books = await this.booksService.findAll(pageNum, limitNum, search);
+            const books = await this.booksService.findAll(pageNum, limitNum, search, includeDeleted === '1' || includeDeleted === 'true');
             return res.json(books);
         }
     }
-    async findAllApi(page = "1", limit = "5", search) {
+    async findAllApi(page = "1", limit = "5", search, includeDeleted) {
         const pageNum = Number(page);
         const limitNum = Number(limit);
-        const result = await this.booksService.findAll(pageNum, limitNum, search);
+        const result = await this.booksService.findAll(pageNum, limitNum, search, includeDeleted === '1' || includeDeleted === 'true');
         return result;
     }
     async findOneApi(id) {
@@ -138,13 +146,28 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findOne", null);
 __decorate([
+    (0, common_1.Patch)('books/:id/restore'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BooksController.prototype, "restore", null);
+__decorate([
+    (0, common_1.Patch)('api/books/:id/restore'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BooksController.prototype, "restoreApi", null);
+__decorate([
     (0, common_1.Get)("books"),
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Query)("page")),
     __param(2, (0, common_1.Query)("limit")),
     __param(3, (0, common_1.Query)("search")),
+    __param(4, (0, common_1.Query)("includeDeleted")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findAll", null);
 __decorate([
@@ -152,8 +175,9 @@ __decorate([
     __param(0, (0, common_1.Query)("page")),
     __param(1, (0, common_1.Query)("limit")),
     __param(2, (0, common_1.Query)("search")),
+    __param(3, (0, common_1.Query)("includeDeleted")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "findAllApi", null);
 __decorate([

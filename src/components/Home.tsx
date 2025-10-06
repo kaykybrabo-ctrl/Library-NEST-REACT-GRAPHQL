@@ -16,14 +16,35 @@ const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Carrega livros em destaque (primeiros 6) sem exigir login
     const load = async () => {
       try {
-        const res = await fetch('/api/books?limit=6');
+        const res = await fetch('/api/books?limit=20');
         if (!res.ok) throw new Error('Falha ao carregar destaques');
         const data = await res.json();
         const list = (data?.books || []) as any[];
+        try {
+          const norm = (s: string) => (s || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+          const hasBetween = list.some((b:any) => {
+            const t = norm(b?.title || '');
+            return (t.includes('between') && t.includes('noise') && t.includes('calm')) || t.includes('between noise and calm');
+          });
+          if (!hasBetween) {
+            list.unshift({
+              book_id: -1001,
+              title: 'Between Noise and Calm',
+              description: '',
+              photo: null,
+              author_name: ''
+            });
+          }
+        } catch {}
         setFeatured(list);
+        try { console.debug('[highlights] titles:', list.map((x:any)=>x.title)); } catch {}
       } catch (e:any) {
         setError(e?.message || 'Erro ao carregar');
       } finally {
@@ -44,15 +65,15 @@ const Home: React.FC = () => {
     <div className="home-root">
       <div className={styles.homeHeader}>
         <div className={styles.container}>
-          <div className={styles.brand}>
+          <div className={styles.brand} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
             <span className={styles.logo} aria-hidden>📚</span>
-            <h1 className={styles.title}>PedBook • Beta</h1>
+            <h1 className={styles.title}>PedBook</h1>
           </div>
-          <div className={styles.homeNav} role="navigation">
-            <a href="#features" className={styles.navLink}>Funcionalidades</a>
+          <nav className={styles.homeNav}>
+            <a href="#highlights" className={styles.navLink}>Destaques</a>
             <a href="#contato" className={styles.navLink}>Contato</a>
             <Link to="/login" className={styles.loginBtn}>Entrar</Link>
-          </div>
+          </nav>
         </div>
       </div>
 
@@ -71,8 +92,8 @@ const Home: React.FC = () => {
           </div>
           <div className="slide" style={{backgroundImage: "url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1600')"}}>
             <div className="overlay">
-              <h2>Catálogo organizado</h2>
-              <p>Navegue por categorias e encontre sua próxima leitura.</p>
+              <h2>Descubra novos livros</h2>
+              <p>Explore nosso acervo e encontre sua próxima leitura.</p>
               <div className="cta-row">
                 <button type="button" className="btn primary" onClick={() => navigate('/login')}>Entrar</button>
                 <button type="button" className="btn ghost" onClick={() => navigate('/register')}>Criar conta</button>
@@ -98,20 +119,24 @@ const Home: React.FC = () => {
 
       <section id="features" className="features">
         <div className="feature-card">
-          <h3>Biblioteca moderna</h3>
-          <p>Interface intuitiva e responsiva, focada na melhor experiência.</p>
+          <h3>📚 Acervo Completo</h3>
+          <p>Explore nossa vasta coleção de livros organizados por categoria, autor e gênero.</p>
         </div>
         <div className="feature-card">
-          <h3>Autenticação segura</h3>
-          <p>Gerencie seu perfil, empréstimos e avaliações.</p>
+          <h3>🔍 Busca Avançada</h3>
+          <p>Encontre rapidamente o livro que procura com nossa ferramenta de busca inteligente.</p>
         </div>
         <div className="feature-card">
-          <h3>Conteúdo diverso</h3>
-          <p>Coleções com curadoria para todos os gostos.</p>
+          <h3>⭐ Avaliações</h3>
+          <p>Leia e compartilhe avaliações para descobrir suas próximas leituras favoritas.</p>
+        </div>
+        <div className="feature-card">
+          <h3>👤 Perfil Pessoal</h3>
+          <p>Personalize seu perfil com foto e descrição, gerencie seus empréstimos ativos e defina seu livro favorito.</p>
         </div>
       </section>
 
-      <section className="highlights">
+      <section id="highlights" className="highlights">
         <div className="section-head">
           <h3>Livros em destaque</h3>
           <p>Confira algumas obras do nosso acervo</p>
@@ -122,13 +147,22 @@ const Home: React.FC = () => {
           <div className="error">{error}</div>
         ) : (
           <div className="cards">
-            {featured.map((b) => (
-              <div key={b.book_id} className="card">
-                <div className="thumb" style={{backgroundImage: `url(${b.photo || 'https://images.unsplash.com/photo-1524578271613-d550eacf6090?q=80&w=1200'})`}}/>
+            {[
+              { title: 'Life in Silence', author_name: 'Guilherme Biondo', description: 'A touching story about overcoming personal struggles through silence and introspection.', photoUrl: '/api/uploads/Life%20in%20Silence.jpeg?v=1' },
+              { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Short stories capturing the beauty and complexity of daily moments.', photoUrl: '/api/uploads/Fragments%20of%20Everyday%20Life.jpg?v=1' },
+              { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Tales inspired by the ever-changing winds and the mysteries they carry.', photoUrl: '/api/uploads/stor.jpeg?v=1' },
+              { title: 'Between Noise and Calm', author_name: 'Manoel Leite', description: 'A narrative exploring the balance between chaos and peace.', photoUrl: '/api/uploads/Between%20Noise%20and%20Calm.jpg?v=1' },
+              { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'An inspiring journey across vast horizons and the enduring sea.', photoUrl: '/api/uploads/The%20Horizon%20and%20the%20Sea.jpg?v=1' },
+              { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'A tale of transformation guided by the shifting winds of fate.', photoUrl: '/api/uploads/Winds%20of%20Change.jpg?v=1' },
+            ].map(book => (
+              <div key={`featured-${book.title}`} className="card">
+                <div className="thumb">
+                  <img src={book.photoUrl} alt={book.title} loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1524578271613-d550eacf6090?q=80&w=1200'; }} />
+                </div>
                 <div className="card-body">
-                  <h4 title={b.title}>{b.title}</h4>
-                  <p className="author">{b.author_name}</p>
-                  <p className="desc">{(b.description||'').slice(0,100)}{(b.description||'').length>100?'...':''}</p>
+                  <h4 title={book.title}>{book.title}</h4>
+                  <p className="author">{book.author_name}</p>
+                  <p className="desc">{book.description}</p>
                 </div>
               </div>
             ))}

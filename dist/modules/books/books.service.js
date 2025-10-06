@@ -30,17 +30,20 @@ let BooksService = class BooksService {
             },
         });
     }
-    async findAll(page, limit, search) {
+    async findAll(page, limit, search, includeDeleted = false) {
         const pageNum = page || 1;
         const limitNum = limit || 5;
         const offset = (pageNum - 1) * limitNum;
-        const whereClause = search
-            ? {
-                title: {
-                    contains: search,
-                },
-            }
-            : {};
+        const whereClause = {
+            ...(includeDeleted ? {} : { deletedAt: null }),
+            ...(search
+                ? {
+                    title: {
+                        contains: search,
+                    },
+                }
+                : {}),
+        };
         const books = await this.prisma.book.findMany({
             where: whereClause,
             skip: offset,
@@ -67,8 +70,8 @@ let BooksService = class BooksService {
         };
     }
     async findOne(id) {
-        const book = await this.prisma.book.findUnique({
-            where: { book_id: id },
+        const book = await this.prisma.book.findFirst({
+            where: { book_id: id, deletedAt: null },
             include: {
                 author: true,
             },
@@ -85,6 +88,10 @@ let BooksService = class BooksService {
         };
     }
     async update(id, updateBookDto) {
+        const exists = await this.prisma.book.findFirst({ where: { book_id: id, deletedAt: null } });
+        if (!exists) {
+            throw new Error("Book not found");
+        }
         return this.prisma.book.update({
             where: { book_id: id },
             data: {
@@ -99,8 +106,8 @@ let BooksService = class BooksService {
         });
     }
     async remove(id) {
-        const book = await this.prisma.book.findUnique({
-            where: { book_id: id },
+        const book = await this.prisma.book.findFirst({
+            where: { book_id: id, deletedAt: null },
         });
         if (!book) {
             throw new Error(`Book with ID ${id} not found`);
@@ -108,17 +115,20 @@ let BooksService = class BooksService {
         await this.prisma.$transaction([
             this.prisma.review.deleteMany({ where: { book_id: id } }),
             this.prisma.loan.deleteMany({ where: { book_id: id } }),
-            this.prisma.book.delete({ where: { book_id: id } }),
+            this.prisma.book.update({ where: { book_id: id }, data: { deletedAt: new Date() } }),
         ]);
     }
     async count() {
-        return this.prisma.book.count();
+        return this.prisma.book.count({ where: { deletedAt: null } });
     }
     async updatePhoto(id, photo) {
         await this.prisma.book.update({
             where: { book_id: id },
             data: { photo },
         });
+    }
+    async restore(id) {
+        await this.prisma.book.update({ where: { book_id: id }, data: { deletedAt: null } });
     }
 };
 exports.BooksService = BooksService;

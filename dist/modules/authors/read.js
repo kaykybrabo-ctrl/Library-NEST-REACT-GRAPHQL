@@ -10,7 +10,7 @@ async function read(req, res) {
     if (isNaN(offset) || offset < 0)
         offset = 0;
     try {
-        const authors = await (0, connection_1.executeQuery)(`SELECT * FROM authors LIMIT ${limit} OFFSET ${offset}`);
+        const authors = await (0, connection_1.executeQuery)(`SELECT * FROM authors WHERE deleted_at IS NULL LIMIT ${limit} OFFSET ${offset}`);
         res.json(authors);
     }
     catch {

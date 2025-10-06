@@ -46,20 +46,20 @@ let AuthorsController = class AuthorsController {
     async findOneApi(id) {
         return this.authorsService.findOne(+id);
     }
-    async findAll(res) {
+    async findAll(res, includeDeleted) {
         const acceptHeader = res.req.headers.accept || "";
         if (acceptHeader.includes("text/html")) {
             return res.sendFile((0, path_1.join)(__dirname, "..", "..", "FRONTEND", "react-dist", "index.html"));
         }
         else {
-            const authors = await this.authorsService.findAll();
+            const authors = await this.authorsService.findAll(undefined, undefined, includeDeleted === '1' || includeDeleted === 'true');
             return res.json(authors);
         }
     }
-    async findAllApi(page = "1", limit = "1000") {
+    async findAllApi(page = "1", limit = "1000", includeDeleted) {
         const pageNum = Number(page);
         const limitNum = Number(limit);
-        return this.authorsService.findAll(pageNum, limitNum);
+        return this.authorsService.findAll(pageNum, limitNum, includeDeleted === '1' || includeDeleted === 'true');
     }
     async create(createAuthorDto) {
         return this.authorsService.create(createAuthorDto);
@@ -80,6 +80,14 @@ let AuthorsController = class AuthorsController {
     async removeApi(id) {
         await this.authorsService.remove(+id);
         return { message: "Author deleted successfully" };
+    }
+    async restore(id) {
+        await this.authorsService.restore(+id);
+        return { message: 'Author restored successfully' };
+    }
+    async restoreApi(id) {
+        await this.authorsService.restore(+id);
+        return { message: 'Author restored successfully' };
     }
     async updateImage(id, file) {
         if (!file) {
@@ -132,16 +140,18 @@ __decorate([
 __decorate([
     (0, common_1.Get)("authors"),
     __param(0, (0, common_1.Res)()),
+    __param(1, (0, common_1.Query)("includeDeleted")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)("api/authors"),
     __param(0, (0, common_1.Query)("page")),
     __param(1, (0, common_1.Query)("limit")),
+    __param(2, (0, common_1.Query)("includeDeleted")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "findAllApi", null);
 __decorate([
@@ -188,6 +198,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthorsController.prototype, "removeApi", null);
+__decorate([
+    (0, common_1.Patch)('authors/:id/restore'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthorsController.prototype, "restore", null);
+__decorate([
+    (0, common_1.Patch)('api/authors/:id/restore'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthorsController.prototype, "restoreApi", null);
 __decorate([
     (0, common_1.Post)("authors/:id/image"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {

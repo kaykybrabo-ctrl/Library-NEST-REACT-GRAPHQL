@@ -25,30 +25,20 @@ import { MailModule } from "@/infrastructure/mail/mail.module";
     }),
     MailerModule.forRootAsync({
       useFactory: async () => {
-        let host = process.env.SMTP_HOST || "smtp.ethereal.email";
-        let port = Number(process.env.SMTP_PORT || 587);
-        let secure = process.env.SMTP_SECURE === "true" ? true : false;
-        let user = process.env.SMTP_USER || "";
-        let pass = process.env.SMTP_PASS || "";
-
-        if (!user || !pass) {
-          const testAccount = await nodemailer.createTestAccount();
-          user = testAccount.user;
-          pass = testAccount.pass;
-          host = "smtp.ethereal.email";
-          port = 587;
-          secure = false;
-        }
+        const host = process.env.SMTP_HOST || "smtp.ethereal.email";
+        const port = Number(process.env.SMTP_PORT || 587);
+        const secure = process.env.SMTP_SECURE === "true" ? true : false;
+        const user = process.env.SMTP_USER || "";
+        const pass = process.env.SMTP_PASS || "";
 
         const templateDir = join(process.cwd(), "src", "infrastructure", "mail", "templates");
 
+        const transport = user && pass
+          ? { host, port, secure, auth: { user, pass } }
+          : { jsonTransport: true };
+
         return {
-          transport: {
-            host,
-            port,
-            secure,
-            auth: { user, pass },
-          },
+          transport,
           defaults: {
             from: process.env.MAIL_FROM || '"PedBook" <no-reply@pedbook.local>',
           },
