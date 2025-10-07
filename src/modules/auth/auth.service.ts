@@ -16,11 +16,16 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
+    console.log('Validando usuário:', { username, password });
     const user = await this.usersService.findByUsername(username);
+    console.log('Usuário encontrado:', user ? { id: user.id, username: user.username, password: user.password } : 'null');
+    
     if (user && user.password === password) {
+      console.log('Senha correta, autenticação bem-sucedida');
       const { password, ...result } = user;
       return result;
     }
+    console.log('Falha na autenticação - usuário não encontrado ou senha incorreta');
     return null;
   }
 

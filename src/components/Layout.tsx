@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, title }) => {
-  const { logout } = useAuth()
+  const { logout, isAdmin } = useAuth()
   const location = useLocation()
 
   const handleLogout = () => {
@@ -52,6 +52,14 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         >
           Perfil
         </Link>
+        {isAdmin && (
+          <Link 
+            to="/loans" 
+            className={location.pathname === '/loans' ? 'active' : ''}
+          >
+            Empréstimos
+          </Link>
+        )}
       </nav>
 
       <main>{children}</main>

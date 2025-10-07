@@ -9,6 +9,7 @@ import Authors from '@/pages/Authors/Authors'
 import BookDetail from '@/pages/Books/BookDetail'
 import AuthorDetail from '@/pages/Authors/AuthorDetail'
 import UserProfile from '@/pages/User/UserProfile'
+import Loans from '@/pages/Loans/Loans'
 import ResetPassword from './components/ResetPassword'
 
 function App() {
@@ -43,6 +44,11 @@ function App() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <UserProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/loans" element={
+            <ProtectedRoute>
+              <Loans />
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -19,8 +19,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log('Interceptor de resposta - erro:', error);
     const status = error?.response?.status;
-    if (status === 401 || status === 403) {
+    const url = error?.config?.url;
+    
+    // Não redirecionar se for erro de login
+    if ((status === 401 || status === 403) && !url?.includes('/login')) {
+      console.log('Redirecionando para home devido a erro de autenticação');
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       if (typeof window !== "undefined") {

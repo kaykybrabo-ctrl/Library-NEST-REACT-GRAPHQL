@@ -7,7 +7,7 @@ import { Book, Author } from '@/types'
 import './BooksCards.css'
 
 const Books: React.FC = () => {
-  const { isAdmin } = useAuth()
+  const { isAdmin, user } = useAuth()
   const [books, setBooks] = useState<Book[]>([])
   const [authors, setAuthors] = useState<Author[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,6 +22,8 @@ const Books: React.FC = () => {
   const [featured, setFeatured] = useState<Book[]>([])
   const [carouselItems, setCarouselItems] = useState<Book[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [bookLoans, setBookLoans] = useState<{[key: number]: any}>({})
+  const [userLoans, setUserLoans] = useState<{[key: number]: any}>({})
   const limit = 6
   const navigate = useNavigate()
   const featuredInitialized = useRef(false)
@@ -44,6 +46,12 @@ const Books: React.FC = () => {
   useEffect(() => {
     fetchBooks();
   }, [currentPage, searchQuery, includeDeleted]);
+
+  useEffect(() => {
+    if (books.length > 0) {
+      fetchLoanStatuses();
+    }
+  }, [books]);
 
   useEffect(() => {
     if (slidesLength <= 1) return;
@@ -76,6 +84,62 @@ const Books: React.FC = () => {
       }
     } catch { }
   }
+
+  const fetchLoanStatuses = async () => {
+    try {
+      const loanPromises = books.map(async (book) => {
+        const [loanStatus, userLoan] = await Promise.all([
+          api.get(`/api/books/${book.book_id}/loan-status`),
+          user ? api.get(`/api/books/${book.book_id}/my-loan`) : Promise.resolve({ data: { hasLoan: false } })
+        ]);
+        return {
+          bookId: book.book_id,
+          loanStatus: loanStatus.data,
+          userLoan: userLoan.data
+        };
+      });
+
+      const results = await Promise.all(loanPromises);
+      const newBookLoans: {[key: number]: any} = {};
+      const newUserLoans: {[key: number]: any} = {};
+
+      results.forEach(({ bookId, loanStatus, userLoan }) => {
+        newBookLoans[bookId] = loanStatus;
+        newUserLoans[bookId] = userLoan;
+      });
+
+      setBookLoans(newBookLoans);
+      setUserLoans(newUserLoans);
+    } catch (err) {
+      console.error('Erro ao buscar status de empréstimos:', err);
+    }
+  };
+
+  const handleRentBook = async (bookId: number) => {
+    try {
+      await api.post(`/api/rent/${bookId}`);
+      alert('Livro alugado com sucesso!');
+      fetchLoanStatuses();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Erro ao alugar livro';
+      alert(errorMessage);
+    }
+  };
+
+  const handleReturnBook = async (bookId: number) => {
+    if (!confirm('Tem certeza de que deseja devolver este livro?')) {
+      return;
+    }
+
+    try {
+      await api.post(`/api/books/${bookId}/return`);
+      alert('Livro devolvido com sucesso!');
+      fetchLoanStatuses();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Erro ao devolver livro';
+      alert(errorMessage);
+    }
+  };
 
   const handleRestoreBook = async (bookId: number) => {
     try {
@@ -452,6 +516,16 @@ const Books: React.FC = () => {
                       <div className="book-card-meta">
                         <span>ID: {book.book_id}</span>
                         {book.deleted_at && <span style={{color: '#ff9800', fontWeight: 'bold'}}>EXCLUÍDO</span>}
+                        {!book.deleted_at && bookLoans[book.book_id]?.isRented && (
+                          <span style={{color: '#f44336', fontWeight: 'bold'}}>
+                            ALUGADO POR: {bookLoans[book.book_id]?.loan?.username}
+                          </span>
+                        )}
+                        {!book.deleted_at && userLoans[book.book_id]?.hasLoan && (
+                          <span style={{color: '#4caf50', fontWeight: 'bold'}}>
+                            VOCÊ ALUGOU ESTE LIVRO
+                          </span>
+                        )}
                       </div>
                       
                       <div className="book-card-actions">
@@ -466,6 +540,52 @@ const Books: React.FC = () => {
                             <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor" />
                           </svg>
                         </button>
+
+                        {/* Botões de aluguel/devolução */}
+                        {!book.deleted_at && (
+                          <>
+                            {userLoans[book.book_id]?.hasLoan ? (
+                              <button
+                                type="button"
+                                onClick={() => handleReturnBook(book.book_id)}
+                                aria-label="Devolver livro"
+                                title="Devolver livro"
+                                className="icon-button"
+                                style={{borderColor: '#ff9800', color: '#ff9800'}}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor" />
+                                </svg>
+                              </button>
+                            ) : bookLoans[book.book_id]?.isRented ? (
+                              <button
+                                type="button"
+                                disabled
+                                aria-label="Livro já alugado"
+                                title={`Livro alugado por ${bookLoans[book.book_id]?.loan?.username || 'outro usuário'}`}
+                                className="icon-button"
+                                style={{borderColor: '#ccc', color: '#ccc', cursor: 'not-allowed'}}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" fill="currentColor" />
+                                </svg>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleRentBook(book.book_id)}
+                                aria-label="Alugar livro"
+                                title="Alugar livro"
+                                className="icon-button"
+                                style={{borderColor: '#4caf50', color: '#4caf50'}}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 8h-3V7h-4v3H7l5 5 5-5z" fill="currentColor" />
+                                </svg>
+                              </button>
+                            )}
+                          </>
+                        )}
                         
                         {isAdmin && (
                           <>
