@@ -41,7 +41,6 @@ exports.AppModule = AppModule = __decorate([
                     const user = process.env.SMTP_USER || "";
                     const pass = process.env.SMTP_PASS || "";
                     const templateDir = (0, path_1.join)(process.cwd(), "src", "infrastructure", "mail", "templates");
-                    // If SMTP credentials are provided, use real SMTP. Otherwise use local jsonTransport
                     const transport = user && pass
                         ? { host, port, secure, auth: { user, pass } }
                         : { jsonTransport: true };

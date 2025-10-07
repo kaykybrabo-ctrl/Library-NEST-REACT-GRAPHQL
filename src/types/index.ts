@@ -5,6 +5,7 @@ export interface Book {
   author_id: number;
   author_name?: string;
   photo?: string;
+  deleted_at?: string | null;
 }
 
 export interface Author {
@@ -12,6 +13,7 @@ export interface Author {
   name_author: string;
   photo?: string;
   biography?: string;
+  deleted_at?: string | null;
 }
 
 export interface User {

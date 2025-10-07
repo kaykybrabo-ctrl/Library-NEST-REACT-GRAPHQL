@@ -33,7 +33,6 @@ let UploadsController = class UploadsController {
             tryPaths.push((0, path_1.join)(baseDir, filename.replace(/\.jpeg$/i, '.JPEG')));
         }
         let found = tryPaths.find(p => (0, fs_1.existsSync)(p));
-        // As a last resort, try to find a close match in the uploads dir ignoring case/diacritics/spaces
         if (!found) {
             try {
                 const norm = (s) => (s || "")

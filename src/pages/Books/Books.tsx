@@ -4,6 +4,7 @@ import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { Book, Author } from '@/types'
+import './BooksCards.css'
 
 const Books: React.FC = () => {
   const { isAdmin } = useAuth()
@@ -21,7 +22,7 @@ const Books: React.FC = () => {
   const [featured, setFeatured] = useState<Book[]>([])
   const [carouselItems, setCarouselItems] = useState<Book[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
-  const limit = 5
+  const limit = 6
   const navigate = useNavigate()
   const featuredInitialized = useRef(false)
   const prevFeaturedCount = useRef(0)
@@ -384,24 +385,47 @@ const Books: React.FC = () => {
         <div className="no-results">Nenhum resultado encontrado para sua busca.</div>
       ) : (
         <section className="book-list">
-          <h2>Livros</h2>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'center' }}>ID</th>
-                <th style={{ textAlign: 'center' }}>ID do Autor</th>
-                <th style={{ textAlign: 'center' }}>Autor</th>
-                <th style={{ textAlign: 'center' }}>Título</th>
-                <th style={{ textAlign: 'center' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {books.map(book => (
-                <tr key={book.book_id}>
-                  <td style={{ textAlign: 'center' }}>{book.book_id}</td>
-                  <td style={{ textAlign: 'center' }}>{book.author_id}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    {editingBook === book.book_id ? (
+          <h2>Livros ({books.length} {books.length === 1 ? 'livro' : 'livros'})</h2>
+          
+          <div className={`books-grid ${loading ? 'loading' : ''}`}>
+            {books.map(book => (
+              <div 
+                key={book.book_id} 
+                className={`book-card ${book.deleted_at ? 'deleted' : ''} ${editingBook === book.book_id ? 'editing' : ''}`}
+              >
+                <div className="book-card-image">
+                  {book.photo ? (
+                    <img 
+                      src={book.photo.startsWith('http') || book.photo.startsWith('/') ? book.photo : `/api/uploads/${book.photo}`} 
+                      alt={book.title}
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.no-image')) {
+                          const noImageDiv = document.createElement('div');
+                          noImageDiv.className = 'no-image';
+                          noImageDiv.textContent = 'Sem imagem';
+                          parent.appendChild(noImageDiv);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="no-image">
+                      Sem imagem
+                    </div>
+                  )}
+                </div>
+                
+                <div className="book-card-content">
+                  {editingBook === book.book_id ? (
+                    <div className="edit-form">
+                      <input
+                        type="text"
+                        value={editData.title}
+                        onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                        placeholder="Título do livro"
+                      />
                       <select
                         value={editData.author_id}
                         onChange={(e) => setEditData({ ...editData, author_id: e.target.value })}
@@ -412,86 +436,88 @@ const Books: React.FC = () => {
                           </option>
                         ))}
                       </select>
-                    ) : (
-                      getAuthorName(book.author_id)
-                    )}
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    {editingBook === book.book_id ? (
-                      <input
-                        type="text"
-                        value={editData.title}
-                        onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-                      />
-                    ) : (
-                      book.title
-                    )}
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <div className="action-buttons">
-                      {editingBook === book.book_id ? (
-                        <>
-                          <button onClick={handleSaveEdit}>Salvar</button>
-                          <button onClick={handleCancelEdit}>Cancelar</button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/books/${book.book_id}`)}
-                            aria-label="Ver"
-                            title="Ver"
-                            className="icon-button"
-                          >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor" />
-                            </svg>
-                          </button>
-                          {isAdmin && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => handleEditBook(book)}
-                                aria-label="Editar"
-                                title="Editar"
-                                className="icon-button"
-                              >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm18-11.5a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75L21 5.75Z" fill="currentColor" />
-                                </svg>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteBook(book.book_id)}
-                                aria-label="Excluir"
-                                title="Excluir"
-                                className="icon-button"
-                              >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor" />
-                                </svg>
-                              </button>
+                      <div className="edit-actions">
+                        <button className="save-btn" onClick={handleSaveEdit}>Salvar</button>
+                        <button className="cancel-btn" onClick={handleCancelEdit}>Cancelar</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="book-card-title" title={book.title}>{book.title}</h3>
+                      <p className="book-card-author">por {getAuthorName(book.author_id) || 'Autor desconhecido'}</p>
+                      <p className="book-card-description">
+                        {book.description || 'Sem descrição disponível para este livro.'}
+                      </p>
+                      
+                      <div className="book-card-meta">
+                        <span>ID: {book.book_id}</span>
+                        {book.deleted_at && <span style={{color: '#ff9800', fontWeight: 'bold'}}>EXCLUÍDO</span>}
+                      </div>
+                      
+                      <div className="book-card-actions">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/books/${book.book_id}`)}
+                          aria-label="Ver detalhes"
+                          title="Ver detalhes"
+                          className="icon-button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor" />
+                          </svg>
+                        </button>
+                        
+                        {isAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEditBook(book)}
+                              aria-label="Editar"
+                              title="Editar"
+                              className="icon-button"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm18-11.5a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75L21 5.75Z" fill="currentColor" />
+                              </svg>
+                            </button>
+                            
+                            {book.deleted_at ? (
                               <button
                                 type="button"
                                 onClick={() => handleRestoreBook(book.book_id)}
                                 aria-label="Restaurar"
                                 title="Restaurar"
                                 className="icon-button"
+                                style={{borderColor: '#4caf50', color: '#4caf50'}}
                               >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor" />
                                 </svg>
                               </button>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteBook(book.book_id)}
+                                aria-label="Excluir"
+                                title="Excluir"
+                                className="icon-button"
+                                style={{borderColor: '#f44336', color: '#f44336'}}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor" />
+                                </svg>
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          
           {totalPages > 1 && (
             <div className="pagination">
               {Array.from({ length: totalPages }, (_, i) => (
