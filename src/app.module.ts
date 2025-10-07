@@ -53,7 +53,7 @@ import { MailModule } from "@/infrastructure/mail/mail.module";
     PrismaModule,
     MailModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, "..", "FRONTEND", "uploads"),
+      rootPath: join(process.cwd(), "FRONTEND", "uploads"),
       serveRoot: "/api/uploads",
       serveStaticOptions: {
         cacheControl: false,
@@ -75,7 +75,7 @@ import { MailModule } from "@/infrastructure/mail/mail.module";
     MulterModule.register({
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const uploadPath = join(__dirname, "..", "FRONTEND", "uploads");
+          const uploadPath = join(process.cwd(), "FRONTEND", "uploads");
           cb(null, uploadPath);
         },
         filename: (req, file, cb) => {

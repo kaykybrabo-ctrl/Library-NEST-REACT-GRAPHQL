@@ -134,8 +134,10 @@ export class AuthorsController {
   @UseInterceptors(
     FileInterceptor("file", {
       storage: diskStorage({
-        destination: (req, file, cb) =>
-          cb(null, join(__dirname, "..", "..", "FRONTEND", "uploads")),
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), "FRONTEND", "uploads");
+          cb(null, uploadPath);
+        },
         filename: (req, file, cb) =>
           cb(
             null,
@@ -166,8 +168,10 @@ export class AuthorsController {
   @UseInterceptors(
     FileInterceptor("file", {
       storage: diskStorage({
-        destination: (req, file, cb) =>
-          cb(null, join(__dirname, "..", "..", "FRONTEND", "uploads")),
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), "FRONTEND", "uploads");
+          cb(null, uploadPath);
+        },
         filename: (req, file, cb) =>
           cb(
             null,
