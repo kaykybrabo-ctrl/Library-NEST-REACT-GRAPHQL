@@ -385,7 +385,7 @@ const Books: React.FC = () => {
         <div className="no-results">Nenhum resultado encontrado para sua busca.</div>
       ) : (
         <section className="book-list">
-          <h2>Livros ({books.length} {books.length === 1 ? 'livro' : 'livros'})</h2>
+          <h2>Livros</h2>
           
           <div className={`books-grid ${loading ? 'loading' : ''}`}>
             {books.map(book => (

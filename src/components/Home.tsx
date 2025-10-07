@@ -81,7 +81,7 @@ const Home: React.FC = () => {
         <div className="hero-gradient"/>
         <div className="carousel">
           <div className="slide active" style={{backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600')"}}>
-            <div className="overlay">
+            <div className="overlay" style={{paddingLeft: '60px'}}>
               <h2>Explore livros incríveis</h2>
               <p>Descubra autores, leia sinopses e gerencie seus favoritos.</p>
               <div className="cta-row">
@@ -91,7 +91,7 @@ const Home: React.FC = () => {
             </div>
           </div>
           <div className="slide" style={{backgroundImage: "url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1600')"}}>
-            <div className="overlay">
+            <div className="overlay" style={{paddingLeft: '60px'}}>
               <h2>Descubra novos livros</h2>
               <p>Explore nosso acervo e encontre sua próxima leitura.</p>
               <div className="cta-row">
@@ -101,7 +101,7 @@ const Home: React.FC = () => {
             </div>
           </div>
           <div className="slide" style={{backgroundImage: "url('https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1600')"}}>
-            <div className="overlay">
+            <div className="overlay" style={{paddingLeft: '60px'}}>
               <h2>Leituras para todos</h2>
               <p>Ficção, romance, crônicas e muito mais.</p>
               <div className="cta-row">
