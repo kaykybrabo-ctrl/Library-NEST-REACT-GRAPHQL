@@ -26,12 +26,10 @@ RUN npx prisma generate
 RUN npm run react-build
 RUN npm run build
 
-# Copy built React app into the dist folder where Nest ServeStatic serves from
 RUN mkdir -p dist/FRONTEND/react-dist \
  && cp -R FRONTEND/react-dist/* dist/FRONTEND/react-dist/ \
  && mkdir -p dist/FRONTEND/uploads
 
-# Ensure email templates are present in the runtime image
 RUN mkdir -p dist/infrastructure/mail/templates \
  && cp -R src/infrastructure/mail/templates/* dist/infrastructure/mail/templates/ || true
 

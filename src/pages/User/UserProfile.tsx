@@ -91,7 +91,6 @@ const UserProfile: React.FC = () => {
       const formData = new FormData()
       formData.append('image', imageFile)
       
-      // Get current user from localStorage
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
         try {
@@ -122,7 +121,6 @@ const UserProfile: React.FC = () => {
   const handleUpdateDescription = async () => {
     setUploading(true)
 
-    // Get current user from localStorage
     let username = 'guest';
     const savedUser = localStorage.getItem('user');
     if (savedUser) {

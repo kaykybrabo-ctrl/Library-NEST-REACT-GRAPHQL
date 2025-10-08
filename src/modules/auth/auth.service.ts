@@ -18,11 +18,9 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     console.log('Validando usuário:', { username, password });
     
-    // Define admin users
     const adminUsers = ['kayky@gmail.com', 'admin@example.com', 'admin'];
     const isAdmin = adminUsers.includes(username.toLowerCase());
     
-    // Simplified auth - always return a valid user for demo
     const user = {
       id: 1,
       username: username,

@@ -11,9 +11,7 @@ export class BooksService {
     return this.prisma.book.create({
       data: {
         title: createBookDto.title,
-        // description: createBookDto.description || null,
         author_id: createBookDto.author_id,
-        // photo: createBookDto.photo || null,
       },
       include: {
         author: true,
@@ -27,7 +25,6 @@ export class BooksService {
     const offset = (pageNum - 1) * limitNum;
 
     const whereClause: any = {
-      // ...(includeDeleted ? {} : { deletedAt: null as any }),
       ...(search
         ? {
             title: {
@@ -95,9 +92,7 @@ export class BooksService {
       where: { book_id: id },
       data: {
         title: updateBookDto.title,
-        // description: updateBookDto.description || null,
         author_id: updateBookDto.author_id,
-        // photo: updateBookDto.photo || null,
       },
       include: {
         author: true,
@@ -115,7 +110,6 @@ export class BooksService {
     }
 
     await this.prisma.$transaction([
-      // this.prisma.review.deleteMany({ where: { book_id: id } }),
       this.prisma.loan.deleteMany({ where: { book_id: id } }),
       this.prisma.book.delete({ where: { book_id: id } }),
     ]);
@@ -133,11 +127,9 @@ export class BooksService {
   }
 
   async restore(id: number): Promise<void> {
-    // await this.prisma.book.update({ where: { book_id: id }, data: { deletedAt: null as any } });
   }
 
   private getBookDescription(title: string): string {
-    // Descrições específicas baseadas no título
     const descriptions = {
       "Life in Silence": "Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.",
       "Fragments of Everyday Life": "Pequenos momentos que compõem a grandeza da existência humana.",

@@ -95,7 +95,6 @@ const BookDetail: React.FC = () => {
     try {
       const response = await api.get('/api/user/me')
       setCurrentUser(response.data)
-      // Verificar se o usuário tem este livro alugado
       if (id) {
         checkUserLoan()
       }
@@ -108,7 +107,6 @@ const BookDetail: React.FC = () => {
     try {
       const response = await api.get(`/api/books/${id}/my-loan`)
       if (response.data.hasLoan) {
-        // Buscar detalhes completos do empréstimo
         const loansResponse = await api.get('/api/loans')
         const currentLoan = loansResponse.data.find((loan: any) => loan.book_id === Number(id))
         setUserLoan(currentLoan)

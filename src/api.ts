@@ -23,7 +23,6 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     const url = error?.config?.url;
     
-    // Não redirecionar se for erro de login
     if ((status === 401 || status === 403) && !url?.includes('/login')) {
       console.log('Redirecionando para home devido a erro de autenticação');
       localStorage.removeItem("token");

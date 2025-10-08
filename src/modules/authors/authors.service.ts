@@ -95,6 +95,5 @@ export class AuthorsService {
   }
 
   async restore(id: number): Promise<void> {
-    // Restore functionality disabled
   }
 }

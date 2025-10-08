@@ -541,7 +541,6 @@ const Books: React.FC = () => {
                           </svg>
                         </button>
 
-                        {/* Botões de aluguel/devolução */}
                         {!book.deleted_at && (
                           <>
                             {userLoans[book.book_id]?.hasLoan ? (

@@ -10,7 +10,6 @@ import { BooksModule } from "@/modules/books/books.module";
 import { AuthorsModule } from "@/modules/authors/authors.module";
 import { UsersModule } from "@/modules/users/users.module";
 import { LoansModule } from "@/modules/loans/loans.module";
-// import { ReviewsModule } from './modules/reviews/reviews.module';
 import { AuthModule } from "@/modules/auth/auth.module";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 import { UploadsController } from "@/infrastructure/uploads.controller";
@@ -35,10 +34,8 @@ import * as nodemailer from 'nodemailer';
         let transport;
         
         if (user && pass) {
-          // Usar credenciais fornecidas
           transport = { host, port, secure, auth: { user, pass } };
         } else {
-          // Criar conta de teste no Ethereal automaticamente
           const testAccount = await nodemailer.createTestAccount();
           transport = {
             host: "smtp.ethereal.email",

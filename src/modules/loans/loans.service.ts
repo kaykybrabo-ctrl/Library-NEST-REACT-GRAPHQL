@@ -79,7 +79,6 @@ export class LoansService {
         },
       });
 
-      // Calcular tempo restante para cada empréstimo
       const now = new Date();
       const loansWithTimeRemaining = loans.map(loan => {
         const dueDate = new Date(loan.due_date);
@@ -129,7 +128,6 @@ export class LoansService {
         },
       });
 
-      // Calcular tempo restante para cada empréstimo
       const now = new Date();
       const loansWithTimeRemaining = loans.map(loan => {
         const dueDate = new Date(loan.due_date);
