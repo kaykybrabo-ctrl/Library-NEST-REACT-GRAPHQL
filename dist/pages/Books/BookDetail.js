@@ -24,6 +24,7 @@ const BookDetail = () => {
     const [uploadStatus, setUploadStatus] = (0, react_1.useState)('');
     const [newReview, setNewReview] = (0, react_1.useState)({ rating: 5, comment: '' });
     const [currentUser, setCurrentUser] = (0, react_1.useState)(null);
+    const [userLoan, setUserLoan] = (0, react_1.useState)(null);
     const { isAdmin } = (0, AuthContext_1.useAuth)();
     const [imgVersion, setImgVersion] = (0, react_1.useState)(0);
     const buildImageSrc = (path) => {
@@ -102,9 +103,30 @@ const BookDetail = () => {
         try {
             const response = await api_1.default.get('/api/user/me');
             setCurrentUser(response.data);
+            // Verificar se o usuário tem este livro alugado
+            if (id) {
+                checkUserLoan();
+            }
         }
         catch {
             setCurrentUser(null);
+        }
+    };
+    const checkUserLoan = async () => {
+        try {
+            const response = await api_1.default.get(`/api/books/${id}/my-loan`);
+            if (response.data.hasLoan) {
+                // Buscar detalhes completos do empréstimo
+                const loansResponse = await api_1.default.get('/api/loans');
+                const currentLoan = loansResponse.data.find((loan) => loan.book_id === Number(id));
+                setUserLoan(currentLoan);
+            }
+            else {
+                setUserLoan(null);
+            }
+        }
+        catch (err) {
+            setUserLoan(null);
         }
     };
     const fetchBook = async () => {
@@ -163,11 +185,31 @@ const BookDetail = () => {
             await api_1.default.post(`/api/rent/${id}`);
             alert('Livro alugado com sucesso!');
             setError('');
+            checkUserLoan(); // Atualizar informações do empréstimo
         }
         catch (err) {
-            const errorMsg = err.response?.data?.error || 'Falha ao alugar o livro. Você pode não estar logado ou o livro já está alugado.';
-            setError(errorMsg);
-            alert(`Erro: ${errorMsg}`);
+            if (err.response?.status === 409) {
+                setError(err.response.data.message || 'Este livro já está alugado');
+            }
+            else {
+                setError('Erro ao alugar livro. Tente novamente.');
+            }
+        }
+    };
+    const handleReturnBook = async () => {
+        if (!userLoan)
+            return;
+        if (!confirm('Tem certeza de que deseja devolver este livro?')) {
+            return;
+        }
+        try {
+            await api_1.default.post(`/api/books/${id}/return`);
+            alert('Livro devolvido com sucesso!');
+            setError('');
+            setUserLoan(null);
+        }
+        catch (err) {
+            setError('Erro ao devolver livro. Tente novamente.');
         }
     };
     const handleFavoriteBook = async () => {
@@ -177,7 +219,7 @@ const BookDetail = () => {
             setError('');
         }
         catch (err) {
-            const errorMsg = err.response?.data?.error || 'Falha ao adicionar o livro aos favoritos';
+            const errorMsg = err.response?.data?.message || 'Erro ao adicionar aos favoritos';
             setError(errorMsg);
             alert(`Erro: ${errorMsg}`);
         }
@@ -225,7 +267,13 @@ const BookDetail = () => {
                             catch { }
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = '/api/uploads/default-user.png';
-                        } }, `${book.photo}-${imgVersion}`)) : null, !previewUrl && !book.photo && ((0, jsx_runtime_1.jsx)("div", { className: "image-placeholder", children: "Nenhuma imagem definida ainda. Selecione um arquivo abaixo para enviar." })), !book.photo && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: "Nenhuma imagem definida para este livro ainda." })), isAdmin && ((0, jsx_runtime_1.jsxs)("div", { className: "image-upload", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Atualizar Imagem do Livro" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { type: "file", accept: "image/*", onChange: onSelectImage, disabled: uploading }), imageFile && ((0, jsx_runtime_1.jsxs)("div", { style: { fontSize: 12, color: '#666', marginTop: 4 }, children: ["Selecionado: ", imageFile.name] })), (0, jsx_runtime_1.jsx)("button", { onClick: handleUploadImageClick, disabled: !imageFile || uploading, children: uploading ? 'Enviando...' : 'Atualizar Imagem' })] })] })), uploadStatus && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Erro') ? '#c00' : '#0a0' }, children: uploadStatus }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "A\u00E7\u00F5es do Livro" }), (0, jsx_runtime_1.jsxs)("div", { className: "book-actions", children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleRentBook, children: "Alugar Livro" }), (0, jsx_runtime_1.jsx)("button", { onClick: handleFavoriteBook, children: "Adicionar aos Favoritos" })] })] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Escreva uma Avalia\u00E7\u00E3o" }), !currentUser ? ((0, jsx_runtime_1.jsx)("p", { children: "Fa\u00E7a login para escrever uma avalia\u00E7\u00E3o." })) : ((0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmitReview, children: [(0, jsx_runtime_1.jsxs)(material_1.Box, { sx: { mb: 2 }, children: [(0, jsx_runtime_1.jsx)(material_1.Typography, { component: "legend", sx: { mb: 1 }, children: "Nota:" }), (0, jsx_runtime_1.jsx)(material_1.Rating, { name: "book-rating", value: newReview.rating, onChange: (_, newValue) => {
+                        } }, `${book.photo}-${imgVersion}`)) : null, !previewUrl && !book.photo && ((0, jsx_runtime_1.jsx)("div", { className: "image-placeholder", children: "Nenhuma imagem definida ainda. Selecione um arquivo abaixo para enviar." })), !book.photo && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: '#666' }, children: "Nenhuma imagem definida para este livro ainda." })), isAdmin && ((0, jsx_runtime_1.jsxs)("div", { className: "image-upload", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Atualizar Imagem do Livro" }), (0, jsx_runtime_1.jsxs)("div", { children: [(0, jsx_runtime_1.jsx)("input", { type: "file", accept: "image/*", onChange: onSelectImage, disabled: uploading }), imageFile && ((0, jsx_runtime_1.jsxs)("div", { style: { fontSize: 12, color: '#666', marginTop: 4 }, children: ["Selecionado: ", imageFile.name] })), (0, jsx_runtime_1.jsx)("button", { onClick: handleUploadImageClick, disabled: !imageFile || uploading, children: uploading ? 'Enviando...' : 'Atualizar Imagem' })] })] })), uploadStatus && ((0, jsx_runtime_1.jsx)("div", { style: { marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Erro') ? '#c00' : '#0a0' }, children: uploadStatus }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "A\u00E7\u00F5es do Livro" }), userLoan ? ((0, jsx_runtime_1.jsxs)("div", { className: "loan-info", children: [(0, jsx_runtime_1.jsxs)("div", { className: "loan-status", children: [(0, jsx_runtime_1.jsx)("h4", { children: "\uD83D\uDCDA Voc\u00EA tem este livro alugado" }), (0, jsx_runtime_1.jsxs)("div", { className: "loan-details", children: [(0, jsx_runtime_1.jsxs)("p", { children: [(0, jsx_runtime_1.jsx)("strong", { children: "Alugado em:" }), " ", new Date(userLoan.loan_date).toLocaleDateString('pt-BR')] }), (0, jsx_runtime_1.jsxs)("p", { children: [(0, jsx_runtime_1.jsx)("strong", { children: "Vencimento:" }), " ", new Date(userLoan.due_date).toLocaleDateString('pt-BR')] }), (0, jsx_runtime_1.jsx)("div", { className: `days-remaining ${userLoan.is_overdue ? 'overdue' : userLoan.days_remaining <= 1 ? 'urgent' : userLoan.days_remaining <= 3 ? 'warning' : 'normal'}`, children: userLoan.is_overdue
+                                                    ? `⚠️ Atrasado há ${Math.abs(userLoan.days_remaining)} dias`
+                                                    : userLoan.days_remaining === 0
+                                                        ? '⏰ Vence hoje!'
+                                                        : userLoan.days_remaining === 1
+                                                            ? '⏰ Vence amanhã'
+                                                            : `📅 ${userLoan.days_remaining} dias restantes` }), userLoan.is_overdue && ((0, jsx_runtime_1.jsx)("div", { className: "fine-amount", children: (0, jsx_runtime_1.jsxs)("strong", { children: ["\uD83D\uDCB0 Multa: R$ ", userLoan.fine_amount.toFixed(2)] }) }))] })] }), (0, jsx_runtime_1.jsxs)("div", { className: "book-actions", children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleReturnBook, className: "return-button", children: "Devolver Livro" }), (0, jsx_runtime_1.jsx)("button", { onClick: handleFavoriteBook, children: "Adicionar aos Favoritos" })] })] })) : ((0, jsx_runtime_1.jsxs)("div", { className: "book-actions", children: [(0, jsx_runtime_1.jsx)("button", { onClick: handleRentBook, children: "Alugar Livro" }), (0, jsx_runtime_1.jsx)("button", { onClick: handleFavoriteBook, children: "Adicionar aos Favoritos" })] }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Escreva uma Avalia\u00E7\u00E3o" }), !currentUser ? ((0, jsx_runtime_1.jsx)("p", { children: "Fa\u00E7a login para escrever uma avalia\u00E7\u00E3o." })) : ((0, jsx_runtime_1.jsxs)("form", { onSubmit: handleSubmitReview, children: [(0, jsx_runtime_1.jsxs)(material_1.Box, { sx: { mb: 2 }, children: [(0, jsx_runtime_1.jsx)(material_1.Typography, { component: "legend", sx: { mb: 1 }, children: "Nota:" }), (0, jsx_runtime_1.jsx)(material_1.Rating, { name: "book-rating", value: newReview.rating, onChange: (_, newValue) => {
                                             setNewReview({ ...newReview, rating: newValue || 1 });
                                         }, max: 5, size: "large" })] }), (0, jsx_runtime_1.jsx)("label", { htmlFor: "comment", children: "Coment\u00E1rio:" }), (0, jsx_runtime_1.jsx)("textarea", { id: "comment", value: newReview.comment, onChange: (e) => setNewReview({ ...newReview, comment: e.target.value }), rows: 4, className: "review-textarea" }), (0, jsx_runtime_1.jsx)("button", { type: "submit", children: "Enviar Avalia\u00E7\u00E3o" })] }))] }), (0, jsx_runtime_1.jsxs)("section", { className: "form-section", children: [(0, jsx_runtime_1.jsx)("h3", { children: "Avalia\u00E7\u00F5es" }), reviews.length === 0 ? ((0, jsx_runtime_1.jsx)("p", { children: "Sem avalia\u00E7\u00F5es ainda." })) : ((0, jsx_runtime_1.jsx)("div", { children: reviews.map(review => ((0, jsx_runtime_1.jsxs)("div", { className: "review-card", children: [(0, jsx_runtime_1.jsxs)("div", { className: "review-header", children: [(0, jsx_runtime_1.jsx)("strong", { children: review.username }), (0, jsx_runtime_1.jsxs)("span", { children: ['★'.repeat(review.rating), '☆'.repeat(5 - review.rating)] })] }), (0, jsx_runtime_1.jsx)("p", { children: review.comment }), (0, jsx_runtime_1.jsx)("small", { className: "review-date", children: new Date(review.review_date).toLocaleDateString('pt-BR') })] }, review.review_id))) }))] })] }));
 };

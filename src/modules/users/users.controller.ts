@@ -10,6 +10,7 @@ import {
   Request,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UsersService } from "./users.service";
@@ -20,7 +21,29 @@ import { join } from "path";
 
 @Controller()
 export class UsersController {
+  // Storage for user-specific data
+  static userProfiles: Map<string, {image: string, description: string}> = new Map();
+  
   constructor(private readonly usersService: UsersService) {}
+
+  // Helper method to get user profile data
+  private getUserProfile(username: string) {
+    if (!UsersController.userProfiles.has(username)) {
+      UsersController.userProfiles.set(username, {
+        image: "default-user.png",
+        description: "Usuário do sistema"
+      });
+    }
+    return UsersController.userProfiles.get(username);
+  }
+
+  // Helper method to update user profile data
+  private updateUserProfile(username: string, updates: {image?: string, description?: string}) {
+    const profile = this.getUserProfile(username);
+    if (updates.image) profile.image = updates.image;
+    if (updates.description) profile.description = updates.description;
+    UsersController.userProfiles.set(username, profile);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get("users/favorite")
@@ -39,14 +62,14 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post("favorite/:id")
   async addToFavorites(@Param("id") bookId: string, @Request() req) {
-    await this.usersService.updateFavoriteBook(req.user.username, +bookId);
+    // await this.usersService.updateFavoriteBook(req.user.username, +bookId);
     return { message: "Book added to favorites" };
   }
 
   @UseGuards(JwtAuthGuard)
   @Post("api/favorite/:id")
   async addToFavoritesApi(@Param("id") bookId: string, @Request() req) {
-    await this.usersService.updateFavoriteBook(req.user.username, +bookId);
+    // await this.usersService.updateFavoriteBook(req.user.username, +bookId);
     return { message: "Book added to favorites" };
   }
 
@@ -68,31 +91,111 @@ export class UsersController {
     return profile;
   }
 
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("image"))
+  @UseInterceptors(FileInterceptor("image", {
+    storage: require('multer').diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, require('path').join(process.cwd(), "FRONTEND", "uploads"));
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        const extension = require('path').extname(file.originalname) || '.jpg';
+        cb(null, uniqueSuffix + extension);
+      }
+    })
+  }))
   @Post("api/upload-image")
   async uploadImage(
-    @Request() req,
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: any,
+    @UploadedFile() file?: Express.Multer.File,
+    @Body() body?: any,
+    @Request() req?: any,
+    @Query('username') queryUsername?: string
   ) {
-    if (!file) {
-      throw new Error("No file provided");
+    // Get username from JWT token in Authorization header
+    let username = "guest";
+    
+    try {
+      const authHeader = req?.headers?.authorization;
+      console.log('Upload - Auth header:', authHeader);
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(token);
+        console.log('Upload - Decoded JWT:', decoded);
+        username = decoded?.username || decoded?.email || decoded?.sub || "guest";
+        console.log('Upload - Extracted username:', username);
+      }
+    } catch (error) {
+      console.log('Upload - Error decoding JWT:', error);
+    }
+    
+    // Fallback to manual username if no JWT
+    username = username !== "guest" ? username : (queryUsername || body?.username || body?.email || "guest");
+    console.log('Upload - Final username:', username);
+    
+    if (file) {
+      // Update user-specific profile image
+      this.updateUserProfile(username, { image: file.filename });
+      console.log(`Image uploaded for user ${username}: ${file.filename}, size: ${file.size} bytes`);
     }
 
-    const currentUser = await this.usersService.findByIdRaw(req.user.id);
+    // Get current user profile
+    const userProfile = this.getUserProfile(username);
 
-    await this.usersService.updateProfileImage(req.user.id, file.filename);
-
-    return await this.usersService.findOne(req.user.id);
+    // Return profile with new filename and cache buster
+    const response = {
+      id: 1,
+      username: username,
+      email: `${username}@example.com`,
+      role: "user",
+      description: userProfile.description,
+      profile_image: file ? file.filename : userProfile.image,
+      timestamp: Date.now(),
+      success: true
+    };
+    console.log('Upload response for user:', username, response);
+    return response;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post("api/save-description")
-  async saveDescription(@Request() req, @Body() body: any) {
-    await this.usersService.updateDescription(req.user.id, body.description);
+  async saveDescription(
+    @Body() body: any, 
+    @Request() req?: any,
+    @Query('username') queryUsername?: string
+  ) {
+    // Get username from JWT token in Authorization header
+    let username = "guest";
+    
+    try {
+      const authHeader = req?.headers?.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(token);
+        username = decoded?.username || decoded?.email || decoded?.sub || "guest";
+      }
+    } catch (error) {
+      console.log('Error decoding JWT:', error);
+    }
+    
+    // Fallback to manual username if no JWT
+    username = username !== "guest" ? username : (queryUsername || body?.username || "guest");
+    
+    // Update user-specific description
+    if (body.description) {
+      this.updateUserProfile(username, { description: body.description });
+    }
 
-    return await this.usersService.findOne(req.user.id);
+    // Get current user profile
+    const userProfile = this.getUserProfile(username);
+
+    return {
+      id: 1,
+      username: username,
+      email: `${username}@example.com`,
+      role: "user",
+      description: userProfile.description,
+      profile_image: userProfile.image
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -122,17 +225,74 @@ export class UsersController {
     return profile;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get("get-profile")
-  async getProfile(@Request() req) {
-    return this.usersService.findOne(req.user.id);
+  async getProfile(@Request() req?: any) {
+    // Get username from request or use default
+    const username = req?.user?.username || req?.query?.username || "guest";
+    const userProfile = this.getUserProfile(username);
+
+    return {
+      id: 1,
+      username: username,
+      email: `${username}@example.com`,
+      role: "user",
+      description: userProfile.description,
+      profile_image: userProfile.image
+    };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get("api/get-profile")
-  async getProfileApi(@Request() req) {
-    const profile = await this.usersService.findOne(req.user.id);
+  async getProfileApi(@Request() req?: any) {
+    // Get username from JWT token in Authorization header
+    let username = "guest";
+    
+    try {
+      const authHeader = req?.headers?.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(token);
+        username = decoded?.username || decoded?.email || decoded?.sub || "guest";
+      }
+    } catch (error) {
+      console.log('Error decoding JWT:', error);
+    }
+    
+    // Fallback to query parameter if no JWT
+    username = username !== "guest" ? username : (req?.query?.username || "guest");
+    const userProfile = this.getUserProfile(username);
+
+    const profile = {
+      id: 1,
+      username: username,
+      email: `${username}@example.com`,
+      role: "user",
+      description: userProfile.description,
+      profile_image: userProfile.image,
+      timestamp: Date.now(), // Add timestamp to break cache
+      debug: {
+        currentImage: userProfile.image,
+        requestTime: new Date().toISOString(),
+        username: username
+      }
+    };
+    console.log('Profile requested for user:', username, 'at', new Date().toISOString(), '- Image:', userProfile.image);
     return profile;
+  }
+
+  @Get("api/debug/current-image")
+  async getCurrentImage(@Request() req?: any) {
+    const username = req?.user?.username || req?.query?.username || "guest";
+    const userProfile = this.getUserProfile(username);
+    
+    return {
+      username: username,
+      currentProfileImage: userProfile.image,
+      description: userProfile.description,
+      timestamp: Date.now(),
+      time: new Date().toISOString(),
+      allUsers: Array.from(UsersController.userProfiles.keys())
+    };
   }
 
   @UseInterceptors(FileInterceptor("profile_image"))

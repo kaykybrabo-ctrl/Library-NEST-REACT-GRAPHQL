@@ -9,11 +9,13 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  ConflictException,
 } from "@nestjs/common";
 import { LoansService } from "./loans.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { AdminGuard } from "../auth/admin.guard";
 
-@Controller()
+@Controller('api')
 export class LoansController {
   constructor(private readonly loansService: LoansService) {}
 
@@ -27,95 +29,99 @@ export class LoansController {
       });
       return { message: "Livro alugado com sucesso", loan };
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.CONFLICT);
+      if (error instanceof ConflictException) {
+        throw new HttpException(error.message, HttpStatus.CONFLICT);
+      }
+      throw new HttpException('Erro interno do servidor', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("api/rent/:id")
-  async rentBookApi(@Param("id") bookId: string, @Request() req) {
-    try {
-      const loan = await this.loansService.create({
-        user_id: req.user.id,
-        book_id: +bookId,
-      });
-      return { message: "Livro alugado com sucesso", loan };
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.CONFLICT);
-    }
-  }
-
   @Get("loans")
-  async findLoans(@Query("username") username: string) {
-    if (!username) {
-      throw new Error("Nome de usuário obrigatório");
-    }
-    return this.loansService.findByUser(username);
+  async findLoans(@Request() req, @Query("username") username?: string) {
+    return this.loansService.findByUser(req.user.id);
   }
 
-  @Get("api/loans")
-  async findLoansApi(@Query("username") username: string) {
-    if (!username) {
-      throw new Error("Nome de usuário obrigatório");
-    }
-    return this.loansService.findByUser(username);
-  }
-
-  @Post("return/:loanId")
-  async returnBook(@Param("loanId") loanId: string) {
-    await this.loansService.remove(+loanId);
-    return { message: "Livro devolvido com sucesso" };
-  }
-
-  @Post("api/return/:loanId")
-  async returnBookApi(@Param("loanId") loanId: string) {
-    await this.loansService.remove(+loanId);
-    return { message: "Livro devolvido com sucesso" };
-  }
-
-  // Endpoint para admin listar todos os empréstimos
   @UseGuards(JwtAuthGuard)
-  @Get("api/loans/all")
-  async findAllLoans(@Request() req) {
-    // Verificar se é admin
-    if (req.user.role !== 'admin') {
-      throw new HttpException('Acesso negado', HttpStatus.FORBIDDEN);
+  @Post("return/:loanId")
+  async returnBook(@Param("loanId") loanId: string, @Request() req) {
+    const loan = await this.loansService.findById(+loanId);
+    if (!loan) {
+      throw new HttpException('Empréstimo não encontrado', HttpStatus.NOT_FOUND);
     }
+    
+    if (loan.user_id !== req.user.id && req.user.role !== 'admin') {
+      throw new HttpException('Você não tem permissão para devolver este livro', HttpStatus.FORBIDDEN);
+    }
+    
+    await this.loansService.remove(+loanId);
+    
+    return { 
+      success: true,
+      message: "Livro devolvido com sucesso",
+      loanId: +loanId,
+      bookTitle: loan.book?.title || 'Livro'
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get("loans/all")
+  async findAllLoans() {
     return this.loansService.findAll();
   }
 
-  // Endpoint para verificar status de um livro
-  @Get("api/books/:id/loan-status")
+  @Get("test-loans")
+  async testLoans() {
+    return { message: "Loans API working", loans: [] };
+  }
+
+  @Get("debug/book/:id/loans")
+  async debugBookLoans(@Param("id") bookId: string) {
+    const allLoans = await this.loansService.findAllLoansForBook(+bookId);
+    const activeLoans = await this.loansService.findByBookId(+bookId);
+    return {
+      bookId: +bookId,
+      allLoans,
+      activeLoans,
+      hasActiveLoans: !!activeLoans
+    };
+  }
+
+  @Get("books/:id/loan-status")
   async getBookLoanStatus(@Param("id") bookId: string) {
-    const loan = await this.loansService.findByBookId(+bookId);
-    return {
-      isRented: !!loan,
-      loan: loan ? {
-        loans_id: loan.loans_id,
-        loan_date: loan.loan_date,
-        username: loan.user.username,
-        user_id: loan.user.id,
-      } : null,
-    };
+    try {
+      const loan = await this.loansService.findByBookId(+bookId);
+      return {
+        isRented: !!loan,
+        loan: loan,
+      };
+    } catch (error) {
+      return {
+        isRented: false,
+        loan: null,
+      };
+    }
   }
 
-  // Endpoint para usuário verificar seus empréstimos de um livro específico
   @UseGuards(JwtAuthGuard)
-  @Get("api/books/:id/my-loan")
+  @Get("books/:id/my-loan")
   async getMyLoanForBook(@Param("id") bookId: string, @Request() req) {
-    const loan = await this.loansService.findUserLoan(req.user.id, +bookId);
-    return {
-      hasLoan: !!loan,
-      loan: loan ? {
-        loans_id: loan.loans_id,
-        loan_date: loan.loan_date,
-      } : null,
-    };
+    try {
+      const loan = await this.loansService.findUserLoan(req.user.id, +bookId);
+      return {
+        hasLoan: !!loan,
+        loan: loan,
+      };
+    } catch (error) {
+      return {
+        hasLoan: false,
+        loan: null,
+      };
+    }
   }
 
-  // Endpoint para devolver livro pelo book_id (mais conveniente para o frontend)
   @UseGuards(JwtAuthGuard)
-  @Post("api/books/:id/return")
+  @Post("books/:id/return")
   async returnBookByBookId(@Param("id") bookId: string, @Request() req) {
     const loan = await this.loansService.findUserLoan(req.user.id, +bookId);
     if (!loan) {
@@ -123,5 +129,18 @@ export class LoansController {
     }
     await this.loansService.remove(loan.loans_id);
     return { message: "Livro devolvido com sucesso" };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("loans/overdue")
+  async getOverdueLoans(@Request() req) {
+    try {
+      if (req.user.role === 'admin') {
+        return [];
+      }
+      return this.loansService.getOverdueLoans(req.user.id);
+    } catch (error) {
+      return [];
+    }
   }
 }

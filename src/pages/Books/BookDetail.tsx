@@ -20,6 +20,7 @@ const BookDetail: React.FC = () => {
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [userLoan, setUserLoan] = useState<any>(null)
   const { isAdmin } = useAuth()
   const [imgVersion, setImgVersion] = useState(0)
 
@@ -94,8 +95,28 @@ const BookDetail: React.FC = () => {
     try {
       const response = await api.get('/api/user/me')
       setCurrentUser(response.data)
+      // Verificar se o usuário tem este livro alugado
+      if (id) {
+        checkUserLoan()
+      }
     } catch {
       setCurrentUser(null)
+    }
+  }
+
+  const checkUserLoan = async () => {
+    try {
+      const response = await api.get(`/api/books/${id}/my-loan`)
+      if (response.data.hasLoan) {
+        // Buscar detalhes completos do empréstimo
+        const loansResponse = await api.get('/api/loans')
+        const currentLoan = loansResponse.data.find((loan: any) => loan.book_id === Number(id))
+        setUserLoan(currentLoan)
+      } else {
+        setUserLoan(null)
+      }
+    } catch (err) {
+      setUserLoan(null)
     }
   }
 
@@ -150,16 +171,35 @@ const BookDetail: React.FC = () => {
       setUploading(false)
     }
   }
-
   const handleRentBook = async () => {
     try {
       await api.post(`/api/rent/${id}`)
       alert('Livro alugado com sucesso!')
       setError('')
+      checkUserLoan() // Atualizar informações do empréstimo
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Falha ao alugar o livro. Você pode não estar logado ou o livro já está alugado.'
-      setError(errorMsg)
-      alert(`Erro: ${errorMsg}`)
+      if (err.response?.status === 409) {
+        setError(err.response.data.message || 'Este livro já está alugado')
+      } else {
+        setError('Erro ao alugar livro. Tente novamente.')
+      }
+    }
+  }
+
+  const handleReturnBook = async () => {
+    if (!userLoan) return
+    
+    if (!confirm('Tem certeza de que deseja devolver este livro?')) {
+      return
+    }
+
+    try {
+      await api.post(`/api/books/${id}/return`)
+      alert('Livro devolvido com sucesso!')
+      setError('')
+      setUserLoan(null)
+    } catch (err: any) {
+      setError('Erro ao devolver livro. Tente novamente.')
     }
   }
 
@@ -169,7 +209,7 @@ const BookDetail: React.FC = () => {
       alert('Livro adicionado aos favoritos!')
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Falha ao adicionar o livro aos favoritos'
+      const errorMsg = err.response?.data?.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
       alert(`Erro: ${errorMsg}`)
     }
@@ -295,10 +335,41 @@ const BookDetail: React.FC = () => {
 
       <section className="form-section">
         <h3>Ações do Livro</h3>
-        <div className="book-actions">
-          <button onClick={handleRentBook}>Alugar Livro</button>
-          <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
-        </div>
+        {userLoan ? (
+          <div className="loan-info">
+            <div className="loan-status">
+              <h4>📚 Você tem este livro alugado</h4>
+              <div className="loan-details">
+                <p><strong>Alugado em:</strong> {new Date(userLoan.loan_date).toLocaleDateString('pt-BR')}</p>
+                <p><strong>Vencimento:</strong> {new Date(userLoan.due_date).toLocaleDateString('pt-BR')}</p>
+                <div className={`days-remaining ${userLoan.is_overdue ? 'overdue' : userLoan.days_remaining <= 1 ? 'urgent' : userLoan.days_remaining <= 3 ? 'warning' : 'normal'}`}>
+                  {userLoan.is_overdue 
+                    ? `⚠️ Atrasado há ${Math.abs(userLoan.days_remaining)} dias`
+                    : userLoan.days_remaining === 0 
+                      ? '⏰ Vence hoje!'
+                      : userLoan.days_remaining === 1
+                        ? '⏰ Vence amanhã'
+                        : `📅 ${userLoan.days_remaining} dias restantes`
+                  }
+                </div>
+                {userLoan.is_overdue && (
+                  <div className="fine-amount">
+                    <strong>💰 Multa: R$ {userLoan.fine_amount.toFixed(2)}</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="book-actions">
+              <button onClick={handleReturnBook} className="return-button">Devolver Livro</button>
+              <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
+            </div>
+          </div>
+        ) : (
+          <div className="book-actions">
+            <button onClick={handleRentBook}>Alugar Livro</button>
+            <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
+          </div>
+        )}
       </section>
 
       <section className="form-section">

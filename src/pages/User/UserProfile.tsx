@@ -90,6 +90,18 @@ const UserProfile: React.FC = () => {
     try {
       const formData = new FormData()
       formData.append('image', imageFile)
+      
+      // Get current user from localStorage
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          formData.append('username', user.username || user.email || 'guest');
+        } catch (e) {
+          console.log('Error parsing user from localStorage:', e);
+        }
+      }
+      
       const resp = await api.post('/api/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
@@ -110,7 +122,20 @@ const UserProfile: React.FC = () => {
   const handleUpdateDescription = async () => {
     setUploading(true)
 
+    // Get current user from localStorage
+    let username = 'guest';
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        username = user.username || user.email || 'guest';
+      } catch (e) {
+        console.log('Error parsing user from localStorage:', e);
+      }
+    }
+
     const response = await api.post('/api/save-description', {
+      username: username,
       description: description
     })
 

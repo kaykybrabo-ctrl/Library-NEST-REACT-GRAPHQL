@@ -47,17 +47,144 @@
   margin: -8px -8px 8px -8px;
 }
 
+/* Estilos para informações do empréstimo */
+.loan-info {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #3498db;
+}
+
+.loan-status h4 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.loan-details {
+  margin-bottom: 1.5rem;
+}
+
+.loan-details p {
+  margin: 0.5rem 0;
+  color: #5a6c7d;
+}
+
+.days-remaining {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.days-remaining.normal {
+  background: #d5f4e6;
+  color: #27ae60;
+}
+
+.days-remaining.warning {
+  background: #fef9e7;
+  color: #f39c12;
+}
+
+.days-remaining.urgent {
+  background: #fdeaea;
+  color: #e74c3c;
+  animation: pulse 2s infinite;
+}
+
+.days-remaining.overdue {
+  background: #e74c3c;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.fine-amount {
+  background: #e74c3c;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.book-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.book-actions button {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.book-actions button:first-child {
+  background: #3498db;
+  color: white;
+}
+
+.book-actions button:first-child:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.return-button {
+  background: #e74c3c !important;
+  color: white !important;
+}
+
+.return-button:hover {
+  background: #c0392b !important;
+  transform: translateY(-1px);
+}
+
+.book-actions button:not(:first-child) {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.book-actions button:not(:first-child):hover {
+  background: #d5dbdb;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 600px) {
   .book-image {
-    width: 160px;
+    width: 150px;
     height: 200px;
+  }
+  
+  .loan-info {
+    padding: 1rem;
+  }
+  
+  .book-actions {
+    flex-direction: column;
+  }
+  
+  .book-actions button {
+    min-width: auto;
   }
 }
 
 .book-actions {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
 }
 
 .review-textarea {

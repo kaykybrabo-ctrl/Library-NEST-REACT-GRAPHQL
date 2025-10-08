@@ -47,19 +47,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      console.log('Tentando login com:', { username, password });
       const response = await api.post('/api/login', { username, password });
-      console.log('Resposta do login:', response.data);
       const { user: userData, token: newToken } = response.data;
 
       setUser(userData);
       setToken(newToken);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', newToken);
-      console.log('Login realizado com sucesso:', userData);
       return true;
     } catch (error) {
-      console.error('Erro no login:', error);
       return false;
     }
   };

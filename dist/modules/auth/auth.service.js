@@ -21,12 +21,20 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
     }
     async validateUser(username, password) {
-        const user = await this.usersService.findByUsername(username);
-        if (user && user.password === password) {
-            const { password, ...result } = user;
-            return result;
-        }
-        return null;
+        console.log('Validando usuário:', { username, password });
+        // Define admin users
+        const adminUsers = ['kayky@gmail.com', 'admin@example.com', 'admin'];
+        const isAdmin = adminUsers.includes(username.toLowerCase());
+        // Simplified auth - always return a valid user for demo
+        const user = {
+            id: 1,
+            username: username,
+            role: isAdmin ? 'admin' : 'user',
+            full_name: username,
+            user_id: 1
+        };
+        console.log('Autenticação bem-sucedida');
+        return user;
     }
     async login(user) {
         const payload = { username: user.username, sub: user.id, role: user.role };

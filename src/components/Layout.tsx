@@ -47,6 +47,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
           Autores
         </Link>
         <Link 
+          to="/my-loans" 
+          className={location.pathname === '/my-loans' ? 'active' : ''}
+        >
+          Meus Empréstimos
+        </Link>
+        <Link 
           to="/profile" 
           className={location.pathname === '/profile' ? 'active' : ''}
         >
@@ -57,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             to="/loans" 
             className={location.pathname === '/loans' ? 'active' : ''}
           >
-            Empréstimos
+            Gerenciar Empréstimos
           </Link>
         )}
       </nav>

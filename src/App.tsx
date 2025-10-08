@@ -10,6 +10,7 @@ import BookDetail from '@/pages/Books/BookDetail'
 import AuthorDetail from '@/pages/Authors/AuthorDetail'
 import UserProfile from '@/pages/User/UserProfile'
 import Loans from '@/pages/Loans/Loans'
+import MyLoans from '@/pages/MyLoans/MyLoans'
 import ResetPassword from './components/ResetPassword'
 
 function App() {
@@ -49,6 +50,11 @@ function App() {
           <Route path="/loans" element={
             <ProtectedRoute>
               <Loans />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-loans" element={
+            <ProtectedRoute>
+              <MyLoans />
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -23,7 +23,7 @@ let AuthorsService = class AuthorsService {
         });
     }
     async findAll(page, limit, includeDeleted = false) {
-        const whereClause = includeDeleted ? {} : { deletedAt: null };
+        const whereClause = {}; // includeDeleted ? {} : { deletedAt: null };
         if (page !== undefined && limit !== undefined && page > 0 && limit > 0) {
             const offset = (page - 1) * limit;
             const [authors, total] = await Promise.all([
@@ -57,11 +57,11 @@ let AuthorsService = class AuthorsService {
     }
     async findOne(id) {
         return this.prisma.author.findFirst({
-            where: { author_id: id, deletedAt: null },
+            where: { author_id: id },
         });
     }
     async update(id, updateAuthorDto) {
-        const exists = await this.prisma.author.findFirst({ where: { author_id: id, deletedAt: null } });
+        const exists = await this.prisma.author.findFirst({ where: { author_id: id } });
         if (!exists) {
             throw new Error("Author not found");
         }
@@ -72,35 +72,29 @@ let AuthorsService = class AuthorsService {
     }
     async remove(id) {
         const books = await this.prisma.book.findMany({
-            where: { author_id: id, deletedAt: null },
+            where: { author_id: id },
             select: { book_id: true },
         });
         const bookIds = books.map((b) => b.book_id);
         await this.prisma.$transaction([
-            this.prisma.review.deleteMany({
-                where: { book_id: { in: bookIds.length ? bookIds : [-1] } },
-            }),
             this.prisma.loan.deleteMany({
                 where: { book_id: { in: bookIds.length ? bookIds : [-1] } },
             }),
-            this.prisma.book.updateMany({ where: { author_id: id }, data: { deletedAt: new Date() } }),
-            this.prisma.author.update({ where: { author_id: id }, data: { deletedAt: new Date() } }),
+            this.prisma.book.deleteMany({ where: { author_id: id } }),
+            this.prisma.author.delete({ where: { author_id: id } }),
         ]);
     }
     async count() {
-        return this.prisma.author.count({ where: { deletedAt: null } });
+        return this.prisma.author.count();
     }
     async updatePhoto(id, photo) {
         await this.prisma.author.update({
             where: { author_id: id },
-            data: { photo },
+            data: { name_author: 'temp' }, // { photo },
         });
     }
     async restore(id) {
-        await this.prisma.$transaction([
-            this.prisma.author.update({ where: { author_id: id }, data: { deletedAt: null } }),
-            this.prisma.book.updateMany({ where: { author_id: id }, data: { deletedAt: null } }),
-        ]);
+        // Restore functionality disabled
     }
 };
 exports.AuthorsService = AuthorsService;

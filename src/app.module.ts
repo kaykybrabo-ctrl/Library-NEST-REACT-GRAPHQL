@@ -6,17 +6,16 @@ import { join } from "path";
 import { diskStorage } from "multer";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { PugAdapter } from "@nestjs-modules/mailer/dist/adapters/pug.adapter";
-import * as nodemailer from "nodemailer";
-
 import { BooksModule } from "@/modules/books/books.module";
 import { AuthorsModule } from "@/modules/authors/authors.module";
 import { UsersModule } from "@/modules/users/users.module";
 import { LoansModule } from "@/modules/loans/loans.module";
-import { ReviewsModule } from "@/modules/reviews/reviews.module";
+// import { ReviewsModule } from './modules/reviews/reviews.module';
 import { AuthModule } from "@/modules/auth/auth.module";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 import { UploadsController } from "@/infrastructure/uploads.controller";
 import { MailModule } from "@/infrastructure/mail/mail.module";
+import * as nodemailer from 'nodemailer';
 
 @Module({
   imports: [
@@ -33,9 +32,25 @@ import { MailModule } from "@/infrastructure/mail/mail.module";
 
         const templateDir = join(process.cwd(), "src", "infrastructure", "mail", "templates");
 
-        const transport = user && pass
-          ? { host, port, secure, auth: { user, pass } }
-          : { jsonTransport: true };
+        let transport;
+        
+        if (user && pass) {
+          // Usar credenciais fornecidas
+          transport = { host, port, secure, auth: { user, pass } };
+        } else {
+          // Criar conta de teste no Ethereal automaticamente
+          const testAccount = await nodemailer.createTestAccount();
+          transport = {
+            host: "smtp.ethereal.email",
+            port: 587,
+            secure: false,
+            auth: {
+              user: testAccount.user,
+              pass: testAccount.pass,
+            },
+          };
+          console.log('Conta de teste Ethereal criada:', testAccount.user);
+        }
 
         return {
           transport,
@@ -88,7 +103,6 @@ import { MailModule } from "@/infrastructure/mail/mail.module";
     AuthorsModule,
     UsersModule,
     LoansModule,
-    ReviewsModule,
     AuthModule,
   ],
   controllers: [UploadsController],

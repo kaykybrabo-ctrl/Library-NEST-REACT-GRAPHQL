@@ -235,7 +235,10 @@ __decorate([
     (0, common_1.Post)("books/:id/image"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads")),
+            destination: (req, file, cb) => {
+                const uploadPath = (0, path_1.join)(process.cwd(), "FRONTEND", "uploads");
+                cb(null, uploadPath);
+            },
             filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
         }),
         fileFilter: (req, file, cb) => {
@@ -256,7 +259,10 @@ __decorate([
     (0, common_1.Post)("api/books/:id/image"),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: (req, file, cb) => cb(null, (0, path_1.join)(__dirname, "..", "..", "FRONTEND", "uploads")),
+            destination: (req, file, cb) => {
+                const uploadPath = (0, path_1.join)(process.cwd(), "FRONTEND", "uploads");
+                cb(null, uploadPath);
+            },
             filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${(0, path_1.extname)(file.originalname)}`),
         }),
         fileFilter: (req, file, cb) => {

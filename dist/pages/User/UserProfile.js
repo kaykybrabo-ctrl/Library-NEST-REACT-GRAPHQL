@@ -87,6 +87,17 @@ const UserProfile = () => {
         try {
             const formData = new FormData();
             formData.append('image', imageFile);
+            // Get current user from localStorage
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    formData.append('username', user.username || user.email || 'guest');
+                }
+                catch (e) {
+                    console.log('Error parsing user from localStorage:', e);
+                }
+            }
             const resp = await api_1.default.post('/api/upload-image', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -107,7 +118,20 @@ const UserProfile = () => {
     };
     const handleUpdateDescription = async () => {
         setUploading(true);
+        // Get current user from localStorage
+        let username = 'guest';
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                username = user.username || user.email || 'guest';
+            }
+            catch (e) {
+                console.log('Error parsing user from localStorage:', e);
+            }
+        }
         const response = await api_1.default.post('/api/save-description', {
+            username: username,
             description: description
         });
         setProfile(prev => prev ? {
