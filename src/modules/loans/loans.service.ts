@@ -145,7 +145,7 @@ export class LoansService {
           photo: loan.book?.photo || null,
           description: loan.book?.description || null,
           user_id: loan.user_id,
-          username: loan.user?.username || 'Usuário não encontrado',
+          username: loan.user?.email || 'Email não encontrado',
           is_overdue: isOverdue,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),

@@ -99,7 +99,21 @@ const BookDetail: React.FC = () => {
         checkUserLoan()
       }
     } catch {
-      setCurrentUser(null)
+      const token = localStorage.getItem('token')
+      const user = localStorage.getItem('user')
+      if (token && user) {
+        try {
+          const userData = JSON.parse(user)
+          setCurrentUser(userData)
+          if (id) {
+            checkUserLoan()
+          }
+        } catch {
+          setCurrentUser(null)
+        }
+      } else {
+        setCurrentUser(null)
+      }
     }
   }
 
@@ -136,12 +150,11 @@ const BookDetail: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await api.get('/api/reviews')
-      const bookReviews = response.data.filter((review: Review) => 
-        review.book_id === Number(id)
-      )
-      setReviews(bookReviews)
+      const response = await api.get(`/api/books/${id}/reviews`)
+      setReviews(response.data)
     } catch (err) {
+      console.error('Erro ao buscar reviews:', err)
+      setReviews([])
     }
   }
 
@@ -174,7 +187,7 @@ const BookDetail: React.FC = () => {
       await api.post(`/api/rent/${id}`)
       alert('Livro alugado com sucesso!')
       setError('')
-      checkUserLoan() // Atualizar informações do empréstimo
+      checkUserLoan()
     } catch (err: any) {
       if (err.response?.status === 409) {
         setError(err.response.data.message || 'Este livro já está alugado')
@@ -202,12 +215,20 @@ const BookDetail: React.FC = () => {
   }
 
   const handleFavoriteBook = async () => {
+    if (!currentUser) {
+      alert('Faça login para adicionar aos favoritos')
+      return
+    }
+
     try {
-      await api.post(`/api/favorite/${id}`)
+      console.log('Adicionando livro aos favoritos:', id)
+      const response = await api.post(`/api/favorite/${id}`)
+      console.log('Resposta do servidor:', response.data)
       alert('Livro adicionado aos favoritos!')
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Erro ao adicionar aos favoritos'
+      console.error('Erro ao adicionar aos favoritos:', err)
+      const errorMsg = err.response?.data?.message || err.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
       alert(`Erro: ${errorMsg}`)
     }
@@ -224,7 +245,6 @@ const BookDetail: React.FC = () => {
     try {
       await api.post('/api/reviews', {
         book_id: Number(id),
-        user_id: currentUser.id,
         rating: newReview.rating,
         comment: newReview.comment
       })
@@ -410,14 +430,14 @@ const BookDetail: React.FC = () => {
         ) : (
           <div>
             {reviews.map(review => (
-              <div key={review.review_id} className="review-card">
+              <div key={review.id} className="review-card">
                 <div className="review-header">
-                  <strong>{review.username}</strong>
+                  <strong>{review.user?.username || 'Usuário'}</strong>
                   <span>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
                 </div>
                 <p>{review.comment}</p>
                 <small className="review-date">
-                  {new Date(review.review_date).toLocaleDateString('pt-BR')}
+                  {new Date(review.created_at).toLocaleDateString('pt-BR')}
                 </small>
               </div>
             ))}

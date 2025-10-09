@@ -68,12 +68,29 @@ const UserProfile: React.FC = () => {
   }
 
   const fetchFavoriteBook = async () => {
-    if (!user?.username) return
+    console.log('fetchFavoriteBook chamado, user:', user)
+    if (!user?.username) {
+      console.log('Usuário não encontrado ou sem username')
+      return
+    }
 
-    const response = await api.get(`/api/users/favorite?username=${user.username}`)
-    if (response.data) {
-      setFavoriteBook(response.data)
-    } else {
+    try {
+      console.log('Buscando favorito para:', user.username)
+      const response = await api.get(`/api/users/favorite?username=${user.username}`)
+      console.log('Resposta da API de favoritos:', response.data)
+      if (response.data) {
+        const favoriteData = {
+          ...response.data,
+          author_name: response.data.author?.name_author || 'Desconhecido'
+        }
+        console.log('Definindo favorito:', favoriteData)
+        setFavoriteBook(favoriteData)
+      } else {
+        console.log('Nenhum favorito encontrado')
+        setFavoriteBook(null)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar livro favorito:', error)
       setFavoriteBook(null)
     }
   }
@@ -187,7 +204,10 @@ const UserProfile: React.FC = () => {
         </button>
         <button
           className={`tab ${activeTab === 'favorite' ? 'active' : ''}`}
-          onClick={() => setActiveTab('favorite')}
+          onClick={() => {
+            setActiveTab('favorite')
+            fetchFavoriteBook()
+          }}
         >
           Livro Favorito
         </button>
@@ -334,7 +354,12 @@ const UserProfile: React.FC = () => {
 
         {activeTab === 'favorite' && (
           <section className="profile-section">
-            <h2>Meu Livro Favorito</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2>Meu Livro Favorito</h2>
+              <button onClick={fetchFavoriteBook} style={{ padding: '8px 16px' }}>
+                🔄 Recarregar
+              </button>
+            </div>
             {!favoriteBook ? (
               <p>Você ainda não definiu um livro favorito.</p>
             ) : (

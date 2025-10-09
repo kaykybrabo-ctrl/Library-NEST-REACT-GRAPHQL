@@ -14,7 +14,7 @@ export class AuthorsService {
   }
 
   async findAll(page?: number, limit?: number, includeDeleted: boolean = false): Promise<any> {
-    const whereClause = {}; // includeDeleted ? {} : { deletedAt: null };
+    const whereClause = {};
     if (page !== undefined && limit !== undefined && page > 0 && limit > 0) {
       const offset = (page - 1) * limit;
 
@@ -90,7 +90,7 @@ export class AuthorsService {
   async updatePhoto(id: number, photo: string): Promise<void> {
     await this.prisma.author.update({
       where: { author_id: id },
-      data: { name_author: 'temp' }, // { photo },
+      data: { photo },
     });
   }
 

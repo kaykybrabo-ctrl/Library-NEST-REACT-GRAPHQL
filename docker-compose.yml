@@ -2,21 +2,30 @@
 services:
   app:
     build: .
-    volumes:
-      - ./FRONTEND/uploads:/usr/src/app/FRONTEND/uploads
-      - ./src/infrastructure/mail/templates:/usr/src/app/dist/infrastructure/mail/templates:ro
-    ports:
-      - "8080:8082"
     environment:
+      - DATABASE_URL=mysql://root:12345678@db:3306/library1
       - SMTP_HOST=smtp.ethereal.email
       - SMTP_PORT=587
       - SMTP_SECURE=false
       - MAIL_FROM=pedbook <no-reply@pedbook.local>
       - PUBLIC_WEB_URL=http://localhost:8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app-network
+    ports:
+      - "8080:8082"
+    command: >
+      sh -c "
+        echo 'Aguardando banco de dados...' &&
+        npx prisma db push --accept-data-loss &&
+        echo 'Schema sincronizado com sucesso!' &&
+        echo 'Populando banco com dados iniciais...' &&
+        npx prisma db seed &&
+        echo 'Iniciando aplicação...' &&
+        npm run start:prod
+      "
 
   db:
     image: mysql:8.0
@@ -29,6 +38,12 @@ services:
       - "3310:3306"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p12345678"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

@@ -34,11 +34,14 @@ export interface Loan {
 }
 
 export interface Review {
-  review_id: number;
+  id: number;
   book_id: number;
   user_id: number;
   rating: number;
   comment: string;
-  username: string;
-  review_date: string;
+  created_at: string;
+  user?: {
+    id: number;
+    username: string;
+  };
 }

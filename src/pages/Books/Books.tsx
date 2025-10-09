@@ -518,7 +518,7 @@ const Books: React.FC = () => {
                         {book.deleted_at && <span style={{color: '#ff9800', fontWeight: 'bold'}}>EXCLUÍDO</span>}
                         {!book.deleted_at && bookLoans[book.book_id]?.isRented && (
                           <span style={{color: '#f44336', fontWeight: 'bold'}}>
-                            ALUGADO POR: {bookLoans[book.book_id]?.loan?.username}
+                            ALUGADO POR: {bookLoans[book.book_id]?.loan?.user?.username}
                           </span>
                         )}
                         {!book.deleted_at && userLoans[book.book_id]?.hasLoan && (
@@ -561,7 +561,7 @@ const Books: React.FC = () => {
                                 type="button"
                                 disabled
                                 aria-label="Livro já alugado"
-                                title={`Livro alugado por ${bookLoans[book.book_id]?.loan?.username || 'outro usuário'}`}
+                                title={`Livro alugado por ${bookLoans[book.book_id]?.loan?.user?.username || 'outro usuário'}`}
                                 className="icon-button"
                                 style={{borderColor: '#ccc', color: '#ccc', cursor: 'not-allowed'}}
                               >

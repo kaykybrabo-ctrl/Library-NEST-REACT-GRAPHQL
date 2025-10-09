@@ -51,8 +51,8 @@ export class BooksService {
     const transformedBooks = books.map((book) => ({
       book_id: book.book_id,
       title: book.title,
-      description: this.getBookDescription(book.title), // Descrições específicas por título
-      photo: null,
+      description: this.getBookDescription(book.title),
+      photo: book.photo,
       author_name: book.author.name_author,
       author_id: book.author.author_id,
     }));
@@ -77,7 +77,7 @@ export class BooksService {
       book_id: book.book_id,
       title: book.title,
       description: this.getBookDescription(book.title),
-      photo: null,
+      photo: book.photo,
       author_name: book.author.name_author,
       author_id: book.author.author_id,
     };
@@ -122,7 +122,7 @@ export class BooksService {
   async updatePhoto(id: number, photo: string): Promise<void> {
     await this.prisma.book.update({
       where: { book_id: id },
-      data: { title: 'temp' }, // { photo },
+      data: { photo },
     });
   }
 

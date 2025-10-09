@@ -60,13 +60,23 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post("favorite/:id")
   async addToFavorites(@Param("id") bookId: string, @Request() req) {
-    return { message: "Book added to favorites" };
+    try {
+      await this.usersService.setFavoriteBook(req.user.id, +bookId);
+      return { message: "Livro adicionado aos favoritos com sucesso", success: true };
+    } catch (error) {
+      return { message: "Erro ao adicionar livro aos favoritos", success: false };
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Post("api/favorite/:id")
   async addToFavoritesApi(@Param("id") bookId: string, @Request() req) {
-    return { message: "Book added to favorites" };
+    try {
+      await this.usersService.setFavoriteBook(req.user.id, +bookId);
+      return { message: "Livro adicionado aos favoritos com sucesso", success: true };
+    } catch (error) {
+      return { message: "Erro ao adicionar livro aos favoritos", success: false };
+    }
   }
 
   @UseGuards(JwtAuthGuard)

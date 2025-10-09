@@ -11,6 +11,7 @@ import { AuthorsModule } from "@/modules/authors/authors.module";
 import { UsersModule } from "@/modules/users/users.module";
 import { LoansModule } from "@/modules/loans/loans.module";
 import { AuthModule } from "@/modules/auth/auth.module";
+import { ReviewsModule } from "@/modules/reviews/reviews.module";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 import { UploadsController } from "@/infrastructure/uploads.controller";
 import { MailModule } from "@/infrastructure/mail/mail.module";
@@ -101,6 +102,7 @@ import * as nodemailer from 'nodemailer';
     UsersModule,
     LoansModule,
     AuthModule,
+    ReviewsModule,
   ],
   controllers: [UploadsController],
 })

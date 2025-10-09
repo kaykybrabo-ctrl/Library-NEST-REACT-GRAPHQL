@@ -23,13 +23,12 @@ ENV DATABASE_URL=mysql://root:12345678@db:3306/library1
 COPY FRONTEND/ ./FRONTEND/
 
 RUN npx prisma generate
+
 RUN npm run react-build
+
 RUN npm run build
 
-RUN mkdir -p dist/FRONTEND/react-dist \
- && cp -R FRONTEND/react-dist/* dist/FRONTEND/react-dist/ \
- && mkdir -p dist/FRONTEND/uploads
-
+RUN cp -R FRONTEND/ dist/FRONTEND/
 RUN mkdir -p dist/infrastructure/mail/templates \
  && cp -R src/infrastructure/mail/templates/* dist/infrastructure/mail/templates/ || true
 

@@ -7,22 +7,22 @@ import { PrismaService } from '@/infrastructure/prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.prisma.user.create({
+  async create(createUserDto: CreateUserDto) {
+    return this.prisma.authUser.create({
       data: {
-        username: createUserDto.username || 'User',
-        password: 'defaultpassword',
-        role: 'user',
+        username: createUserDto.username,
+        password: createUserDto.password,
+        role: createUserDto.role,
       },
     });
   }
 
   async findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.authUser.findMany();
   }
 
   async findOne(id: number) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.authUser.findUnique({
       where: { id: id },
     });
 
@@ -37,7 +37,7 @@ export class UsersService {
   }
 
   async findByUsername(username: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.authUser.findUnique({
       where: { username: username },
     });
     
@@ -54,13 +54,13 @@ export class UsersService {
   }
 
   async findByIdRaw(id: number) {
-    return this.prisma.user.findUnique({
+    return this.prisma.authUser.findUnique({
       where: { id: id },
     });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    return this.prisma.user.update({
+    return this.prisma.authUser.update({
       where: { id: id },
       data: {
         username: updateUserDto.username,
@@ -69,12 +69,40 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<void> {
-    await this.prisma.user.delete({
+    await this.prisma.authUser.delete({
       where: { id: id },
     });
   }
 
   async getFavoriteBook(username: string): Promise<any> {
-    return null;
+    const user = await this.prisma.authUser.findUnique({
+      where: { username: username },
+      include: {
+        user: true
+      }
+    });
+    
+    if (!user || !user.favorite_book_id) {
+      return null;
+    }
+    
+    return this.prisma.book.findUnique({
+      where: { book_id: user.favorite_book_id },
+      include: {
+        author: true
+      }
+    });
+  }
+
+  async setFavoriteBook(userId: number, bookId: number): Promise<any> {
+    return this.prisma.authUser.update({
+      where: { id: userId },
+      data: {
+        favorite_book_id: bookId
+      },
+      include: {
+        user: true
+      }
+    });
   }
 }
