@@ -10,6 +10,15 @@ export class LoansService {
   constructor(private prisma: PrismaService) {}
 
   async create(createLoanDto: any): Promise<any> {
+    // Busca o AuthUser para pegar o user_id correto
+    const authUser = await this.prisma.authUser.findUnique({
+      where: { id: createLoanDto.user_id },
+    });
+
+    if (!authUser || !authUser.user_id) {
+      throw new ConflictException('Usuário não encontrado ou não possui perfil completo');
+    }
+
     const existingLoan = await this.prisma.loan.findFirst({
       where: {
         book_id: createLoanDto.book_id,
@@ -23,7 +32,7 @@ export class LoansService {
 
     const userHasBook = await this.prisma.loan.findFirst({
       where: {
-        user_id: createLoanDto.user_id,
+        user_id: authUser.user_id,
         book_id: createLoanDto.book_id,
         returned_at: null,
       },
@@ -39,7 +48,7 @@ export class LoansService {
     
     const loan = await this.prisma.loan.create({
       data: {
-        user_id: createLoanDto.user_id,
+        user_id: authUser.user_id,
         book_id: createLoanDto.book_id,
         loan_date: now,
         due_date: dueDate,
@@ -61,9 +70,18 @@ export class LoansService {
 
   async findByUser(userId: number): Promise<any[]> {
     try {
+      // Busca o AuthUser para pegar o user_id correto
+      const authUser = await this.prisma.authUser.findUnique({
+        where: { id: userId },
+      });
+
+      if (!authUser || !authUser.user_id) {
+        return [];
+      }
+
       const loans = await this.prisma.loan.findMany({
         where: {
-          user_id: userId,
+          user_id: authUser.user_id,
           returned_at: null,
         },
         include: {
@@ -212,9 +230,18 @@ export class LoansService {
 
   async findUserLoan(userId: number, bookId: number) {
     try {
+      // Busca o AuthUser para pegar o user_id correto
+      const authUser = await this.prisma.authUser.findUnique({
+        where: { id: userId },
+      });
+
+      if (!authUser || !authUser.user_id) {
+        return null;
+      }
+
       return this.prisma.loan.findFirst({
         where: {
-          user_id: userId,
+          user_id: authUser.user_id,
           book_id: bookId,
           returned_at: null,
         },
@@ -244,10 +271,19 @@ export class LoansService {
 
   async getOverdueLoans(userId: number): Promise<any[]> {
     try {
+      // Busca o AuthUser para pegar o user_id correto
+      const authUser = await this.prisma.authUser.findUnique({
+        where: { id: userId },
+      });
+
+      if (!authUser || !authUser.user_id) {
+        return [];
+      }
+
       const now = new Date();
       const overdueLoans = await this.prisma.loan.findMany({
         where: {
-          user_id: userId,
+          user_id: authUser.user_id,
           returned_at: null,
           due_date: {
             lt: now,
@@ -276,6 +312,17 @@ export class LoansService {
       return await this.prisma.authUser.findFirst({
         where: { user_id: userId },
         select: { username: true, photo: true }
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getAuthUserById(authUserId: number) {
+    try {
+      return await this.prisma.authUser.findUnique({
+        where: { id: authUserId },
+        select: { id: true, user_id: true, username: true, photo: true }
       });
     } catch (error) {
       return null;

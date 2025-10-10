@@ -24,11 +24,11 @@ export class AuthService {
     }
     
     const user = {
-      id: dbUser.user_id || dbUser.id,
+      id: dbUser.id,
       username: dbUser.username,
       role: dbUser.role,
       full_name: dbUser.username,
-      user_id: dbUser.user_id || dbUser.id
+      user_id: dbUser.id
     };
     
     return user;
