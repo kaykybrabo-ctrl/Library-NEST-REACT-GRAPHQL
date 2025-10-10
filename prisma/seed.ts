@@ -34,36 +34,36 @@ async function main() {
   ])
   const categories = await Promise.all([
     prisma.categories.create({ data: { category_id: 1, name_category: 'Romance' } }),
-    prisma.categories.create({ data: { category_id: 2, name_category: 'Chronicle' } }),
-    prisma.categories.create({ data: { category_id: 3, name_category: 'Fiction' } }),
+    prisma.categories.create({ data: { category_id: 2, name_category: 'Crônica' } }),
+    prisma.categories.create({ data: { category_id: 3, name_category: 'Ficção' } }),
     prisma.categories.create({ data: { category_id: 4, name_category: 'Drama' } }),
   ])
   const publishers = await Promise.all([
-    prisma.publishers.create({ data: { publish_id: 1, publish_name: 'Aurora Publishing' } }),
-    prisma.publishers.create({ data: { publish_id: 2, publish_name: 'Books of Time' } }),
-    prisma.publishers.create({ data: { publish_id: 3, publish_name: 'House of Letters' } }),
+    prisma.publishers.create({ data: { publish_id: 1, publish_name: 'Editora Aurora' } }),
+    prisma.publishers.create({ data: { publish_id: 2, publish_name: 'Livros do Tempo' } }),
+    prisma.publishers.create({ data: { publish_id: 3, publish_name: 'Casa das Letras' } }),
   ])
   const booksData = [
-    { id: 1, author_id: 1, title: 'Life in Silence', description: 'A touching story about overcoming personal struggles through silence and introspection.' },
-    { id: 2, author_id: 1, title: 'Fragments of Everyday Life', description: 'Short stories capturing the beauty and complexity of daily moments.' },
-    { id: 3, author_id: 2, title: 'Stories of the Wind', description: 'Tales inspired by the ever-changing winds and the mysteries they carry.' },
-    { id: 4, author_id: 2, title: 'Between Noise and Calm', description: 'A narrative exploring the balance between chaos and peace.' },
-    { id: 5, author_id: 1, title: 'The Horizon and the Sea', description: 'An evocative journey of discovery along the endless horizon.' },
-    { id: 6, author_id: 1, title: 'Winds of Change', description: 'Stories about transformation and the winds that guide us.' },
-    { id: 7, author_id: 2, title: 'Paths of the Soul', description: 'A poetic exploration of the inner paths we all travel.' },
-    { id: 8, author_id: 2, title: 'Under the Grey Sky', description: 'A dramatic tale set against a backdrop of uncertain skies.' },
-    { id: 9, author_id: 1, title: 'Notes of a Silence', description: 'Reflections on moments of quiet and their powerful meanings.' },
-    { id: 10, author_id: 2, title: 'The Last Letter', description: 'A heartfelt story revolving around a final farewell.' },
-    { id: 11, author_id: 1, title: 'Between Words', description: 'Exploring what lies beyond spoken language and written text.' },
-    { id: 12, author_id: 2, title: 'Colors of the City', description: 'A vivid portrayal of urban life through its vibrant colors.' },
-    { id: 13, author_id: 1, title: 'The Weight of the Rain', description: 'A metaphorical story about burdens and relief brought by rain.' },
-    { id: 14, author_id: 2, title: 'Blue Night', description: 'A mysterious journey through the darkness and light of the night.' },
-    { id: 15, author_id: 1, title: 'Faces of Memory', description: 'Stories that capture the fleeting nature of memories.' },
-    { id: 16, author_id: 2, title: 'Origin Tales', description: 'Exploring the roots and beginnings of our existence.' },
-    { id: 17, author_id: 1, title: 'Echoes of Tomorrow', description: 'A futuristic narrative about hope and possibility.' },
-    { id: 18, author_id: 2, title: 'The Garden of Words', description: 'A collection of poetic reflections on language and meaning.' },
-    { id: 19, author_id: 1, title: 'Shadows and Light', description: 'A story about contrasts and the beauty found in duality.' },
-    { id: 20, author_id: 2, title: 'The River of Time', description: 'An exploration of memory, time, and the flow of life.' },
+    { id: 1, author_id: 1, title: 'Life in Silence', description: 'Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.' },
+    { id: 2, author_id: 1, title: 'Fragments of Everyday Life', description: 'Pequenos momentos que compõem a grandeza da existência humana.' },
+    { id: 3, author_id: 2, title: 'Stories of the Wind', description: 'Contos místicos que navegam entre realidade e fantasia.' },
+    { id: 4, author_id: 2, title: 'Between Noise and Calm', description: 'Uma jornada filosófica sobre encontrar equilíbrio na vida moderna.' },
+    { id: 5, author_id: 1, title: 'The Horizon and the Sea', description: 'Romance épico que explora os limites do amor e da aventura.' },
+    { id: 6, author_id: 1, title: 'Winds of Change', description: 'Drama histórico sobre transformações sociais e pessoais.' },
+    { id: 7, author_id: 2, title: 'Paths of the Soul', description: 'Reflexões espirituais sobre o propósito da vida.' },
+    { id: 8, author_id: 2, title: 'Under the Grey Sky', description: 'Thriller psicológico ambientado em uma cidade sombria.' },
+    { id: 9, author_id: 1, title: 'Notes of a Silence', description: 'Poesia em prosa sobre a beleza do silêncio.' },
+    { id: 10, author_id: 2, title: 'The Last Letter', description: 'Mistério envolvente sobre segredos familiares.' },
+    { id: 11, author_id: 1, title: 'Between Words', description: 'Explorando o não dito e os significados ocultos nas entrelinhas da comunicação.' },
+    { id: 12, author_id: 2, title: 'Colors of the City', description: 'Um retrato vibrante da vida urbana através de suas múltiplas cores e nuances.' },
+    { id: 13, author_id: 1, title: 'The Weight of the Rain', description: 'Metáfora poética sobre os fardos que carregamos e a renovação que vem das lágrimas.' },
+    { id: 14, author_id: 2, title: 'Blue Night', description: 'Jornada misteriosa através da escuridão iluminada pela luz azulada da noite.' },
+    { id: 15, author_id: 1, title: 'Faces of Memory', description: 'Histórias que capturam a natureza efêmera das lembranças e dos rostos que marcam nossas vidas.' },
+    { id: 16, author_id: 2, title: 'Origin Tales', description: 'Explorando as raízes e os começos que moldam quem somos.' },
+    { id: 17, author_id: 1, title: 'Echoes of Tomorrow', description: 'Narrativa futurista sobre esperança, possibilidades e os ecos do que está por vir.' },
+    { id: 18, author_id: 2, title: 'The Garden of Words', description: 'Coleção de reflexões poéticas sobre linguagem, significado e expressão.' },
+    { id: 19, author_id: 1, title: 'Shadows and Light', description: 'História sobre contrastes e a beleza encontrada na dualidade da existência.' },
+    { id: 20, author_id: 2, title: 'The River of Time', description: 'Exploração profunda sobre memória, tempo e o fluxo constante da vida.' },
   ]
 
   const books = await Promise.all(
@@ -100,6 +100,15 @@ async function main() {
         email: 'kaue@gmail.com',
       },
     }),
+    prisma.user.create({
+      data: {
+        user_id: 3,
+        full_name: 'Barbara Silva',
+        birth_date: new Date('1995-05-15'),
+        address: 'Rua das Acácias, 789',
+        email: 'barbara@gmail.com',
+      },
+    }),
   ])
   const authUsers = await Promise.all([
     prisma.authUser.create({
@@ -119,6 +128,16 @@ async function main() {
         password: hashedPassword,
         role: 'user',
         user_id: 2,
+        favorite_book_id: null,
+      },
+    }),
+    prisma.authUser.create({
+      data: {
+        id: 3,
+        username: 'barbara@gmail.com',
+        password: hashedPassword,
+        role: 'user',
+        user_id: 3,
         favorite_book_id: null,
       },
     }),

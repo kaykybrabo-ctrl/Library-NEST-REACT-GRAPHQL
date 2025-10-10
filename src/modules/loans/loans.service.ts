@@ -53,7 +53,6 @@ export class LoansService {
             author: true,
           },
         },
-        user: true,
       },
     });
 
@@ -121,7 +120,6 @@ export class LoansService {
               author: true,
             },
           },
-          user: true,
         },
         orderBy: {
           loan_date: 'desc',
@@ -145,7 +143,7 @@ export class LoansService {
           photo: loan.book?.photo || null,
           description: loan.book?.description || null,
           user_id: loan.user_id,
-          username: loan.user?.email || 'Email não encontrado',
+          username: 'Usuário',
           is_overdue: isOverdue,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),
@@ -171,7 +169,6 @@ export class LoansService {
               author: true,
             },
           },
-          user: true,
         },
       });
     } catch (error) {
@@ -187,7 +184,6 @@ export class LoansService {
         },
         include: {
           book: true,
-          user: true,
         },
         orderBy: {
           loan_date: 'desc',
@@ -207,7 +203,6 @@ export class LoansService {
         },
         include: {
           book: true,
-          user: true,
         },
       });
     } catch (error) {

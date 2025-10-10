@@ -5,6 +5,7 @@ import {
   UseGuards,
   Request,
   Get,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { LocalAuthGuard } from "./local-auth.guard";
@@ -27,36 +28,19 @@ export class AuthController {
 
   @Post("login")
   async login(@Body() loginDto: LoginDto) {
-    const adminUsers = ['kayky@gmail.com', 'admin@example.com', 'admin'];
-    const isAdmin = adminUsers.includes(loginDto.username.toLowerCase());
-    const userRole = isAdmin ? 'admin' : 'user';
+    const dbUser = await this.authService.validateUser(loginDto.username, loginDto.password);
     
-    let userId = 1;
-    if (loginDto.username.toLowerCase() === 'kayky@gmail.com' || loginDto.username.toLowerCase() === 'kayky') {
-      userId = 1;
-    } else if (loginDto.username.toLowerCase() === 'kaue@gmail.com' || loginDto.username.toLowerCase() === 'kaue') {
-      userId = 2;
-    } else if (loginDto.username.toLowerCase() === 'admin') {
-      userId = 1;
-    } else {
-      userId = Math.abs(loginDto.username.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a;
-      }, 0)) % 1000 + 3;
+    if (!dbUser) {
+      throw new UnauthorizedException('Credenciais inválidas');
     }
     
-    const token = this.jwtService.sign({ 
-      username: loginDto.username, 
-      sub: userId, 
-      role: userRole 
-    });
-    
+    const loginData = await this.authService.login(dbUser);
     return {
-      token: token,
+      token: loginData.access_token,
       user: {
-        id: userId,
-        username: loginDto.username,
-        role: userRole
+        id: dbUser.id,
+        username: dbUser.username,
+        role: dbUser.role
       }
     };
   }
@@ -96,12 +80,12 @@ export class AuthController {
 
   @Post("register")
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    return await this.authService.register(registerDto);
   }
 
   @Post("api/register")
   async registerApi(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    return await this.authService.register(registerDto);
   }
 
   @UseGuards(JwtAuthGuard)

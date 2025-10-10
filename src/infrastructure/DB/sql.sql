@@ -25,8 +25,8 @@
 
 -- INSERT INTO categories VALUES
 --   (1, 'Romance'),
---   (2, 'Chronicle'),
---   (3, 'Fiction'),
+--   (2, 'Crônica'),
+--   (3, 'Ficção'),
 --   (4, 'Drama');
 
 -- DROP TABLE IF EXISTS publishers;
@@ -37,9 +37,9 @@
 -- );
 
 -- INSERT INTO publishers VALUES
---   (1, 'Aurora Publishing'),
---   (2, 'Books of Time'),
---   (3, 'House of Letters');
+--   (1, 'Editora Aurora'),
+--   (2, 'Livros do Tempo'),
+--   (3, 'Casa das Letras');
 
 -- DROP TABLE IF EXISTS books;
 -- CREATE TABLE books (
@@ -54,26 +54,26 @@
 -- );
 
 -- INSERT INTO books VALUES
---   (1, 1, 'Life in Silence', 'A touching story about overcoming personal struggles through silence and introspection.', NULL),
---   (2, 1, 'Fragments of Everyday Life', 'Short stories capturing the beauty and complexity of daily moments.', NULL),
---   (3, 2, 'Stories of the Wind', 'Tales inspired by the ever-changing winds and the mysteries they carry.', NULL),
---   (4, 2, 'Between Noise and Calm', 'A narrative exploring the balance between chaos and peace.', NULL),
---   (5, 1, 'The Horizon and the Sea', 'An evocative journey of discovery along the endless horizon.', NULL),
---   (6, 1, 'Winds of Change', 'Stories about transformation and the winds that guide us.', NULL),
---   (7, 2, 'Paths of the Soul', 'A poetic exploration of the inner paths we all travel.', NULL),
---   (8, 2, 'Under the Grey Sky', 'A dramatic tale set against a backdrop of uncertain skies.', NULL),
---   (9, 1, 'Notes of a Silence', 'Reflections on moments of quiet and their powerful meanings.', NULL),
---   (10, 2, 'The Last Letter', 'A heartfelt story revolving around a final farewell.', NULL),
---   (11, 1, 'Between Words', 'Exploring what lies beyond spoken language and written text.', NULL),
---   (12, 2, 'Colors of the City', 'A vivid portrayal of urban life through its vibrant colors.', NULL),
---   (13, 1, 'The Weight of the Rain', 'A metaphorical story about burdens and relief brought by rain.', NULL),
---   (14, 2, 'Blue Night', 'A mysterious journey through the darkness and light of the night.', NULL),
---   (15, 1, 'Faces of Memory', 'Stories that capture the fleeting nature of memories.', NULL),
---   (16, 2, 'Origin Tales', 'Exploring the roots and beginnings of our existence.', NULL),
---   (17, 1, 'Fragments of Hope', 'Small glimmers of hope in challenging times.', NULL),
---   (18, 2, 'Trails and Scars', 'The marks left by life’s journeys and struggles.', NULL),
---   (19, 1, 'From the Other Side of the Street', 'A perspective shift to see the world from a new angle.', NULL),
---   (20, 2, 'Interrupted Seasons', 'Stories about unexpected changes and pauses in life.', NULL);
+--   (1, 1, 'Life in Silence', 'Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.', NULL),
+--   (2, 1, 'Fragments of Everyday Life', 'Pequenos momentos que compõem a grandeza da existência humana.', NULL),
+--   (3, 2, 'Stories of the Wind', 'Contos místicos que navegam entre realidade e fantasia.', NULL),
+--   (4, 2, 'Between Noise and Calm', 'Uma jornada filosófica sobre encontrar equilíbrio na vida moderna.', NULL),
+--   (5, 1, 'The Horizon and the Sea', 'Romance épico que explora os limites do amor e da aventura.', NULL),
+--   (6, 1, 'Winds of Change', 'Drama histórico sobre transformações sociais e pessoais.', NULL),
+--   (7, 2, 'Paths of the Soul', 'Reflexões espirituais sobre o propósito da vida.', NULL),
+--   (8, 2, 'Under the Grey Sky', 'Thriller psicológico ambientado em uma cidade sombria.', NULL),
+--   (9, 1, 'Notes of a Silence', 'Poesia em prosa sobre a beleza do silêncio.', NULL),
+--   (10, 2, 'The Last Letter', 'Mistério envolvente sobre segredos familiares.', NULL),
+--   (11, 1, 'Between Words', 'Explorando o não dito e os significados ocultos nas entrelinhas da comunicação.', NULL),
+--   (12, 2, 'Colors of the City', 'Um retrato vibrante da vida urbana através de suas múltiplas cores e nuances.', NULL),
+--   (13, 1, 'The Weight of the Rain', 'Metáfora poética sobre os fardos que carregamos e a renovação que vem das lágrimas.', NULL),
+--   (14, 2, 'Blue Night', 'Jornada misteriosa através da escuridão iluminada pela luz azulada da noite.', NULL),
+--   (15, 1, 'Faces of Memory', 'Histórias que capturam a natureza efêmera das lembranças e dos rostos que marcam nossas vidas.', NULL),
+--   (16, 2, 'Origin Tales', 'Explorando as raízes e os começos que moldam quem somos.', NULL),
+--   (17, 1, 'Echoes of Tomorrow', 'Narrativa futurista sobre esperança, possibilidades e os ecos do que está por vir.', NULL),
+--   (18, 2, 'The Garden of Words', 'Coleção de reflexões poéticas sobre linguagem, significado e expressão.', NULL),
+--   (19, 1, 'Shadows and Light', 'História sobre contrastes e a beleza encontrada na dualidade da existência.', NULL),
+--   (20, 2, 'The River of Time', 'Exploração profunda sobre memória, tempo e o fluxo constante da vida.', NULL);
 
 -- DROP TABLE IF EXISTS book_categories;
 -- CREATE TABLE book_categories (

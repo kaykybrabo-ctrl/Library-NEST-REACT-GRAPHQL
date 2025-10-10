@@ -6,6 +6,8 @@ export interface Book {
   author_name?: string;
   photo?: string;
   deleted_at?: string | null;
+  categories?: string[];
+  publishers?: string[];
 }
 
 export interface Author {

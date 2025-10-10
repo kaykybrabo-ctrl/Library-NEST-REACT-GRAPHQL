@@ -4,9 +4,9 @@ import '../styles/home.css';
 import styles from './HomeHeader.module.css';
 
 const Home: React.FC = () => {
-  const [featured, setFeatured] = useState<Array<{book_id:number; title:string; description:string; photo:string|null; author_name:string}>>([]);
+  const [featured, setFeatured] = useState<Array<{ book_id: number; title: string; description: string; photo: string | null; author_name: string }>>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string|undefined>();
+  const [error, setError] = useState<string | undefined>();
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ const Home: React.FC = () => {
             .toLowerCase()
             .replace(/\s+/g, ' ')
             .trim();
-          const hasBetween = list.some((b:any) => {
+          const hasBetween = list.some((b: any) => {
             const t = norm(b?.title || '');
             return (t.includes('between') && t.includes('noise') && t.includes('calm')) || t.includes('between noise and calm');
           });
@@ -42,10 +42,9 @@ const Home: React.FC = () => {
               author_name: ''
             });
           }
-        } catch {}
+        } catch { }
         setFeatured(list);
-        try { console.debug('[highlights] titles:', list.map((x:any)=>x.title)); } catch {}
-      } catch (e:any) {
+      } catch (e: any) {
         setError(e?.message || 'Erro ao carregar');
       } finally {
         setLoading(false);
@@ -78,10 +77,10 @@ const Home: React.FC = () => {
       </div>
 
       <section className="hero">
-        <div className="hero-gradient"/>
+        <div className="hero-gradient" />
         <div className="carousel">
-          <div className="slide active" style={{backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600')"}}>
-            <div className="overlay" style={{paddingLeft: '60px'}}>
+          <div className="slide active" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600')" }}>
+            <div className="overlay" style={{ paddingLeft: '60px' }}>
               <h2>Explore livros incríveis</h2>
               <p>Descubra autores, leia sinopses e gerencie seus favoritos.</p>
               <div className="cta-row">
@@ -90,8 +89,8 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="slide" style={{backgroundImage: "url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1600')"}}>
-            <div className="overlay" style={{paddingLeft: '60px'}}>
+          <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1600')" }}>
+            <div className="overlay" style={{ paddingLeft: '60px' }}>
               <h2>Descubra novos livros</h2>
               <p>Explore nosso acervo e encontre sua próxima leitura.</p>
               <div className="cta-row">
@@ -100,8 +99,8 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="slide" style={{backgroundImage: "url('https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1600')"}}>
-            <div className="overlay" style={{paddingLeft: '60px'}}>
+          <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1600')" }}>
+            <div className="overlay" style={{ paddingLeft: '60px' }}>
               <h2>Leituras para todos</h2>
               <p>Ficção, romance, crônicas e muito mais.</p>
               <div className="cta-row">
@@ -148,12 +147,12 @@ const Home: React.FC = () => {
         ) : (
           <div className="cards">
             {[
-              { title: 'Life in Silence', author_name: 'Guilherme Biondo', description: 'A touching story about overcoming personal struggles through silence and introspection.', photoUrl: '/api/uploads/Life%20in%20Silence.jpeg?v=1' },
-              { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Short stories capturing the beauty and complexity of daily moments.', photoUrl: '/api/uploads/Fragments%20of%20Everyday%20Life.jpg?v=1' },
-              { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Tales inspired by the ever-changing winds and the mysteries they carry.', photoUrl: '/api/uploads/stor.jpeg?v=1' },
-              { title: 'Between Noise and Calm', author_name: 'Manoel Leite', description: 'A narrative exploring the balance between chaos and peace.', photoUrl: '/api/uploads/Between%20Noise%20and%20Calm.jpg?v=1' },
-              { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'An inspiring journey across vast horizons and the enduring sea.', photoUrl: '/api/uploads/The%20Horizon%20and%20the%20Sea.jpg?v=1' },
-              { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'A tale of transformation guided by the shifting winds of fate.', photoUrl: '/api/uploads/Winds%20of%20Change.jpg?v=1' },
+              { title: 'Life in Silence', author_name: 'Guilherme Biondo', description: 'Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.', photoUrl: '/api/uploads/Life%20in%20Silence.jpeg?v=1' },
+              { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Pequenos momentos que compõem a grandeza da existência humana.', photoUrl: '/api/uploads/Fragments%20of%20Everyday%20Life.jpg?v=1' },
+              { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Contos místicos que navegam entre realidade e fantasia.', photoUrl: '/api/uploads/stor.jpeg?v=1' },
+              { title: 'Between Noise and Calm', author_name: 'Manoel Leite', description: 'Uma jornada filosófica sobre encontrar equilíbrio na vida moderna.', photoUrl: '/api/uploads/Between%20Noise%20and%20Calm.jpg?v=1' },
+              { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'Romance épico que explora os limites do amor e da aventura.', photoUrl: '/api/uploads/The%20Horizon%20and%20the%20Sea.jpg?v=1' },
+              { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'Drama histórico sobre transformações sociais e pessoais.', photoUrl: '/api/uploads/Winds%20of%20Change.jpg?v=1' },
             ].map(book => (
               <div key={`featured-${book.title}`} className="card">
                 <div className="thumb">
@@ -201,7 +200,7 @@ const Home: React.FC = () => {
           </div>
           <div>
             <h4>Endereço</h4>
-            <p>Pedbot Tecnologia Ltda.<br/>Av. Paulista, 1000 - Bela Vista<br/>São Paulo - SP, 01310-100</p>
+            <p>Pedbot Tecnologia Ltda.<br />Av. Paulista, 1000 - Bela Vista<br />São Paulo - SP, 01310-100</p>
           </div>
           <div>
             <h4>Sobre</h4>

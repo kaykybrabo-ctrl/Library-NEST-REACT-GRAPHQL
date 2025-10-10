@@ -35,11 +35,10 @@ const Register: React.FC = () => {
       if (success) {
         setSuccess('Registro realizado com sucesso! Você já pode entrar.')
         setTimeout(() => navigate('/'), 2000)
-      } else {
-        setError('Falha no registro. O e-mail pode já estar em uso.')
       }
-    } catch (err) {
-      setError('Falha no registro. Tente novamente.')
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || err.message || 'Falha no registro. Tente novamente.'
+      setError(errorMsg)
     } finally {
       setLoading(false)
     }

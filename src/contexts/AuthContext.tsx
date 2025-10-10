@@ -62,10 +62,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (username: string, password: string): Promise<boolean> => {
     try {
-      await api.post('/api/register', { username, password });
+      const response = await api.post('/api/register', { username, password });
       return true;
-    } catch (error) {
-      return false;
+    } catch (error: any) {
+      throw error;
     }
   };
 

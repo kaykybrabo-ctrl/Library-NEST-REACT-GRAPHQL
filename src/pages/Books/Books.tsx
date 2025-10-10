@@ -111,7 +111,6 @@ const Books: React.FC = () => {
       setBookLoans(newBookLoans);
       setUserLoans(newUserLoans);
     } catch (err) {
-      console.error('Erro ao buscar status de empréstimos:', err);
     }
   };
 

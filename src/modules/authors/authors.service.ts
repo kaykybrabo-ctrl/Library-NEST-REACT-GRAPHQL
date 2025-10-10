@@ -59,7 +59,7 @@ export class AuthorsService {
   async update(id: number, updateAuthorDto: UpdateAuthorDto) {
     const exists = await this.prisma.author.findFirst({ where: { author_id: id } });
     if (!exists) {
-      throw new Error("Author not found");
+      throw new Error("Autor não encontrado");
     }
     return this.prisma.author.update({
       where: { author_id: id },

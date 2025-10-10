@@ -32,7 +32,11 @@ export class LoansController {
       if (error instanceof ConflictException) {
         throw new HttpException(error.message, HttpStatus.CONFLICT);
       }
-      throw new HttpException('Erro interno do servidor', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException({
+        message: 'Erro interno do servidor',
+        error: error.message,
+        details: error
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

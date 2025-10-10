@@ -39,7 +39,6 @@ const Loans: React.FC = () => {
       setError('')
     } catch (err: any) {
       setError('Erro ao carregar empréstimos')
-      console.error('Erro ao carregar empréstimos:', err)
     } finally {
       setLoading(false)
     }
@@ -56,7 +55,6 @@ const Loans: React.FC = () => {
       fetchLoans()
     } catch (err: any) {
       alert('Erro ao cancelar empréstimo')
-      console.error('Erro ao cancelar empréstimo:', err)
     }
   }
 

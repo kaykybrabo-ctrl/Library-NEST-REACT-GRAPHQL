@@ -127,14 +127,12 @@ export class UsersController {
         username = decoded?.username || decoded?.email || decoded?.sub || "guest";
       }
     } catch (error) {
-      console.log('Error decoding JWT:', error);
     }
     
     username = username !== "guest" ? username : (queryUsername || body?.username || body?.email || "guest");
     
     if (file) {
       this.updateUserProfile(username, { image: file.filename });
-      console.log(`Image uploaded for user ${username}: ${file.filename}, size: ${file.size} bytes`);
     }
 
     const userProfile = this.getUserProfile(username);
@@ -145,7 +143,6 @@ export class UsersController {
       email: `${username}@example.com`,
       role: "user",
       description: userProfile.description,
-      profile_image: file ? file.filename : userProfile.image,
       timestamp: Date.now(),
       success: true
     };
@@ -170,7 +167,6 @@ export class UsersController {
         username = decoded?.username || decoded?.email || decoded?.sub || "guest";
       }
     } catch (error) {
-      console.log('Error decoding JWT:', error);
     }
     
     username = username !== "guest" ? username : (queryUsername || body?.username || "guest");
@@ -219,7 +215,6 @@ export class UsersController {
         username = decoded?.username || decoded?.email || decoded?.sub || "guest";
       }
     } catch (error) {
-      console.log('Error decoding JWT:', error);
     }
     
     username = username !== "guest" ? username : (req?.query?.username || "guest");

@@ -47,7 +47,6 @@ import * as nodemailer from 'nodemailer';
               pass: testAccount.pass,
             },
           };
-          console.log('Conta de teste Ethereal criada:', testAccount.user);
         }
 
         return {

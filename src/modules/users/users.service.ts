@@ -8,11 +8,21 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    const newUser = await this.prisma.user.create({
+      data: {
+        full_name: createUserDto.username.split('@')[0],
+        birth_date: new Date('2000-01-01'),
+        address: 'Endereço não informado',
+        email: createUserDto.username,
+      },
+    });
+
     return this.prisma.authUser.create({
       data: {
         username: createUserDto.username,
         password: createUserDto.password,
         role: createUserDto.role,
+        user_id: newUser.user_id,
       },
     });
   }
@@ -40,15 +50,6 @@ export class UsersService {
     const user = await this.prisma.authUser.findUnique({
       where: { username: username },
     });
-    
-    if (!user) {
-      return {
-        id: 1,
-        username: username,
-        role: 'admin',
-        password: 'admin'
-      };
-    }
     
     return user;
   }

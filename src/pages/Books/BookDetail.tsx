@@ -153,7 +153,6 @@ const BookDetail: React.FC = () => {
       const response = await api.get(`/api/books/${id}/reviews`)
       setReviews(response.data)
     } catch (err) {
-      console.error('Erro ao buscar reviews:', err)
       setReviews([])
     }
   }
@@ -221,13 +220,10 @@ const BookDetail: React.FC = () => {
     }
 
     try {
-      console.log('Adicionando livro aos favoritos:', id)
       const response = await api.post(`/api/favorite/${id}`)
-      console.log('Resposta do servidor:', response.data)
       alert('Livro adicionado aos favoritos!')
       setError('')
     } catch (err: any) {
-      console.error('Erro ao adicionar aos favoritos:', err)
       const errorMsg = err.response?.data?.message || err.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
       alert(`Erro: ${errorMsg}`)
@@ -289,6 +285,14 @@ const BookDetail: React.FC = () => {
         <h2>{book.title}</h2>
         <p><strong>Autor:</strong> {book.author_name || 'Desconhecido'}</p>
         <p><strong>Descrição:</strong> {book.description || 'Sem descrição disponível'}</p>
+        
+        {book.categories && book.categories.length > 0 && (
+          <p><strong>Gêneros:</strong> {book.categories.join(', ')}</p>
+        )}
+        
+        {book.publishers && book.publishers.length > 0 && (
+          <p><strong>Editoras:</strong> {book.publishers.join(', ')}</p>
+        )}
 
         {previewUrl ? (
           <img src={previewUrl} alt="Pré-visualização selecionada" className="book-image" />

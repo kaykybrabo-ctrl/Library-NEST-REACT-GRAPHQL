@@ -68,29 +68,22 @@ const UserProfile: React.FC = () => {
   }
 
   const fetchFavoriteBook = async () => {
-    console.log('fetchFavoriteBook chamado, user:', user)
     if (!user?.username) {
-      console.log('Usuário não encontrado ou sem username')
       return
     }
 
     try {
-      console.log('Buscando favorito para:', user.username)
       const response = await api.get(`/api/users/favorite?username=${user.username}`)
-      console.log('Resposta da API de favoritos:', response.data)
       if (response.data) {
         const favoriteData = {
           ...response.data,
           author_name: response.data.author?.name_author || 'Desconhecido'
         }
-        console.log('Definindo favorito:', favoriteData)
         setFavoriteBook(favoriteData)
       } else {
-        console.log('Nenhum favorito encontrado')
         setFavoriteBook(null)
       }
     } catch (error) {
-      console.error('Erro ao buscar livro favorito:', error)
       setFavoriteBook(null)
     }
   }
@@ -114,7 +107,6 @@ const UserProfile: React.FC = () => {
           const user = JSON.parse(savedUser);
           formData.append('username', user.username || user.email || 'guest');
         } catch (e) {
-          console.log('Error parsing user from localStorage:', e);
         }
       }
       
@@ -145,7 +137,6 @@ const UserProfile: React.FC = () => {
         const user = JSON.parse(savedUser);
         username = user.username || user.email || 'guest';
       } catch (e) {
-        console.log('Error parsing user from localStorage:', e);
       }
     }
 

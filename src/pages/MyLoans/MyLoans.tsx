@@ -52,7 +52,6 @@ const MyLoans: React.FC = () => {
       setError('')
     } catch (err: any) {
       setError('Erro ao carregar seus empréstimos')
-      console.error('Erro ao carregar empréstimos:', err)
     } finally {
       setLoading(false)
     }
@@ -66,7 +65,6 @@ const MyLoans: React.FC = () => {
         setShowOverdueModal(true)
       }
     } catch (err: any) {
-      console.error('Erro ao verificar empréstimos em atraso:', err)
     }
   }
 
@@ -85,7 +83,6 @@ const MyLoans: React.FC = () => {
       const errorMsg = err.response?.data?.message || 'Erro ao devolver livro'
       setError(errorMsg)
       setTimeout(() => setError(''), 5000)
-      console.error('Erro ao devolver livro:', err)
     }
   }
 

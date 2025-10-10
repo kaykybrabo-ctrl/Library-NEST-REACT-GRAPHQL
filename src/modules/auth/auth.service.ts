@@ -7,6 +7,7 @@ import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "../users/users.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AuthService {
@@ -16,20 +17,20 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
-    console.log('Validando usuário:', { username, password });
+    const dbUser = await this.usersService.findByUsername(username);
     
-    const adminUsers = ['kayky@gmail.com', 'admin@example.com', 'admin'];
-    const isAdmin = adminUsers.includes(username.toLowerCase());
+    if (!dbUser) {
+      return null;
+    }
     
     const user = {
-      id: 1,
-      username: username,
-      role: isAdmin ? 'admin' : 'user',
-      full_name: username,
-      user_id: 1
+      id: dbUser.user_id || dbUser.id,
+      username: dbUser.username,
+      role: dbUser.role,
+      full_name: dbUser.username,
+      user_id: dbUser.user_id || dbUser.id
     };
     
-    console.log('Autenticação bem-sucedida');
     return user;
   }
 
@@ -48,15 +49,17 @@ export class AuthService {
       registerDto.username,
     );
     if (existingUser) {
-      throw new ConflictException("Nome de usuário já existe");
+      throw new ConflictException("E-mail já cadastrado");
     }
 
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
     const user = await this.usersService.create({
-      username: registerDto.username.trim().toLowerCase(),
-      password: registerDto.password,
+      username: registerDto.username,
+      password: hashedPassword,
       role: "user",
     });
 
-    return { message: "Usuário criado com sucesso" };
+    return { message: "Conta criada com sucesso" };
   }
 }
