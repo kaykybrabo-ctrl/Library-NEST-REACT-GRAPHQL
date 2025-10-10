@@ -131,18 +131,21 @@ export class UsersController {
     
     username = username !== "guest" ? username : (queryUsername || body?.username || body?.email || "guest");
     
-    if (file) {
-      this.updateUserProfile(username, { image: file.filename });
+    const dbUser = await this.usersService.findByUsername(username);
+    
+    if (dbUser && file) {
+      await this.usersService.updateProfileImage(dbUser.id, file.filename);
     }
 
-    const userProfile = this.getUserProfile(username);
+    const updatedUser = await this.usersService.findByUsername(username);
 
     const response = {
-      id: 1,
+      id: updatedUser?.id || 1,
       username: username,
-      email: `${username}@example.com`,
-      role: "user",
-      description: userProfile.description,
+      email: username,
+      role: updatedUser?.role || "user",
+      description: updatedUser?.description || '',
+      profile_image: updatedUser?.profile_image || updatedUser?.photo || 'default-user.png',
       timestamp: Date.now(),
       success: true
     };
@@ -171,19 +174,21 @@ export class UsersController {
     
     username = username !== "guest" ? username : (queryUsername || body?.username || "guest");
     
-    if (body.description) {
-      this.updateUserProfile(username, { description: body.description });
+    const dbUser = await this.usersService.findByUsername(username);
+    
+    if (dbUser && body.description !== undefined) {
+      await this.usersService.updateDescription(dbUser.id, body.description);
     }
 
-    const userProfile = this.getUserProfile(username);
+    const updatedUser = await this.usersService.findByUsername(username);
 
     return {
-      id: 1,
+      id: updatedUser?.id || 1,
       username: username,
-      email: `${username}@example.com`,
-      role: "user",
-      description: userProfile.description,
-      profile_image: userProfile.image
+      email: username,
+      role: updatedUser?.role || "user",
+      description: updatedUser?.description || '',
+      profile_image: updatedUser?.profile_image || updatedUser?.photo || 'default-user.png'
     };
   }
 
@@ -218,8 +223,22 @@ export class UsersController {
     }
     
     username = username !== "guest" ? username : (req?.query?.username || "guest");
-    const userProfile = this.getUserProfile(username);
+    
+    const dbUser = await this.usersService.findByUsername(username);
+    
+    if (dbUser) {
+      return {
+        id: dbUser.id,
+        username: dbUser.username,
+        email: dbUser.username,
+        role: dbUser.role,
+        description: dbUser.description || '',
+        profile_image: dbUser.profile_image || dbUser.photo || 'default-user.png',
+        timestamp: Date.now()
+      };
+    }
 
+    const userProfile = this.getUserProfile(username);
     const profile = {
       id: 1,
       username: username,

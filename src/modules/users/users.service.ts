@@ -106,4 +106,23 @@ export class UsersService {
       }
     });
   }
+
+  async updateDescription(userId: number, description: string): Promise<any> {
+    return this.prisma.authUser.update({
+      where: { id: userId },
+      data: {
+        description: description
+      }
+    });
+  }
+
+  async updateProfileImage(userId: number, imagePath: string): Promise<any> {
+    return this.prisma.authUser.update({
+      where: { id: userId },
+      data: {
+        profile_image: imagePath,
+        photo: imagePath
+      }
+    });
+  }
 }

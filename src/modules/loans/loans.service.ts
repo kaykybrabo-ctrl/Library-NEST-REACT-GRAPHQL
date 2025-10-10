@@ -271,6 +271,17 @@ export class LoansService {
     }
   }
 
+  async findAuthUserById(userId: number) {
+    try {
+      return await this.prisma.authUser.findFirst({
+        where: { user_id: userId },
+        select: { username: true }
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
   private formatTimeRemaining(days: number, hours: number): string {
     if (days > 0) {
       return `${days} dia${days > 1 ? 's' : ''}`;
