@@ -24,6 +24,7 @@ export interface User {
   role: string;
   profile_image?: string;
   description?: string;
+  display_name?: string;
 }
 
 export interface Loan {

@@ -109,25 +109,25 @@ export class AuthorsController {
   @Delete("authors/:id")
   async remove(@Param("id") id: string) {
     await this.authorsService.remove(+id);
-    return { message: "Author deleted successfully" };
+    return { message: "Autor excluído com sucesso" };
   }
 
   @Delete("api/authors/:id")
   async removeApi(@Param("id") id: string) {
     await this.authorsService.remove(+id);
-    return { message: "Author deleted successfully" };
+    return { message: "Autor excluído com sucesso" };
   }
 
   @Patch('authors/:id/restore')
   async restore(@Param('id') id: string) {
     await this.authorsService.restore(+id);
-    return { message: 'Author restored successfully' };
+    return { message: 'Autor restaurado com sucesso' };
   }
 
   @Patch('api/authors/:id/restore')
   async restoreApi(@Param('id') id: string) {
     await this.authorsService.restore(+id);
-    return { message: 'Author restored successfully' };
+    return { message: 'Autor restaurado com sucesso' };
   }
 
   @Post("authors/:id/image")

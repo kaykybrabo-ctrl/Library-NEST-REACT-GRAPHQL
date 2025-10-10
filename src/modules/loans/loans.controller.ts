@@ -97,12 +97,13 @@ export class LoansController {
       const loan = await this.loansService.findByBookId(+bookId);
       if (loan && loan.user_id) {
         const authUser = await this.loansService.findAuthUserById(loan.user_id);
+        const displayName = authUser?.photo || authUser?.username || 'Usuário desconhecido';
         return {
           isRented: !!loan,
           loan: {
             ...loan,
             user: {
-              username: authUser?.username || 'Usuário desconhecido'
+              username: displayName
             }
           },
         };

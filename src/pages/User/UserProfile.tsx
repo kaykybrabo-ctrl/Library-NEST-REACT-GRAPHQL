@@ -26,6 +26,8 @@ const UserProfile: React.FC = () => {
   const [imgVersion, setImgVersion] = useState(0)
   const [description, setDescription] = useState('')
   const [editingDescription, setEditingDescription] = useState(false)
+  const [displayName, setDisplayName] = useState('')
+  const [editingDisplayName, setEditingDisplayName] = useState(false)
 
   const buildImageSrc = (path?: string | null) => {
     if (!path) return ''
@@ -46,7 +48,10 @@ const UserProfile: React.FC = () => {
     if (profile?.description !== undefined) {
       setDescription(profile.description || '')
     }
-  }, [profile?.description])
+    if (profile?.display_name !== undefined) {
+      setDisplayName(profile.display_name || '')
+    }
+  }, [profile?.description, profile?.display_name])
 
   const fetchProfile = async () => {
     try {
@@ -156,16 +161,55 @@ const UserProfile: React.FC = () => {
     setUploading(false)
   }
 
-  const handleReturnBook = async (loanId: number) => {
-    const response = await api.post(`/api/return/${loanId}`, {}, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+  const handleUpdateDisplayName = async () => {
+    setUploading(true)
 
-    fetchLoans()
-    alert('Livro devolvido com sucesso!')
-    setError('')
+    try {
+      await api.post('/api/save-display-name', {
+        display_name: displayName
+      })
+
+      setProfile(prev => prev ? {
+        ...prev,
+        display_name: displayName
+      } : null)
+      
+      setEditingDisplayName(false)
+      setError('')
+      alert('Nome atualizado com sucesso!')
+    } catch (e: any) {
+      const errorMessage = e.response?.data?.message || 'Falha ao atualizar o nome'
+      setError(errorMessage)
+      alert(errorMessage)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleReturnBook = async (loanId: number, bookTitle?: string) => {
+    const confirmMessage = bookTitle 
+      ? `Tem certeza que deseja devolver o livro "${bookTitle}"?`
+      : 'Tem certeza que deseja devolver este livro?'
+    
+    if (!window.confirm(confirmMessage)) {
+      return
+    }
+
+    try {
+      const response = await api.post(`/api/return/${loanId}`, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      fetchLoans()
+      alert('Livro devolvido com sucesso!')
+      setError('')
+    } catch (e: any) {
+      const errorMessage = e.response?.data?.message || 'Falha ao devolver o livro'
+      setError(errorMessage)
+      alert(errorMessage)
+    }
   }
 
   if (loading) {
@@ -210,6 +254,47 @@ const UserProfile: React.FC = () => {
             <h2>Informações do Perfil</h2>
             <p><strong>E-mail:</strong> {user?.username || 'Desconhecido'}</p>
             <p><strong>Função:</strong> {user?.role || 'Usuário'}</p>
+
+            <div className="display-name-section">
+              <h3>Nome de Exibição</h3>
+              {editingDisplayName ? (
+                <div>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Digite seu nome (ex: João Silva)"
+                    className="display-name-input"
+                    maxLength={50}
+                  />
+                  <div>
+                    <button onClick={handleUpdateDisplayName} disabled={uploading}>
+                      {uploading ? 'Salvando...' : 'Salvar Nome'}
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setEditingDisplayName(false)
+                        setDisplayName(profile?.display_name || '')
+                      }}
+                      disabled={uploading}
+                      style={{marginLeft: '10px'}}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p>{profile?.display_name || 'Nenhum nome definido'}</p>
+                  <button onClick={() => setEditingDisplayName(true)}>
+                    {profile?.display_name ? 'Editar Nome' : 'Adicionar Nome'}
+                  </button>
+                </div>
+              )}
+              <p style={{fontSize: '0.9em', color: '#666', marginTop: '5px'}}>
+                Este nome aparecerá quando você alugar livros
+              </p>
+            </div>
 
             <div className="profile-image-container">
               <h3>Imagem de Perfil</h3>
@@ -329,7 +414,7 @@ const UserProfile: React.FC = () => {
                       <button 
                         onClick={(e) => {
                           e.preventDefault()
-                          handleReturnBook(loan.loans_id)
+                          handleReturnBook(loan.loans_id, loan.title)
                         }}
                         className="return-button"
                       >

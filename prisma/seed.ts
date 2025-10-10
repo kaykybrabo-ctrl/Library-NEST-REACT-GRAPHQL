@@ -19,7 +19,7 @@ async function main() {
       data: {
         author_id: 1,
         name_author: 'Guilherme Biondo',
-        biography: 'Guilherme Biondo is a writer who started writing at a young age, driven by curiosity and a passion for storytelling. His books talk about people, feelings, and everything that is part of everyday life, but with a unique and sincere perspective.',
+        biography: 'Guilherme Biondo é um escritor que começou a escrever desde jovem, movido pela curiosidade e pela paixão por contar histórias. Seus livros falam sobre pessoas, sentimentos e tudo o que faz parte do cotidiano, mas com uma perspectiva única e sincera.',
         photo: null,
       },
     }),
@@ -27,7 +27,7 @@ async function main() {
       data: {
         author_id: 2,
         name_author: 'Manoel Leite',
-        biography: 'Manoel Leite is an author and keen observer of daily life. His stories arise from simple experiences, but full of meaning. With a direct and human writing style, Manoel aims to touch the reader with themes about memory, affection, and identity.',
+        biography: 'Manoel Leite é um autor e observador atento da vida cotidiana. Suas histórias surgem de experiências simples, mas cheias de significado. Com um estilo de escrita direto e humano, Manoel busca tocar o leitor com temas sobre memória, afeto e identidade.',
         photo: null,
       },
     }),
@@ -80,7 +80,7 @@ async function main() {
     )
   )
   const hashedPassword = await bcrypt.hash('123', 10)
-  
+
   const users = await Promise.all([
     prisma.user.create({
       data: {

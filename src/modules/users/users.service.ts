@@ -8,6 +8,15 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    // Verifica se o username já existe
+    const existingUser = await this.prisma.authUser.findUnique({
+      where: { username: createUserDto.username }
+    });
+
+    if (existingUser) {
+      throw new Error('Este nome de usuário já está em uso');
+    }
+
     const newUser = await this.prisma.user.create({
       data: {
         full_name: createUserDto.username.split('@')[0],
@@ -61,6 +70,20 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
+    // Se está atualizando o username, verifica se já existe
+    if (updateUserDto.username) {
+      const existingUser = await this.prisma.authUser.findFirst({
+        where: {
+          username: updateUserDto.username,
+          id: { not: id }
+        }
+      });
+
+      if (existingUser) {
+        throw new Error('Este nome de usuário já está em uso');
+      }
+    }
+
     return this.prisma.authUser.update({
       where: { id: id },
       data: {
@@ -116,12 +139,31 @@ export class UsersService {
     });
   }
 
+  async updateDisplayName(userId: number, displayName: string): Promise<any> {
+    const existingUser = await this.prisma.authUser.findFirst({
+      where: {
+        photo: displayName,
+        id: { not: userId }
+      }
+    });
+
+    if (existingUser) {
+      throw new Error('Este nome já está em uso por outro usuário');
+    }
+
+    return this.prisma.authUser.update({
+      where: { id: userId },
+      data: {
+        photo: displayName
+      }
+    });
+  }
+
   async updateProfileImage(userId: number, imagePath: string): Promise<any> {
     return this.prisma.authUser.update({
       where: { id: userId },
       data: {
-        profile_image: imagePath,
-        photo: imagePath
+        profile_image: imagePath
       }
     });
   }

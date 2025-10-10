@@ -159,7 +159,7 @@ const Authors: React.FC = () => {
       )}
 
       <section className="author-list">
-        <h2>Autores ({authors.length} {authors.length === 1 ? 'autor' : 'autores'})</h2>
+        <h2>Autores</h2>
         {isAdmin && (
           <div style={{ marginBottom: 10 }}>
             <label style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>

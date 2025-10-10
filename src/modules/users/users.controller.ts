@@ -11,6 +11,8 @@ import {
   UseInterceptors,
   UploadedFile,
   Query,
+  HttpException,
+  HttpStatus,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UsersService } from "./users.service";
@@ -91,10 +93,16 @@ export class UsersController {
       updateUserDto.profile_image = file.filename;
     }
 
-    const result = await this.usersService.update(req.user.id, updateUserDto);
-
-    const profile = await this.usersService.findOne(req.user.id);
-    return profile;
+    try {
+      const result = await this.usersService.update(req.user.id, updateUserDto);
+      const profile = await this.usersService.findOne(req.user.id);
+      return profile;
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao atualizar perfil',
+        HttpStatus.BAD_REQUEST
+      );
+    }
   }
 
   @UseInterceptors(FileInterceptor("image", {
@@ -188,7 +196,52 @@ export class UsersController {
       email: username,
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
-      profile_image: updatedUser?.profile_image || updatedUser?.photo || 'default-user.png'
+      profile_image: updatedUser?.profile_image || 'default-user.png',
+      display_name: updatedUser?.photo || ''
+    };
+  }
+
+  @Post("api/save-display-name")
+  async saveDisplayName(
+    @Body() body: any,
+    @Request() req?: any
+  ) {
+    let username = "guest";
+    
+    try {
+      const authHeader = req?.headers?.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(token);
+        username = decoded?.username || decoded?.email || decoded?.sub || "guest";
+      }
+    } catch (error) {
+    }
+    
+    const dbUser = await this.usersService.findByUsername(username);
+    
+    if (dbUser && body.display_name !== undefined) {
+      try {
+        await this.usersService.updateDisplayName(dbUser.id, body.display_name);
+      } catch (error) {
+        throw new HttpException(
+          error.message || 'Erro ao atualizar nome',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+
+    const updatedUser = await this.usersService.findByUsername(username);
+
+    return {
+      id: updatedUser?.id || 1,
+      username: username,
+      email: username,
+      role: updatedUser?.role || "user",
+      description: updatedUser?.description || '',
+      profile_image: updatedUser?.profile_image || 'default-user.png',
+      display_name: updatedUser?.photo || ''
     };
   }
 
@@ -233,7 +286,8 @@ export class UsersController {
         email: dbUser.username,
         role: dbUser.role,
         description: dbUser.description || '',
-        profile_image: dbUser.profile_image || dbUser.photo || 'default-user.png',
+        profile_image: dbUser.profile_image || 'default-user.png',
+        display_name: dbUser.photo || '',
         timestamp: Date.now()
       };
     }

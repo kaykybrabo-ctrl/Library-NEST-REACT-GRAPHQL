@@ -275,7 +275,7 @@ export class LoansService {
     try {
       return await this.prisma.authUser.findFirst({
         where: { user_id: userId },
-        select: { username: true }
+        select: { username: true, photo: true }
       });
     } catch (error) {
       return null;
