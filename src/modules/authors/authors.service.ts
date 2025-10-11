@@ -14,7 +14,7 @@ export class AuthorsService {
   }
 
   async findAll(page?: number, limit?: number, includeDeleted: boolean = false): Promise<any> {
-    const whereClause = {};
+    const whereClause: any = includeDeleted ? {} : { deleted_at: null };
     if (page !== undefined && limit !== undefined && page > 0 && limit > 0) {
       const offset = (page - 1) * limit;
 
@@ -68,23 +68,25 @@ export class AuthorsService {
   }
 
   async remove(id: number): Promise<void> {
-    const books = await this.prisma.book.findMany({
-      where: { author_id: id },
-      select: { book_id: true },
+    const author = await this.prisma.author.findFirst({ 
+      where: { author_id: id } 
     });
-    const bookIds = books.map((b) => b.book_id);
 
-    await this.prisma.$transaction([
-      this.prisma.loan.deleteMany({
-        where: { book_id: { in: bookIds.length ? bookIds : [-1] } },
-      }),
-      this.prisma.book.deleteMany({ where: { author_id: id } }),
-      this.prisma.author.delete({ where: { author_id: id } }),
-    ]);
+    if (!author) {
+      throw new Error('Autor não encontrado');
+    }
+
+    // Soft delete: apenas marca como deletado
+    await this.prisma.author.update({
+      where: { author_id: id },
+      data: { deleted_at: new Date() },
+    });
   }
 
   async count(): Promise<number> {
-    return this.prisma.author.count();
+    return this.prisma.author.count({
+      where: { deleted_at: null },
+    });
   }
 
   async updatePhoto(id: number, photo: string): Promise<void> {
@@ -95,5 +97,17 @@ export class AuthorsService {
   }
 
   async restore(id: number): Promise<void> {
+    const author = await this.prisma.author.findFirst({ 
+      where: { author_id: id } 
+    });
+
+    if (!author) {
+      throw new Error('Autor não encontrado');
+    }
+
+    await this.prisma.author.update({
+      where: { author_id: id },
+      data: { deleted_at: null },
+    });
   }
 }

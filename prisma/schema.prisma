@@ -8,10 +8,11 @@ datasource db {
 }
 
 model Author {
-  author_id   Int     @id @default(autoincrement())
-  name_author String  @db.VarChar(100)
-  biography   String? @db.Text
-  photo       String? @db.VarChar(255)
+  author_id   Int       @id @default(autoincrement())
+  name_author String    @db.VarChar(100)
+  biography   String?   @db.Text
+  photo       String?   @db.VarChar(255)
+  deleted_at  DateTime? @db.Timestamp(0)
   books       Book[]
 
   @@map("authors")
@@ -23,6 +24,7 @@ model Book {
   title           String            @db.VarChar(100)
   description     String?           @db.Text
   photo           String?           @db.VarChar(255)
+  deleted_at      DateTime?         @db.Timestamp(0)
   book_categories book_categories[]
   book_publishers book_publishers[]
   author          Author?           @relation(fields: [author_id], references: [author_id], onDelete: NoAction, onUpdate: NoAction, map: "books_ibfk_1")

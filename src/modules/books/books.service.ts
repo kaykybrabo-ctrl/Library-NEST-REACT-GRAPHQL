@@ -25,6 +25,7 @@ export class BooksService {
     const offset = (pageNum - 1) * limitNum;
 
     const whereClause: any = {
+      ...(includeDeleted ? {} : { deleted_at: null }),
       ...(search
         ? {
             title: {
@@ -121,14 +122,17 @@ export class BooksService {
       throw new Error(`Livro com ID ${id} não encontrado`);
     }
 
-    await this.prisma.$transaction([
-      this.prisma.loan.deleteMany({ where: { book_id: id } }),
-      this.prisma.book.delete({ where: { book_id: id } }),
-    ]);
+    // Soft delete: apenas marca como deletado
+    await this.prisma.book.update({
+      where: { book_id: id },
+      data: { deleted_at: new Date() },
+    });
   }
 
   async count(): Promise<number> {
-    return this.prisma.book.count();
+    return this.prisma.book.count({
+      where: { deleted_at: null },
+    });
   }
 
   async updatePhoto(id: number, photo: string): Promise<void> {
@@ -139,6 +143,18 @@ export class BooksService {
   }
 
   async restore(id: number): Promise<void> {
+    const book = await this.prisma.book.findFirst({ 
+      where: { book_id: id } 
+    });
+
+    if (!book) {
+      throw new Error('Livro não encontrado');
+    }
+
+    await this.prisma.book.update({
+      where: { book_id: id },
+      data: { deleted_at: null },
+    });
   }
 
   private getBookDescription(title: string): string {
