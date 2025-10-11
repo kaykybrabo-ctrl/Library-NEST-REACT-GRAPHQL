@@ -56,6 +56,7 @@ export class BooksService {
       photo: book.photo,
       author_name: book.author.name_author,
       author_id: book.author.author_id,
+      deleted_at: book.deleted_at,
     }));
 
     return {
@@ -122,7 +123,6 @@ export class BooksService {
       throw new Error(`Livro com ID ${id} não encontrado`);
     }
 
-    // Soft delete: apenas marca como deletado
     await this.prisma.book.update({
       where: { book_id: id },
       data: { deleted_at: new Date() },

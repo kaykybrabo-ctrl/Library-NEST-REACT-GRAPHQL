@@ -76,7 +76,6 @@ export class AuthorsService {
       throw new Error('Autor não encontrado');
     }
 
-    // Soft delete: apenas marca como deletado
     await this.prisma.author.update({
       where: { author_id: id },
       data: { deleted_at: new Date() },

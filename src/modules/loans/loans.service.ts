@@ -10,7 +10,6 @@ export class LoansService {
   constructor(private prisma: PrismaService) {}
 
   async create(createLoanDto: any): Promise<any> {
-    // Busca o AuthUser para pegar o user_id correto
     const authUser = await this.prisma.authUser.findUnique({
       where: { id: createLoanDto.user_id },
     });
@@ -70,7 +69,6 @@ export class LoansService {
 
   async findByUser(userId: number): Promise<any[]> {
     try {
-      // Busca o AuthUser para pegar o user_id correto
       const authUser = await this.prisma.authUser.findUnique({
         where: { id: userId },
       });
@@ -230,7 +228,6 @@ export class LoansService {
 
   async findUserLoan(userId: number, bookId: number) {
     try {
-      // Busca o AuthUser para pegar o user_id correto
       const authUser = await this.prisma.authUser.findUnique({
         where: { id: userId },
       });
@@ -271,7 +268,6 @@ export class LoansService {
 
   async getOverdueLoans(userId: number): Promise<any[]> {
     try {
-      // Busca o AuthUser para pegar o user_id correto
       const authUser = await this.prisma.authUser.findUnique({
         where: { id: userId },
       });

@@ -8,7 +8,6 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    // Verifica se o username já existe
     const existingUser = await this.prisma.authUser.findUnique({
       where: { username: createUserDto.username }
     });
@@ -70,7 +69,6 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    // Se está atualizando o username, verifica se já existe
     if (updateUserDto.username) {
       const existingUser = await this.prisma.authUser.findFirst({
         where: {

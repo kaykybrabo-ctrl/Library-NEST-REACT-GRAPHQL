@@ -54,7 +54,6 @@ export class LoansController {
       throw new HttpException('Empréstimo não encontrado', HttpStatus.NOT_FOUND);
     }
     
-    // Busca o AuthUser para pegar o user_id correto
     const authUser = await this.loansService.getAuthUserById(req.user.id);
     
     if (!authUser || !authUser.user_id) {
@@ -147,7 +146,6 @@ export class LoansController {
   @UseGuards(JwtAuthGuard)
   @Post("books/:id/return")
   async returnBookByBookId(@Param("id") bookId: string, @Request() req) {
-    // findUserLoan já faz a conversão de AuthUser.id para User.user_id internamente
     const loan = await this.loansService.findUserLoan(req.user.id, +bookId);
     if (!loan) {
       throw new HttpException('Você não possui este livro alugado', HttpStatus.NOT_FOUND);

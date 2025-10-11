@@ -1,4 +1,3 @@
-/* Authors Cards Styles */
 .authors-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -185,7 +184,6 @@
   text-transform: uppercase;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .authors-grid {
     grid-template-columns: 1fr;
