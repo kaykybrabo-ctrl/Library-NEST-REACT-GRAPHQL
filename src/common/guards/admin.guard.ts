@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   ForbiddenException,
 } from "@nestjs/common";
-import { JwtAuthGuard } from "./jwt-auth.guard";
+import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 
 @Injectable()
 export class AdminGuard extends JwtAuthGuard implements CanActivate {

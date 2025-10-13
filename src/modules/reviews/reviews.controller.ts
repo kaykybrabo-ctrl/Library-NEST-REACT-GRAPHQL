@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Param, Request, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ReviewsService } from "./reviews.service";
 import { CreateReviewDto } from "./dto/create-review.dto";
-import { JwtAuthGuard } from "@/modules/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 
 @Controller()
 export class ReviewsController {

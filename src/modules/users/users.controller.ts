@@ -17,7 +17,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { existsSync } from "fs";
 import { join } from "path";
 

@@ -12,8 +12,8 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { LoansService } from "./loans.service";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { AdminGuard } from "../auth/admin.guard";
+import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
+import { AdminGuard } from "@/common/guards/admin.guard";
 
 @Controller('api')
 export class LoansController {

@@ -142,7 +142,6 @@ const MyLoans: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Cobrança */}
       {showOverdueModal && overdueLoans.length > 0 && (
         <div className="modal-overlay">
           <div className="overdue-modal">

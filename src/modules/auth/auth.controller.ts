@@ -8,8 +8,8 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LocalAuthGuard } from "./local-auth.guard";
-import { JwtAuthGuard } from "./jwt-auth.guard";
+import { LocalAuthGuard } from "@/common/guards/local-auth.guard";
+import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { UsersService } from "@/modules/users/users.service";

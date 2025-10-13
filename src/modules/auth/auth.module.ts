@@ -4,8 +4,8 @@ import { PassportModule } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { UsersModule } from "@/modules/users/users.module";
-import { JwtStrategy } from "./jwt.strategy";
-import { LocalStrategy } from "./local.strategy";
+import { JwtStrategy } from "@/common/strategies/jwt.strategy";
+import { LocalStrategy } from "@/common/strategies/local.strategy";
 import { MailModule } from "@/infrastructure/mail/mail.module";
 import { MailService } from "@/infrastructure/mail/mail.service";
 
