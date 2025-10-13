@@ -83,7 +83,7 @@ export class AuthController {
     return await this.authService.register(registerDto);
   }
 
-  @Post("api/register")
+  @Post("register-duplicate")
   async registerApi(@Body() registerDto: RegisterDto) {
     return await this.authService.register(registerDto);
   }
@@ -95,7 +95,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("api/user/me")
+  @Get("user/me-duplicate")
   getProfileApi(@Request() req) {
     return req.user;
   }
@@ -110,7 +110,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("api/user/role")
+  @Get("user/role-duplicate")
   getUserRoleApi(@Request() req) {
     return {
       role: req.user.role,
@@ -118,7 +118,7 @@ export class AuthController {
     };
   }
 
-  @Post("api/forgot-password")
+  @Post("forgot-password")
   async forgotPassword(@Body() body: { username: string }) {
     const username = (body?.username || "").trim();
     
@@ -137,23 +137,31 @@ export class AuthController {
     const resetUrl = `${process.env.PUBLIC_WEB_URL || "http://localhost:8080"}/reset?u=${encodeURIComponent(username)}&t=${encodeURIComponent(token)}`;
     
     try {
+      console.log('📧 Tentando enviar email de redefinição para:', username);
       const res = await this.mailService.sendPasswordResetEmail(username, {
         username,
         resetUrl,
       });
       
+      console.log('📬 Resposta do serviço de email:', res);
+      
       if (res?.preview) {
         genericResponse.preview = res.preview;
         genericResponse.messageId = res.messageId;
+        console.log('✅ Preview URL gerado:', res.preview);
+      } else {
+        console.log('⚠️  Preview não foi gerado');
       }
     } catch (error) {
-      
+      console.error('❌ Erro ao enviar email:', error);
+      genericResponse.error = error?.message || 'Erro desconhecido';
     }
     
+    console.log('📤 Retornando resposta:', genericResponse);
     return genericResponse;
   }
 
-  @Post("api/reset-password")
+  @Post("reset-password")
   async resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
     const newPassword = (dto?.newPassword || "").trim();
     if (!newPassword) {
@@ -187,6 +195,9 @@ export class AuthController {
           message: "A senha foi atualizada caso a conta exista",
         };
       }
+      
+      await this.usersService.updatePassword(username, newPassword);
+      
       return { ok: true, message: "Senha atualizada com sucesso" };
     } catch (e) {
       return { ok: false, message: "Falha ao redefinir a senha" };

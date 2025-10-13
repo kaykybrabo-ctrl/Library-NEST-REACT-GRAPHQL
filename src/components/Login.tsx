@@ -41,13 +41,26 @@ const Login: React.FC = () => {
     setPreview(null)
     setLoading(true)
     try {
+      console.log('🔄 Enviando requisição de esqueceu senha para:', username.trim())
       const res = await api.post('/api/forgot-password', { username: username.trim() })
       const data = res?.data || {}
+      console.log('📥 Resposta recebida do backend:', data)
+      
       if (data.preview) {
+        console.log('✅ Preview URL encontrado:', data.preview)
         setPreview(data.preview)
+      } else {
+        console.log('⚠️ Preview não encontrado na resposta')
       }
-      alert('Se a conta existir, um e-mail de redefinição foi enviado.')
+      
+      if (data.error) {
+        console.error('❌ Erro retornado do backend:', data.error)
+        setError('Erro ao enviar email: ' + data.error)
+      } else {
+        alert('Se a conta existir, um e-mail de redefinição foi enviado.')
+      }
     } catch (e) {
+      console.error('❌ Erro na requisição:', e)
       alert('Se a conta existir, um e-mail de redefinição foi enviado.')
     } finally {
       setLoading(false)

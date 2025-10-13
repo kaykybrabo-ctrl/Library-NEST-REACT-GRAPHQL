@@ -15,27 +15,32 @@
 }
 
 .email-preview {
-  margin-top: 12px;
-  padding: 12px;
-  background: #f7f9fc;
-  border: 1px solid #e3e8f2;
-  border-radius: 6px;
+  margin-top: 20px;
+  padding: 16px;
+  background: #e8f4fd;
+  border: 2px solid #0b5cab;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(11, 92, 171, 0.1);
 }
 
 .email-preview-title {
-  font-size: 0.95rem;
-  color: #1f2a44;
-  margin-bottom: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0b5cab;
+  margin-bottom: 10px;
 }
 
 .email-preview-link {
   display: inline-block;
   color: #0b5cab;
+  font-weight: 500;
   word-break: break-all;
   overflow-wrap: anywhere;
-  text-decoration: none;
+  text-decoration: underline;
+  font-size: 0.9rem;
 }
 
 .email-preview-link:hover {
+  color: #084179;
   text-decoration: underline;
 }

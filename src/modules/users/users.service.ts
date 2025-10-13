@@ -165,4 +165,16 @@ export class UsersService {
       }
     });
   }
+
+  async updatePassword(username: string, newPassword: string): Promise<any> {
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    return this.prisma.authUser.update({
+      where: { username: username },
+      data: {
+        password: hashedPassword
+      }
+    });
+  }
 }

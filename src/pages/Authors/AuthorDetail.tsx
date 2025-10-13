@@ -116,7 +116,7 @@ const AuthorDetail: React.FC = () => {
   const handleUpdateBiography = async () => {
     setUploading(true)
     try {
-      await api.put(`/api/authors/${id}`, {
+      await api.patch(`/api/authors/${id}`, {
         name_author: author?.name_author,
         biography: biography
       })

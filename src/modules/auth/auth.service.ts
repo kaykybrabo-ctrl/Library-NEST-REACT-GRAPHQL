@@ -23,6 +23,12 @@ export class AuthService {
       return null;
     }
     
+    const isPasswordValid = await bcrypt.compare(password, dbUser.password);
+    
+    if (!isPasswordValid) {
+      return null;
+    }
+    
     const user = {
       id: dbUser.id,
       username: dbUser.username,
