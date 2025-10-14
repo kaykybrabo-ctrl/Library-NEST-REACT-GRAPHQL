@@ -56,12 +56,8 @@ export class MailService {
       "reset-password.pug",
     );
     
-    console.log('📧 MailService: Enviando email para:', to);
-    console.log('🔗 Reset URL:', context.resetUrl);
-    
     try {
       const html = pug.compileFile(templatePath)(context);
-      console.log('✅ Template HTML compilado com sucesso');
       
       const info = await this.mailer.sendMail({
         to,
@@ -70,10 +66,7 @@ export class MailService {
         text: `Recebemos uma solicitação para redefinir sua senha do PedBook. Abra este link para continuar: ${context.resetUrl}`,
       });
       
-      console.log('✅ Email enviado, messageId:', info?.messageId);
-      
       const preview = nodemailer.getTestMessageUrl(info);
-      console.log('🔗 Preview URL gerado:', preview);
       
       return { messageId: info?.messageId, preview };
     } catch (err) {
@@ -85,10 +78,7 @@ export class MailService {
         text: `Recebemos uma solicitação para redefinir sua senha do PedBook. Abra este link para continuar: ${context.resetUrl}`,
       });
       
-      console.log('✅ Email de texto enviado, messageId:', info2?.messageId);
-      
       const preview2 = nodemailer.getTestMessageUrl(info2);
-      console.log('🔗 Preview URL gerado (fallback):', preview2);
       
       return { messageId: info2?.messageId, preview: preview2 };
     }

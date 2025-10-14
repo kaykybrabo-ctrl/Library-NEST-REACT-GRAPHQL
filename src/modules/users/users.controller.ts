@@ -153,7 +153,8 @@ export class UsersController {
       email: username,
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
-      profile_image: updatedUser?.profile_image || updatedUser?.photo || 'default-user.png',
+      profile_image: updatedUser?.profile_image || 'default-user.png',
+      display_name: updatedUser?.display_name || '',
       timestamp: Date.now(),
       success: true
     };
@@ -197,7 +198,7 @@ export class UsersController {
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
       profile_image: updatedUser?.profile_image || 'default-user.png',
-      display_name: updatedUser?.photo || ''
+      display_name: updatedUser?.display_name || updatedUser?.photo || ''
     };
   }
 
@@ -241,7 +242,7 @@ export class UsersController {
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
       profile_image: updatedUser?.profile_image || 'default-user.png',
-      display_name: updatedUser?.photo || ''
+      display_name: updatedUser?.display_name || updatedUser?.photo || ''
     };
   }
 
@@ -287,7 +288,7 @@ export class UsersController {
         role: dbUser.role,
         description: dbUser.description || '',
         profile_image: dbUser.profile_image || 'default-user.png',
-        display_name: dbUser.photo || '',
+        display_name: dbUser.display_name || '',
         timestamp: Date.now()
       };
     }

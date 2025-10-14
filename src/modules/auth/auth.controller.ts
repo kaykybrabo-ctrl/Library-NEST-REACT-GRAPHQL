@@ -137,27 +137,20 @@ export class AuthController {
     const resetUrl = `${process.env.PUBLIC_WEB_URL || "http://localhost:8080"}/reset?u=${encodeURIComponent(username)}&t=${encodeURIComponent(token)}`;
     
     try {
-      console.log('📧 Tentando enviar email de redefinição para:', username);
       const res = await this.mailService.sendPasswordResetEmail(username, {
         username,
         resetUrl,
       });
       
-      console.log('📬 Resposta do serviço de email:', res);
-      
       if (res?.preview) {
         genericResponse.preview = res.preview;
         genericResponse.messageId = res.messageId;
-        console.log('✅ Preview URL gerado:', res.preview);
-      } else {
-        console.log('⚠️  Preview não foi gerado');
       }
     } catch (error) {
       console.error('❌ Erro ao enviar email:', error);
       genericResponse.error = error?.message || 'Erro desconhecido';
     }
     
-    console.log('📤 Retornando resposta:', genericResponse);
     return genericResponse;
   }
 

@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { MulterModule } from "@nestjs/platform-express";
 import { join } from "path";
@@ -22,6 +24,15 @@ import * as nodemailer from 'nodemailer';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+      playground: true,
+      debug: true,
+      introspection: true,
+      path: '/graphql',
+    }),
     MailerModule.forRootAsync({
       useFactory: async () => {
         const host = process.env.SMTP_HOST || "smtp.ethereal.email";
@@ -35,12 +46,9 @@ import * as nodemailer from 'nodemailer';
         let transport;
         
         if (user && pass) {
-          console.log('📧 Usando credenciais de email do .env');
           transport = { host, port, secure, auth: { user, pass } };
         } else {
-          console.log('📧 Criando conta de teste Ethereal...');
           const testAccount = await nodemailer.createTestAccount();
-          console.log('✅ Conta Ethereal criada:', testAccount.user);
           transport = {
             host: "smtp.ethereal.email",
             port: 587,
@@ -79,7 +87,7 @@ import * as nodemailer from 'nodemailer';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "FRONTEND", "react-dist"),
-      exclude: ["/api*", "/api/*"],
+      exclude: ["/api*", "/api/*", "/graphql*"],
       serveStaticOptions: {
         cacheControl: false,
         etag: false,

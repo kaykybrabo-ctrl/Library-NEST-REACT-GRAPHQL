@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@apollo/client'
+import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
+import { GET_AUTHORS } from '@/graphql/queries/authors'
 import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
@@ -28,6 +31,30 @@ const Books: React.FC = () => {
   const navigate = useNavigate()
   const featuredInitialized = useRef(false)
   const prevFeaturedCount = useRef(0)
+  
+  const { data: booksData, refetch: refetchBooks } = useQuery(GET_BOOKS, {
+    variables: { 
+      page: currentPage + 1, 
+      limit,
+      search: searchQuery || undefined,
+      includeDeleted: includeDeleted || undefined
+    },
+    fetchPolicy: 'network-only',
+  });
+  
+  const { data: booksCountData } = useQuery(GET_BOOKS_COUNT, {
+    fetchPolicy: 'network-only',
+  });
+  
+  const { data: authorsData } = useQuery(GET_AUTHORS, {
+    fetchPolicy: 'cache-first',
+  });
+  
+  const [createBookMutation] = useMutation(CREATE_BOOK);
+  const [updateBookMutation] = useMutation(UPDATE_BOOK);
+  const [removeBookMutation] = useMutation(REMOVE_BOOK);
+  const [restoreBookMutation] = useMutation(RESTORE_BOOK);
+  
   const displayedItems = useMemo(() => (
     carouselItems.length > 0
       ? carouselItems
@@ -36,6 +63,26 @@ const Books: React.FC = () => {
   const slidesLength = displayedItems.length
 
   const capitalizeFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
+
+  useEffect(() => {
+    if (booksData?.books) {
+      setBooks(booksData.books);
+      setLoading(false);
+    }
+  }, [booksData]);
+  
+  useEffect(() => {
+    if (booksCountData?.booksCount) {
+      const total = booksCountData.booksCount;
+      setTotalPages(Math.ceil(total / limit));
+    }
+  }, [booksCountData]);
+  
+  useEffect(() => {
+    if (authorsData?.authors) {
+      setAuthors(authorsData.authors);
+    }
+  }, [authorsData]);
 
   useEffect(() => {
     fetchAuthors();
@@ -142,7 +189,7 @@ const Books: React.FC = () => {
 
   const handleRestoreBook = async (bookId: number) => {
     try {
-      await api.patch(`/api/books/${bookId}/restore`)
+      await restoreBookMutation({ variables: { id: bookId } })
       alert('Livro restaurado com sucesso')
       await fetchBooks()
       setError('')
@@ -153,53 +200,10 @@ const Books: React.FC = () => {
   }
 
   const fetchBooks = async () => {
-    setLoading(true)
-    const page = currentPage + 1
-    const response = await api.get(`/api/books?limit=${limit}&page=${page}&search=${searchQuery}${includeDeleted ? '&includeDeleted=1' : ''}`)
-
-    if (response.data && Array.isArray(response.data.books)) {
-      setBooks(response.data.books)
-      setTotalPages(response.data.totalPages)
-      if (carouselItems.length === 0) {
-        try {
-          const allResp = await api.get(`/api/books?limit=${9999}&page=1${includeDeleted ? '&includeDeleted=1' : ''}`)
-          const allList: Book[] = Array.isArray(allResp.data?.books) ? allResp.data.books : response.data.books
-          const sorted = [...allList].sort((a: Book, b: Book) => b.book_id - a.book_id)
-          const next = sorted.slice(0, Math.min(8, sorted.length))
-          setFeatured(next)
-          setCarouselItems(next)
-          if (prevFeaturedCount.current === 0) {
-            setCurrentSlide(0)
-          }
-          prevFeaturedCount.current = next.length
-        } catch {
-          if (response.data.books.length > 0) {
-            const sorted = [...response.data.books].sort((a: Book, b: Book) => b.book_id - a.book_id)
-            const next = sorted.slice(0, Math.min(8, sorted.length))
-            setFeatured(next)
-            setCarouselItems(next)
-            if (prevFeaturedCount.current === 0) {
-              setCurrentSlide(0)
-            }
-            prevFeaturedCount.current = next.length
-          }
-        }
-      }
-    } else {
-      setBooks([])
-      setTotalPages(0)
-    }
-    setLoading(false)
+    await refetchBooks();
   }
 
-  const fetchAuthors = async () => {
-    const response = await api.get('/api/authors?limit=9999&page=1')
-    if (response.data && Array.isArray(response.data.authors)) {
-      setAuthors(response.data.authors)
-    } else {
-      setAuthors([])
-    }
-  }
+  const fetchAuthors = async () => {}
 
   const getAuthorName = (authorId: number) => {
     const author = authors.find(a => a.author_id === authorId)
@@ -210,9 +214,13 @@ const Books: React.FC = () => {
     e.preventDefault()
     if (!newBook.title.trim() || !newBook.author_id) return
 
-    await api.post('/api/books', {
-      title: capitalizeFirst(newBook.title.trim()),
-      author_id: Number(newBook.author_id)
+    await createBookMutation({
+      variables: {
+        createBookInput: {
+          title: capitalizeFirst(newBook.title.trim()),
+          author_id: Number(newBook.author_id)
+        }
+      }
     })
     setNewBook({ title: '', author_id: '' })
     fetchBooks()
@@ -226,12 +234,15 @@ const Books: React.FC = () => {
   const handleSaveEdit = async () => {
     if (!editData.title.trim() || !editData.author_id || !editingBook) return
 
-    const payload = {
-      title: capitalizeFirst(editData.title.trim()),
-      author_id: Number(editData.author_id)
-    }
-
-    await api.patch(`/api/books/${editingBook}`, payload)
+    await updateBookMutation({
+      variables: {
+        id: editingBook,
+        updateBookInput: {
+          title: capitalizeFirst(editData.title.trim()),
+          author_id: Number(editData.author_id)
+        }
+      }
+    })
     setEditingBook(null)
     setEditData({ title: '', author_id: '' })
     setError('')
@@ -246,7 +257,7 @@ const Books: React.FC = () => {
   const handleDeleteBook = async (bookId: number) => {
     if (!confirm('Tem certeza de que deseja excluir este livro?')) return
     try {
-      await api.delete(`/api/books/${bookId}`)
+      await removeBookMutation({ variables: { id: bookId } })
       alert('Livro excluído com sucesso')
       await fetchBooks()
       setError('')

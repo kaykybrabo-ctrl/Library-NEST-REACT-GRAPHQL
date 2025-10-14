@@ -1,0 +1,84 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Author {
+  author_id: Int!
+  biography: String
+  books: [Book!]
+  deleted_at: DateTime
+  name_author: String!
+  photo: String
+}
+
+type Book {
+  author: Author
+  author_id: Int
+  book_id: Int!
+  deleted_at: DateTime
+  description: String
+  photo: String
+  reviews: [Review!]
+  title: String!
+}
+
+input CreateAuthorDto {
+  biography: String
+  name_author: String!
+  photo: String
+}
+
+input CreateBookDto {
+  author_id: Int!
+  description: String
+  photo: String
+  title: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createAuthor(createAuthorInput: CreateAuthorDto!): Author!
+  createBook(createBookInput: CreateBookDto!): Book!
+  removeAuthor(id: Int!): Boolean!
+  removeBook(id: Int!): Boolean!
+  restoreAuthor(id: Int!): Boolean!
+  restoreBook(id: Int!): Boolean!
+  updateAuthor(id: Int!, updateAuthorInput: UpdateAuthorDto!): Author!
+  updateBook(id: Int!, updateBookInput: UpdateBookDto!): Book!
+}
+
+type Query {
+  author(id: Int!): Author!
+  authors(includeDeleted: Boolean, limit: Int, page: Int): [Author!]!
+  authorsCount: Int!
+  book(id: Int!): Book!
+  books(includeDeleted: Boolean, limit: Int, page: Int, search: String): [Book!]!
+  booksCount: Int!
+}
+
+type Review {
+  book: Book
+  book_id: Int!
+  comment: String
+  created_at: DateTime!
+  id: Int!
+  rating: Int!
+  user_id: Int!
+}
+
+input UpdateAuthorDto {
+  biography: String
+  name_author: String
+  photo: String
+}
+
+input UpdateBookDto {
+  author_id: Int
+  description: String
+  photo: String
+  title: String
+}

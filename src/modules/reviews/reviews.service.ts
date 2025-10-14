@@ -32,14 +32,51 @@ export class ReviewsService {
   }
 
   async findByBook(bookId: number) {
-    return this.prisma.review.findMany({
+    const reviews = await this.prisma.review.findMany({
       where: { book_id: bookId },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            photo: true,
+            user_id: true,
+            user: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         created_at: "desc",
       },
+    });
+
+    return reviews.map(review => {
+      const displayName = review.user.photo; // Nome de exibição salvo em 'photo'
+      const username = review.user.username;
+      const email = review.user.user?.email;
+      
+      // Prioridade: display_name > username (se não for email) > parte antes do @ > email
+      let finalName = displayName || username;
+      
+      if (!displayName && username && username.includes('@')) {
+        finalName = username.split('@')[0];
+      }
+      
+      if (!finalName) {
+        finalName = email || 'Usuário';
+      }
+      
+      return {
+        ...review,
+        user: {
+          ...review.user,
+          username: finalName,
+        },
+      };
     });
   }
 

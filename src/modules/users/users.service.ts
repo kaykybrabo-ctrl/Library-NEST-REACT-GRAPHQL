@@ -140,19 +140,19 @@ export class UsersService {
   async updateDisplayName(userId: number, displayName: string): Promise<any> {
     const existingUser = await this.prisma.authUser.findFirst({
       where: {
-        photo: displayName,
+        display_name: displayName,
         id: { not: userId }
       }
     });
 
     if (existingUser) {
-      throw new Error('Este nome já está em uso por outro usuário');
+      throw new Error('Este nome de exibição já está em uso por outro usuário');
     }
 
     return this.prisma.authUser.update({
       where: { id: userId },
       data: {
-        photo: displayName
+        display_name: displayName
       }
     });
   }

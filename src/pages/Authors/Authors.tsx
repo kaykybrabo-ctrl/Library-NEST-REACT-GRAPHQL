@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@apollo/client'
+import { GET_AUTHORS, GET_AUTHORS_COUNT, CREATE_AUTHOR, UPDATE_AUTHOR, REMOVE_AUTHOR, RESTORE_AUTHOR } from '@/graphql/queries/authors'
 import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
@@ -20,36 +22,51 @@ const Authors: React.FC = () => {
   const limit = 6
   const navigate = useNavigate()
 
+  const { data: authorsData, refetch: refetchAuthors } = useQuery(GET_AUTHORS, {
+    variables: { 
+      page: currentPage + 1, 
+      limit,
+      includeDeleted: includeDeleted || undefined
+    },
+    fetchPolicy: 'network-only',
+  });
+  
+  const { data: authorsCountData } = useQuery(GET_AUTHORS_COUNT, {
+    fetchPolicy: 'network-only',
+  });
+
+  const [createAuthorMutation] = useMutation(CREATE_AUTHOR);
+  const [updateAuthorMutation] = useMutation(UPDATE_AUTHOR);
+  const [removeAuthorMutation] = useMutation(REMOVE_AUTHOR);
+  const [restoreAuthorMutation] = useMutation(RESTORE_AUTHOR);
+
   const capitalizeFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
+
+  useEffect(() => {
+    if (authorsData?.authors) {
+      setAuthors(authorsData.authors);
+      setLoading(false);
+    }
+  }, [authorsData]);
+  
+  useEffect(() => {
+    if (authorsCountData?.authorsCount) {
+      const total = authorsCountData.authorsCount;
+      setTotalPages(Math.ceil(total / limit));
+    }
+  }, [authorsCountData]);
 
   useEffect(() => {
     fetchAuthors()
   }, [currentPage, includeDeleted])
 
   const fetchAuthors = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get(`/api/authors?page=${currentPage + 1}&limit=${limit}${includeDeleted ? '&includeDeleted=1' : ''}`)
-      
-      
-      if (response.data.authors) {
-        setAuthors(response.data.authors)
-        setTotalPages(response.data.totalPages || 0)
-      } else {
-        setAuthors(Array.isArray(response.data) ? response.data : [])
-        setTotalPages(1)
-      }
-    } catch (err) {
-      setError('Falha ao buscar autores')
-      setAuthors([])
-    } finally {
-      setLoading(false)
-    }
+    await refetchAuthors();
   }
 
   const handleRestoreAuthor = async (authorId: number) => {
     try {
-      await api.patch(`/api/authors/${authorId}/restore`)
+      await restoreAuthorMutation({ variables: { id: authorId } })
       alert('Autor restaurado com sucesso')
       fetchAuthors()
     } catch (err) {
@@ -63,9 +80,13 @@ const Authors: React.FC = () => {
     if (!newAuthor.name.trim() || !newAuthor.biography.trim()) return
 
     try {
-      await api.post('/api/authors', {
-        name_author: capitalizeFirst(newAuthor.name.trim()),
-        biography: capitalizeFirst(newAuthor.biography.trim())
+      await createAuthorMutation({
+        variables: {
+          createAuthorInput: {
+            name_author: capitalizeFirst(newAuthor.name.trim()),
+            biography: capitalizeFirst(newAuthor.biography.trim())
+          }
+        }
       })
       setNewAuthor({ name: '', biography: '' })
       fetchAuthors()
@@ -83,9 +104,14 @@ const Authors: React.FC = () => {
     if (!editData.name.trim() || !editingAuthor) return
 
     try {
-      await api.patch(`/api/authors/${editingAuthor}`, {
-        name_author: capitalizeFirst(editData.name.trim()),
-        biography: editData.biography.trim() || null
+      await updateAuthorMutation({
+        variables: {
+          id: editingAuthor,
+          updateAuthorInput: {
+            name_author: capitalizeFirst(editData.name.trim()),
+            biography: editData.biography.trim() || undefined
+          }
+        }
       })
       alert('Autor atualizado com sucesso')
       setEditingAuthor(null)
@@ -106,7 +132,7 @@ const Authors: React.FC = () => {
     if (!confirm('Tem certeza de que deseja excluir este autor?')) return
 
     try {
-      await api.delete(`/api/authors/${authorId}`)
+      await removeAuthorMutation({ variables: { id: authorId } })
       alert('Autor excluído com sucesso')
       fetchAuthors()
     } catch (err) {

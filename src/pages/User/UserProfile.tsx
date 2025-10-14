@@ -285,7 +285,7 @@ const UserProfile: React.FC = () => {
                 </div>
               ) : (
                 <div>
-                  <p>{profile?.display_name || 'Nenhum nome definido'}</p>
+                  <p>{displayName || 'Nenhum nome definido'}</p>
                   <button onClick={() => setEditingDisplayName(true)}>
                     {profile?.display_name ? 'Editar Nome' : 'Adicionar Nome'}
                   </button>
