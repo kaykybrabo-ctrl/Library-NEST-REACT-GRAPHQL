@@ -42,7 +42,7 @@ const Home: React.FC = () => {
               author_name: ''
             });
           }
-        } catch { }
+        } catch {}
         setFeatured(list);
       } catch (e: any) {
         setError(e?.message || 'Erro ao carregar');

@@ -54,12 +54,19 @@ export class ReviewsService {
       },
     });
 
-    return reviews.map(review => {
-      const displayName = review.user.photo; // Nome de exibição salvo em 'photo'
+    return Promise.all(reviews.map(async review => {
+      const authUserResult = await this.prisma.$queryRaw`
+        SELECT display_name, username 
+        FROM auth_users 
+        WHERE id = ${review.user.id}
+        LIMIT 1
+      ` as any[];
+
+      const authUser = authUserResult[0];
+      const displayName = authUser?.display_name;
       const username = review.user.username;
       const email = review.user.user?.email;
       
-      // Prioridade: display_name > username (se não for email) > parte antes do @ > email
       let finalName = displayName || username;
       
       if (!displayName && username && username.includes('@')) {
@@ -77,7 +84,7 @@ export class ReviewsService {
           username: finalName,
         },
       };
-    });
+    }));
   }
 
   async getBookRating(bookId: number) {

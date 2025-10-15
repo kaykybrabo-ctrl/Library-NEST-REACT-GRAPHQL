@@ -172,11 +172,9 @@ const BookDetail: React.FC = () => {
       fetchBook()
       setImageFile(null)
       setImgVersion(v => v + 1)
-      alert('Imagem do livro atualizada com sucesso!')
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem'
       setError(msg)
-      alert(`Erro: ${msg}`)
     } finally {
       setUploading(false)
     }
@@ -184,7 +182,6 @@ const BookDetail: React.FC = () => {
   const handleRentBook = async () => {
     try {
       await api.post(`/api/rent/${id}`)
-      alert('Livro alugado com sucesso!')
       setError('')
       checkUserLoan()
     } catch (err: any) {
@@ -205,7 +202,6 @@ const BookDetail: React.FC = () => {
 
     try {
       await api.post(`/api/books/${id}/return`)
-      alert('Livro devolvido com sucesso!')
       setError('')
       setUserLoan(null)
     } catch (err: any) {
@@ -215,18 +211,16 @@ const BookDetail: React.FC = () => {
 
   const handleFavoriteBook = async () => {
     if (!currentUser) {
-      alert('Faça login para adicionar aos favoritos')
+      setError('Faça login para adicionar aos favoritos')
       return
     }
 
     try {
       const response = await api.post(`/api/favorite/${id}`)
-      alert('Livro adicionado aos favoritos!')
       setError('')
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
-      alert(`Erro: ${errorMsg}`)
     }
   }
 
@@ -247,12 +241,10 @@ const BookDetail: React.FC = () => {
       
       setNewReview({ rating: 5, comment: '' })
       fetchReviews()
-      alert('Avaliação enviada com sucesso!')
       setError('')
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Falha ao enviar a avaliação'
       setError(errorMsg)
-      alert(`Erro: ${errorMsg}`)
     }
   }
 

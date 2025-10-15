@@ -110,38 +110,34 @@ async function main() {
       },
     }),
   ])
-  const authUsers = await Promise.all([
-    prisma.authUser.create({
-      data: {
+  await prisma.authUser.createMany({
+    data: [
+      {
         id: 1,
         username: 'kayky@gmail.com',
         password: hashedPassword,
         role: 'admin',
         user_id: 1,
-        favorite_book_id: null,
+        display_name: 'kayky',
       },
-    }),
-    prisma.authUser.create({
-      data: {
+      {
         id: 2,
         username: 'kaue@gmail.com',
         password: hashedPassword,
         role: 'user',
         user_id: 2,
-        favorite_book_id: null,
+        display_name: 'kaue',
       },
-    }),
-    prisma.authUser.create({
-      data: {
+      {
         id: 3,
         username: 'barbara@gmail.com',
         password: hashedPassword,
         role: 'user',
         user_id: 3,
-        favorite_book_id: null,
+        display_name: 'barbara',
       },
-    }),
-  ])
+    ],
+  });
   const bookCategories = await Promise.all([
     prisma.book_categories.create({ data: { book_id: 1, category_id: 1 } }),
     prisma.book_categories.create({ data: { book_id: 2, category_id: 2 } }),

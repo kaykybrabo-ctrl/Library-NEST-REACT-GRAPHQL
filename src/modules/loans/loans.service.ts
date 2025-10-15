@@ -136,6 +136,11 @@ export class LoansService {
               author: true,
             },
           },
+          user: {
+            include: {
+              auth_user: true,
+            },
+          },
         },
         orderBy: {
           loan_date: 'desc',
@@ -143,12 +148,24 @@ export class LoansService {
       });
 
       const now = new Date();
-      const loansWithTimeRemaining = loans.map(loan => {
+      const loansWithTimeRemaining = await Promise.all(loans.map(async loan => {
         const dueDate = new Date(loan.due_date);
         const isOverdue = now > dueDate;
         const timeDiff = dueDate.getTime() - now.getTime();
         const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
         const hoursRemaining = Math.ceil(timeDiff / (1000 * 60 * 60));
+
+        const authUserResult = await this.prisma.$queryRaw`
+          SELECT display_name, username 
+          FROM auth_users 
+          WHERE user_id = ${loan.user_id}
+          LIMIT 1
+        ` as any[];
+
+        const authUser = authUserResult[0];
+        const displayName = authUser?.display_name;
+        const username = authUser?.username || loan.user?.email;
+        const userDisplayName = displayName || username || 'Usuário';
 
         return {
           loans_id: loan.loans_id,
@@ -159,13 +176,13 @@ export class LoansService {
           photo: loan.book?.photo || null,
           description: loan.book?.description || null,
           user_id: loan.user_id,
-          username: 'Usuário',
+          username: userDisplayName,
           is_overdue: isOverdue,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),
           time_remaining: isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
         };
-      });
+      }));
 
       return loansWithTimeRemaining;
     } catch (error) {

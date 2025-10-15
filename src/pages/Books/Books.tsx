@@ -85,9 +85,8 @@ const Books: React.FC = () => {
   }, [authorsData]);
 
   useEffect(() => {
-    fetchAuthors();
     fetchBooks();
-    fetchFeatured().catch(() => { })
+    fetchFeatured().catch(() => {})
   }, []);
 
   useEffect(() => {
@@ -129,7 +128,7 @@ const Books: React.FC = () => {
         prevFeaturedCount.current = next.length
         featuredInitialized.current = true
       }
-    } catch { }
+    } catch {}
   }
 
   const fetchLoanStatuses = async () => {
@@ -164,11 +163,10 @@ const Books: React.FC = () => {
   const handleRentBook = async (bookId: number) => {
     try {
       await api.post(`/api/rent/${bookId}`);
-      alert('Livro alugado com sucesso!');
       fetchLoanStatuses();
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Erro ao alugar livro';
-      alert(errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -179,31 +177,26 @@ const Books: React.FC = () => {
 
     try {
       await api.post(`/api/books/${bookId}/return`);
-      alert('Livro devolvido com sucesso!');
       fetchLoanStatuses();
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Erro ao devolver livro';
-      alert(errorMessage);
+      setError(errorMessage);
     }
   };
 
   const handleRestoreBook = async (bookId: number) => {
     try {
       await restoreBookMutation({ variables: { id: bookId } })
-      alert('Livro restaurado com sucesso')
       await fetchBooks()
       setError('')
     } catch (err) {
       setError('Falha ao restaurar livro')
-      alert('Falha ao restaurar livro')
     }
   }
 
   const fetchBooks = async () => {
     await refetchBooks();
   }
-
-  const fetchAuthors = async () => {}
 
   const getAuthorName = (authorId: number) => {
     const author = authors.find(a => a.author_id === authorId)
@@ -258,12 +251,10 @@ const Books: React.FC = () => {
     if (!confirm('Tem certeza de que deseja excluir este livro?')) return
     try {
       await removeBookMutation({ variables: { id: bookId } })
-      alert('Livro excluído com sucesso')
       await fetchBooks()
       setError('')
     } catch (err) {
       setError('Falha ao excluir livro')
-      alert('Falha ao excluir livro')
     }
   }
 

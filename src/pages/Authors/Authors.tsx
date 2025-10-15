@@ -67,11 +67,9 @@ const Authors: React.FC = () => {
   const handleRestoreAuthor = async (authorId: number) => {
     try {
       await restoreAuthorMutation({ variables: { id: authorId } })
-      alert('Autor restaurado com sucesso')
       fetchAuthors()
     } catch (err) {
       setError('Falha ao restaurar autor')
-      alert('Falha ao restaurar autor')
     }
   }
 
@@ -113,13 +111,11 @@ const Authors: React.FC = () => {
           }
         }
       })
-      alert('Autor atualizado com sucesso')
       setEditingAuthor(null)
       setEditData({ name: '', biography: '' })
       fetchAuthors()
     } catch (err) {
       setError('Falha ao atualizar autor')
-      alert('Falha ao atualizar autor')
     }
   }
 
@@ -133,11 +129,9 @@ const Authors: React.FC = () => {
 
     try {
       await removeAuthorMutation({ variables: { id: authorId } })
-      alert('Autor excluído com sucesso')
       fetchAuthors()
     } catch (err) {
       setError('Falha ao excluir autor')
-      alert('Falha ao excluir autor')
     }
   }
 

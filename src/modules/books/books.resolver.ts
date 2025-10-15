@@ -58,8 +58,6 @@ export class BooksResolver {
     return true;
   }
 
-  // ========== FIELD RESOLVERS (Relacionamentos) ==========
-
   @ResolveField('author', () => require('../authors/entities/author.entity').Author, { nullable: true })
   async author(@Parent() book: Book) {
     if (!book.author_id) return null;

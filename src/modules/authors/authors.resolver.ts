@@ -12,8 +12,6 @@ export class AuthorsResolver {
     private readonly prisma: PrismaService,
   ) {}
 
-  // ========== QUERIES (Leitura) ==========
-
   @Query(() => [Author], { name: 'authors' })
   async findAll(
     @Args('page', { type: () => Int, nullable: true }) page?: number,
@@ -33,8 +31,6 @@ export class AuthorsResolver {
   async count() {
     return this.authorsService.count();
   }
-
-  // ========== MUTATIONS (Escrita) ==========
 
   @Mutation(() => Author)
   async createAuthor(@Args('createAuthorInput') createAuthorDto: CreateAuthorDto) {
@@ -60,8 +56,6 @@ export class AuthorsResolver {
     await this.authorsService.restore(id);
     return true;
   }
-
-  // ========== FIELD RESOLVERS (Relacionamentos) ==========
 
   @ResolveField('books', () => [require('../books/entities/book.entity').Book], { nullable: true })
   async books(@Parent() author: Author) {

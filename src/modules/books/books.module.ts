@@ -7,8 +7,8 @@ import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 
 @Module({
   imports: [PrismaModule],
-  controllers: [BooksController], // REST continua funcionando
-  providers: [BooksService, BooksRepository, BooksResolver], // ← Resolver adicionado
+  controllers: [BooksController],
+  providers: [BooksService, BooksRepository, BooksResolver],
   exports: [BooksService, BooksRepository],
 })
 export class BooksModule {}

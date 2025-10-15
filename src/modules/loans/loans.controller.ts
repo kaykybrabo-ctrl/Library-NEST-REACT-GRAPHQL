@@ -14,10 +14,14 @@ import {
 import { LoansService } from "./loans.service";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { AdminGuard } from "@/common/guards/admin.guard";
+import { PrismaService } from "@/infrastructure/prisma/prisma.service";
 
 @Controller('api')
 export class LoansController {
-  constructor(private readonly loansService: LoansService) {}
+  constructor(
+    private readonly loansService: LoansService,
+    private readonly prisma: PrismaService
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post("rent/:id")
@@ -102,14 +106,24 @@ export class LoansController {
     try {
       const loan = await this.loansService.findByBookId(+bookId);
       if (loan && loan.user_id) {
-        const authUser = await this.loansService.findAuthUserById(loan.user_id);
-        const displayName = authUser?.photo || authUser?.username || 'Usuário desconhecido';
+        const authUserResult = await this.prisma.$queryRaw`
+          SELECT display_name, username 
+          FROM auth_users 
+          WHERE user_id = ${loan.user_id}
+          LIMIT 1
+        ` as any[];
+
+        const authUser = authUserResult[0];
+        const displayName = authUser?.display_name;
+        const username = authUser?.username;
+        const userDisplayName = displayName || username || 'Usuário desconhecido';
+
         return {
           isRented: !!loan,
           loan: {
             ...loan,
             user: {
-              username: displayName
+              username: userDisplayName
             }
           },
         };
