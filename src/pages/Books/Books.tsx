@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
 import { GET_AUTHORS } from '@/graphql/queries/authors'
+import { RENT_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
+import { useAuth } from '@/contexts/AuthContext'
 import api from '@/api'
 import Layout from '@/components/Layout'
-import { useAuth } from '@/contexts/AuthContext'
+import ErrorModal from '@/components/ErrorModal'
 import { Book, Author } from '@/types'
 import './BooksCards.css'
 
 const Books: React.FC = () => {
   const { isAdmin, user } = useAuth()
+  const apolloClient = useApolloClient()
   const [books, setBooks] = useState<Book[]>([])
   const [authors, setAuthors] = useState<Author[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,6 +25,8 @@ const Books: React.FC = () => {
   const [editData, setEditData] = useState({ title: '', author_id: '' })
   const [error, setError] = useState('')
   const [includeDeleted, setIncludeDeleted] = useState(false)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorModalMessage, setErrorModalMessage] = useState('')
   const [featured, setFeatured] = useState<Book[]>([])
   const [carouselItems, setCarouselItems] = useState<Book[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -54,6 +59,7 @@ const Books: React.FC = () => {
   const [updateBookMutation] = useMutation(UPDATE_BOOK);
   const [removeBookMutation] = useMutation(REMOVE_BOOK);
   const [restoreBookMutation] = useMutation(RESTORE_BOOK);
+  const [rentBookMutation] = useMutation(RENT_BOOK_MUTATION);
   
   const displayedItems = useMemo(() => (
     carouselItems.length > 0
@@ -132,41 +138,53 @@ const Books: React.FC = () => {
   }
 
   const fetchLoanStatuses = async () => {
+    if (!books.length) return;
+    
     try {
-      const loanPromises = books.map(async (book) => {
-        const [loanStatus, userLoan] = await Promise.all([
-          api.get(`/api/books/${book.book_id}/loan-status`),
-          user ? api.get(`/api/books/${book.book_id}/my-loan`) : Promise.resolve({ data: { hasLoan: false } })
-        ]);
-        return {
-          bookId: book.book_id,
-          loanStatus: loanStatus.data,
-          userLoan: userLoan.data
-        };
-      });
-
-      const results = await Promise.all(loanPromises);
-      const newBookLoans: {[key: number]: any} = {};
-      const newUserLoans: {[key: number]: any} = {};
-
-      results.forEach(({ bookId, loanStatus, userLoan }) => {
-        newBookLoans[bookId] = loanStatus;
-        newUserLoans[bookId] = userLoan;
-      });
-
-      setBookLoans(newBookLoans);
-      setUserLoans(newUserLoans);
-    } catch (err) {
+      const loanStatuses: {[key: number]: any} = {};
+      
+      for (const book of books) {
+        try {
+          const { data } = await apolloClient.query({
+            query: BOOK_LOAN_STATUS_QUERY,
+            variables: { bookId: book.book_id },
+            fetchPolicy: 'network-only'
+          });
+          
+          if (data?.bookLoanStatus) {
+            loanStatuses[book.book_id] = data.bookLoanStatus;
+          }
+        } catch (err) {
+          console.log(`Erro ao buscar status do livro ${book.book_id}:`, err);
+        }
+      }
+      
+      setBookLoans(loanStatuses);
+    } catch (error) {
+      console.error('Erro ao buscar status dos empréstimos:', error);
     }
   };
 
   const handleRentBook = async (bookId: number) => {
     try {
-      await api.post(`/api/rent/${bookId}`);
+      await rentBookMutation({
+        variables: { bookId }
+      });
       fetchLoanStatuses();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erro ao alugar livro';
-      setError(errorMessage);
+      let errorMessage = 'Erro ao alugar livro. Tente novamente.'
+      
+      if (err.message?.includes('já está emprestado')) {
+        errorMessage = 'Este livro já está emprestado para outro usuário.'
+      } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
+        errorMessage = err.graphQLErrors[0].message
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      setErrorModalMessage(errorMessage)
+      setShowErrorModal(true)
+      setError('')
     }
   };
 
@@ -175,13 +193,7 @@ const Books: React.FC = () => {
       return;
     }
 
-    try {
-      await api.post(`/api/books/${bookId}/return`);
-      fetchLoanStatuses();
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erro ao devolver livro';
-      setError(errorMessage);
-    }
+    setError('Devolução de livro ainda não implementada via GraphQL');
   };
 
   const handleRestoreBook = async (bookId: number) => {
@@ -198,9 +210,15 @@ const Books: React.FC = () => {
     await refetchBooks();
   }
 
-  const getAuthorName = (authorId: number) => {
-    const author = authors.find(a => a.author_id === authorId)
-    return author ? author.name_author : ''
+  const getAuthorName = (book: Book) => {
+    if (book.author?.name_author) {
+      return book.author.name_author;
+    }
+    const author = authors.find(a => a.author_id === book.author_id);
+    if (author?.name_author) {
+      return author.name_author;
+    }
+    return 'Autor desconhecido';
   }
 
   const handleCreateBook = async (e: React.FormEvent) => {
@@ -297,7 +315,7 @@ const Books: React.FC = () => {
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{bk.title}</div>
-                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Autor: {getAuthorName(bk.author_id) || 'Desconhecido'}</div>
+                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Autor: {getAuthorName(bk) || 'Desconhecido'}</div>
                       <div style={{ color: '#777', marginTop: 6, fontSize: 12, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 36 }}>
                         {bk.description || '—'}
                       </div>
@@ -331,7 +349,7 @@ const Books: React.FC = () => {
                     </div>
                     <div style={{ minWidth: 0, flex: 1, maxWidth: 620, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
                       <div style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 48 }}>{bk.title}</div>
-                      <div style={{ color: '#5a5a5a', fontSize: 13, lineHeight: 1.2 }}>Autor: {getAuthorName(bk.author_id) || 'Desconhecido'}</div>
+                      <div style={{ color: '#5a5a5a', fontSize: 13, lineHeight: 1.2 }}>Autor: {getAuthorName(bk) || 'Desconhecido'}</div>
                       <div style={{ color: '#777', fontSize: 13, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', minHeight: 56 }}>
                         {bk.description || '—'}
                       </div>
@@ -509,7 +527,7 @@ const Books: React.FC = () => {
                   ) : (
                     <>
                       <h3 className="book-card-title" title={book.title}>{book.title}</h3>
-                      <p className="book-card-author">por {getAuthorName(book.author_id) || 'Autor desconhecido'}</p>
+                      <p className="book-card-author">por {getAuthorName(book) || 'Autor desconhecido'}</p>
                       <p className="book-card-description">
                         {book.description || 'Sem descrição disponível para este livro.'}
                       </p>
@@ -519,7 +537,7 @@ const Books: React.FC = () => {
                         {book.deleted_at && <span style={{color: '#ff9800', fontWeight: 'bold'}}>EXCLUÍDO</span>}
                         {!book.deleted_at && bookLoans[book.book_id]?.isRented && (
                           <span style={{color: '#f44336', fontWeight: 'bold'}}>
-                            ALUGADO POR: {bookLoans[book.book_id]?.loan?.user?.username}
+                            ALUGADO POR: {bookLoans[book.book_id]?.loan?.username || 'Usuário'}
                           </span>
                         )}
                         {!book.deleted_at && userLoans[book.book_id]?.hasLoan && (
@@ -562,9 +580,8 @@ const Books: React.FC = () => {
                                 type="button"
                                 disabled
                                 aria-label="Livro já alugado"
-                                title={`Livro alugado por ${bookLoans[book.book_id]?.loan?.user?.username || 'outro usuário'}`}
-                                className="icon-button"
-                                style={{borderColor: '#ccc', color: '#ccc', cursor: 'not-allowed'}}
+                                title={`❌ Livro alugado por ${bookLoans[book.book_id]?.loan?.username || 'outro usuário'}`}
+                                className="icon-button rented"
                               >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" fill="currentColor" />
@@ -575,7 +592,7 @@ const Books: React.FC = () => {
                                 type="button"
                                 onClick={() => handleRentBook(book.book_id)}
                                 aria-label="Alugar livro"
-                                title="Alugar livro"
+                                title="✅ Clique para alugar este livro"
                                 className="icon-button"
                                 style={{borderColor: '#4caf50', color: '#4caf50'}}
                               >
@@ -653,6 +670,13 @@ const Books: React.FC = () => {
           )}
         </section>
       )}
+
+      <ErrorModal
+        isOpen={showErrorModal}
+        title="Erro ao Alugar Livro"
+        message={errorModalMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </Layout>
   )
 }

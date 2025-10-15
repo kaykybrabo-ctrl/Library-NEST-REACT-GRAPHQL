@@ -8,6 +8,12 @@ export interface Book {
   deleted_at?: string | null;
   categories?: string[];
   publishers?: string[];
+  author?: {
+    author_id: number;
+    name_author: string;
+    biography?: string;
+    photo?: string;
+  };
 }
 
 export interface Author {

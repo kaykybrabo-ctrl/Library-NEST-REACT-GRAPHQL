@@ -9,6 +9,12 @@ export const GET_BOOKS = gql`
       photo
       author_id
       deleted_at
+      author {
+        author_id
+        name_author
+        biography
+        photo
+      }
     }
   }
 `;
@@ -78,5 +84,19 @@ export const REMOVE_BOOK = gql`
 export const RESTORE_BOOK = gql`
   mutation RestoreBook($id: Int!) {
     restoreBook(id: $id)
+  }
+`;
+
+export const UPLOAD_BOOK_IMAGE = gql`
+  mutation UploadBookImage($bookId: Int!, $file: Upload!) {
+    uploadBookImage(bookId: $bookId, file: $file) {
+      book_id
+      title
+      description
+      photo
+      author {
+        name_author
+      }
+    }
   }
 `;

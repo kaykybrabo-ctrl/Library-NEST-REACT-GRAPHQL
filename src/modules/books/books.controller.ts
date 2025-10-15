@@ -8,13 +8,16 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  Res,
   Query,
+  Res,
+  Req,
+  ParseIntPipe
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname, join } from "path";
-import { Response } from "express";
+import { v4 as uuid } from "uuid";
+import { Request, Response } from "express";
 import { BooksService } from "./books.service";
 import { CreateBookDto } from "./dto/create-book.dto";
 import { UpdateBookDto } from "./dto/update-book.dto";
@@ -22,7 +25,6 @@ import { UpdateBookDto } from "./dto/update-book.dto";
 @Controller()
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
-
   @Get("books/count")
   async count() {
     const count = await this.booksService.count();
@@ -36,8 +38,8 @@ export class BooksController {
   }
 
   @Get("books/:id")
-  async findOne(@Param("id") id: string, @Res() res: Response) {
-    const acceptHeader = res.req.headers.accept || "";
+  async findOne(@Param("id") id: string, @Req() req: Request, @Res() res: Response) {
+    const acceptHeader = req.headers.accept || "";
 
     if (acceptHeader.includes("text/html")) {
       return res.sendFile(
@@ -63,13 +65,14 @@ export class BooksController {
 
   @Get("books")
   async findAll(
+    @Req() req: Request,
     @Res() res: Response,
     @Query("page") page?: string,
     @Query("limit") limit?: string,
     @Query("search") search?: string,
     @Query("includeDeleted") includeDeleted?: string,
   ) {
-    const acceptHeader = res.req.headers.accept || "";
+    const acceptHeader = req.headers.accept || "";
 
     if (acceptHeader.includes("text/html")) {
       return res.sendFile(
@@ -216,6 +219,44 @@ export class BooksController {
     try {
       await this.booksService.updatePhoto(+id, file.filename);
       return { photo: file.filename };
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post("api/upload-book-image")
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: diskStorage({
+        destination: "./FRONTEND/uploads",
+        filename: (req, file, cb) => {
+          const uniqueSuffix = uuid() + extname(file.originalname);
+          cb(null, uniqueSuffix);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith("image/")) {
+          cb(null, true);
+        } else {
+          cb(new Error("Apenas arquivos de imagem são permitidos"), false);
+        }
+      },
+    }),
+  )
+  async uploadBookImage(
+    @Body("bookId") bookId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new Error("Nenhum arquivo enviado");
+    }
+    try {
+      await this.booksService.updatePhoto(+bookId, file.filename);
+      return { 
+        success: true,
+        message: "Imagem atualizada com sucesso",
+        photo: file.filename 
+      };
     } catch (err) {
       throw err;
     }

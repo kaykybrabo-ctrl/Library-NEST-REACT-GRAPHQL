@@ -229,7 +229,7 @@ export class LoansService {
 
   async findByBookId(bookId: number) {
     try {
-      return this.prisma.loan.findFirst({
+      const loan = await this.prisma.loan.findFirst({
         where: {
           book_id: bookId,
           returned_at: null,
@@ -238,6 +238,34 @@ export class LoansService {
           book: true,
         },
       });
+
+      if (!loan) return null;
+
+      const authUser = await this.prisma.authUser.findUnique({
+        where: { user_id: loan.user_id },
+      });
+
+      let displayName = 'Usuário';
+      if (authUser) {
+        const userResult = await this.prisma.$queryRaw`
+          SELECT display_name, username 
+          FROM auth_users 
+          WHERE id = ${authUser.id}
+          LIMIT 1
+        ` as any[];
+
+        if (userResult.length > 0) {
+          const userData = userResult[0];
+          displayName = userData.display_name || 
+                      (userData.username?.includes('@') ? userData.username.split('@')[0] : userData.username) || 
+                      'Usuário';
+        }
+      }
+
+      return {
+        ...loan,
+        username: displayName,
+      };
     } catch (error) {
       return null;
     }

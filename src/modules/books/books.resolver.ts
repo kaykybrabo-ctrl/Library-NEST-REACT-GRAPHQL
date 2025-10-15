@@ -1,9 +1,17 @@
 import { Resolver, Query, Mutation, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { Book } from './entities/book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
+import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
+import { GqlAdminGuard } from '@/common/guards/gql-admin.guard';
+import { Upload } from '@/common/scalars/upload.scalar';
+import { Author } from '../authors/entities/author.entity';
+import { createWriteStream } from 'fs';
+import { join } from 'path';
+import { v4 as uuid } from 'uuid';
 
 @Resolver(() => Book)
 export class BooksResolver {
@@ -58,7 +66,61 @@ export class BooksResolver {
     return true;
   }
 
-  @ResolveField('author', () => require('../authors/entities/author.entity').Author, { nullable: true })
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
+  @Mutation(() => Book)
+  async uploadBookImage(
+    @Args('bookId', { type: () => Int }) bookId: number,
+    @Args('file', { type: () => Upload }) file: any
+  ): Promise<Book> {
+    const { createReadStream, filename, mimetype } = await file;
+    
+    if (!filename) {
+      throw new Error('Filename is required');
+    }
+    
+    if (!mimetype || !mimetype.startsWith('image/')) {
+      throw new Error('Only image files are allowed');
+    }
+
+    const fileExtension = filename.split('.').pop();
+    const uniqueFilename = `${uuid()}.${fileExtension}`;
+    const uploadPath = join(process.cwd(), 'FRONTEND', 'uploads', uniqueFilename);
+
+    const stream = createReadStream();
+    const writeStream = createWriteStream(uploadPath);
+    
+    await new Promise<void>((resolve, reject) => {
+      stream.pipe(writeStream);
+      writeStream.on('finish', () => resolve());
+      writeStream.on('error', reject);
+    });
+
+    const updatedBook = await this.prisma.book.update({
+      where: { book_id: bookId },
+      data: { photo: uniqueFilename },
+      include: {
+        author: true,
+      },
+    });
+
+    return {
+      book_id: updatedBook.book_id,
+      title: updatedBook.title,
+      description: updatedBook.description,
+      photo: updatedBook.photo,
+      deleted_at: updatedBook.deleted_at,
+      author_id: updatedBook.author_id,
+      author: updatedBook.author ? {
+        author_id: updatedBook.author.author_id,
+        name_author: updatedBook.author.name_author,
+        biography: updatedBook.author.biography,
+        photo: updatedBook.author.photo,
+        deleted_at: updatedBook.author.deleted_at,
+      } : undefined,
+    };
+  }
+
+  @ResolveField('author', () => Author, { nullable: true })
   async author(@Parent() book: Book) {
     if (!book.author_id) return null;
     return this.prisma.author.findUnique({

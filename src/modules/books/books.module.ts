@@ -4,11 +4,12 @@ import { BooksController } from "./books.controller";
 import { BooksRepository } from "./books.repository";
 import { BooksResolver } from "./books.resolver";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
+import { Upload } from "@/common/scalars/upload.scalar";
 
 @Module({
   imports: [PrismaModule],
   controllers: [BooksController],
-  providers: [BooksService, BooksRepository, BooksResolver],
+  providers: [BooksService, BooksRepository, BooksResolver, Upload],
   exports: [BooksService, BooksRepository],
 })
 export class BooksModule {}

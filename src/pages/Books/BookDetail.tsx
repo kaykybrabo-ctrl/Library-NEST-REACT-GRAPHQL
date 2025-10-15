@@ -1,28 +1,65 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import api from '@/api'
+import { useQuery, useMutation } from '@apollo/client'
+import { GET_BOOK } from '@/graphql/queries/books'
+import { RENT_BOOK_MUTATION, MY_BOOK_LOAN_QUERY, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
+import { CREATE_REVIEW_MUTATION, BOOK_REVIEWS_QUERY } from '@/graphql/queries/reviews'
+import { ADD_TO_FAVORITES_MUTATION } from '@/graphql/queries/favorites'
+import { ME_QUERY } from '@/graphql/queries/auth'
 import Layout from '@/components/Layout'
+import ErrorModal from '@/components/ErrorModal'
 import { Rating, Typography, Box } from '@mui/material'
 import { useAuth } from '@/contexts/AuthContext'
 import { Book, Review } from '@/types'
+import api from '@/api'
 import './BookDetail.css'
 
 const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [book, setBook] = useState<Book | null>(null)
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [userLoan, setUserLoan] = useState<any>(null)
   const { isAdmin } = useAuth()
   const [imgVersion, setImgVersion] = useState(0)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorModalMessage, setErrorModalMessage] = useState('')
+
+  const { data: bookData, loading, refetch: refetchBook } = useQuery(GET_BOOK, {
+    variables: { id: Number(id) },
+    skip: !id,
+  })
+
+  const { data: reviewsData, refetch: refetchReviews } = useQuery(BOOK_REVIEWS_QUERY, {
+    variables: { bookId: Number(id) },
+    skip: !id,
+  })
+
+  const { data: currentUserData } = useQuery(ME_QUERY)
+
+  const { data: userLoanData, refetch: refetchUserLoan } = useQuery(MY_BOOK_LOAN_QUERY, {
+    variables: { bookId: Number(id) },
+    skip: !id || !currentUserData?.me,
+  })
+
+  const { data: bookLoanStatusData } = useQuery(BOOK_LOAN_STATUS_QUERY, {
+    variables: { bookId: Number(id) },
+    skip: !id,
+  })
+
+  const [rentBook] = useMutation(RENT_BOOK_MUTATION)
+  const [createReview] = useMutation(CREATE_REVIEW_MUTATION)
+  const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION)
+
+  const book = bookData?.book
+  const reviews = reviewsData?.bookReviews || []
+  const currentUser = currentUserData?.me
+  const userLoan = userLoanData?.myBookLoan?.loan
+  const bookLoanStatus = bookLoanStatusData?.bookLoanStatus
+  const isBookRentedByOther = bookLoanStatus?.isRented && !userLoan
 
   const buildImageSrc = (path?: string | null) => {
     if (!path) return ''
@@ -50,24 +87,24 @@ const BookDetail: React.FC = () => {
     if (!file || !id) return
     setUploading(true)
     setUploadStatus('Enviando imagem...')
+    
     try {
       const formData = new FormData()
-      formData.append('file', file)
-      const uploadResp = await api.post(`/api/books/${id}/image`, formData, {
+      formData.append('image', file)
+      formData.append('bookId', id)
+      
+      await api.post('/api/upload-book-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      setBook(prev => {
-        if (!prev) return prev
-        const respPhoto = uploadResp?.data?.photo
-        return { ...prev, photo: respPhoto || prev?.photo || null } as Book
-      })
-      await fetchBook()
+      
+      refetchBook()
       setImageFile(null)
       setPreviewUrl('')
       setImgVersion(v => v + 1)
       setUploadStatus('Imagem atualizada com sucesso!')
+      setError('')
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem'
+      const msg = err?.response?.data?.message || err?.message || 'Falha ao enviar a imagem'
       setError(msg)
       setUploadStatus(`Erro: ${msg}`)
     } finally {
@@ -81,115 +118,38 @@ const BookDetail: React.FC = () => {
   }
 
   useEffect(() => {
-    if (id) {
-      fetchBook()
-      fetchReviews()
-      checkAuthStatus()
-    }
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
-  }, [id, previewUrl])
-
-  const checkAuthStatus = async () => {
-    try {
-      const response = await api.get('/api/user/me')
-      setCurrentUser(response.data)
-      if (id) {
-        checkUserLoan()
-      }
-    } catch {
-      const token = localStorage.getItem('token')
-      const user = localStorage.getItem('user')
-      if (token && user) {
-        try {
-          const userData = JSON.parse(user)
-          setCurrentUser(userData)
-          if (id) {
-            checkUserLoan()
-          }
-        } catch {
-          setCurrentUser(null)
-        }
-      } else {
-        setCurrentUser(null)
-      }
-    }
-  }
-
-  const checkUserLoan = async () => {
-    try {
-      const response = await api.get(`/api/books/${id}/my-loan`)
-      if (response.data.hasLoan) {
-        const loansResponse = await api.get('/api/loans')
-        const currentLoan = loansResponse.data.find((loan: any) => loan.book_id === Number(id))
-        setUserLoan(currentLoan)
-      } else {
-        setUserLoan(null)
-      }
-    } catch (err) {
-      setUserLoan(null)
-    }
-  }
-
-  const fetchBook = async () => {
-    try {
-      const response = await api.get(`/api/books/${id}`)
-      setBook(prev => {
-        const incoming = response.data as Book | null
-        if (!incoming) return null
-        const photo = incoming.photo ?? prev?.photo ?? null
-        return { ...incoming, photo: photo as any }
-      })
-      setLoading(false)
-    } catch (err) {
-      setError('Falha ao buscar detalhes do livro')
-      setLoading(false)
-    }
-  }
-
-  const fetchReviews = async () => {
-    try {
-      const response = await api.get(`/api/books/${id}/reviews`)
-      setReviews(response.data)
-    } catch (err) {
-      setReviews([])
-    }
-  }
+  }, [previewUrl])
 
   const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!imageFile || !id) return
 
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', imageFile)
-
-    try {
-      const resp = await api.post(`/api/books/${id}/image`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      fetchBook()
-      setImageFile(null)
-      setImgVersion(v => v + 1)
-    } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem'
-      setError(msg)
-    } finally {
-      setUploading(false)
-    }
+    await uploadImage(imageFile)
   }
   const handleRentBook = async () => {
     try {
-      await api.post(`/api/rent/${id}`)
+      await rentBook({
+        variables: { bookId: Number(id) }
+      })
       setError('')
-      checkUserLoan()
+      refetchUserLoan()
     } catch (err: any) {
-      if (err.response?.status === 409) {
-        setError(err.response.data.message || 'Este livro já está alugado')
-      } else {
-        setError('Erro ao alugar livro. Tente novamente.')
+      let errorMessage = 'Erro ao alugar livro. Tente novamente.'
+      
+      if (err.message?.includes('já está emprestado')) {
+        errorMessage = 'Este livro já está emprestado para outro usuário.'
+      } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
+        errorMessage = err.graphQLErrors[0].message
+      } else if (err.message) {
+        errorMessage = err.message
       }
+      
+      setErrorModalMessage(errorMessage)
+      setShowErrorModal(true)
+      setError('')
     }
   }
 
@@ -200,13 +160,7 @@ const BookDetail: React.FC = () => {
       return
     }
 
-    try {
-      await api.post(`/api/books/${id}/return`)
-      setError('')
-      setUserLoan(null)
-    } catch (err: any) {
-      setError('Erro ao devolver livro. Tente novamente.')
-    }
+    setError('Devolução de livro ainda não implementada via GraphQL')
   }
 
   const handleFavoriteBook = async () => {
@@ -216,10 +170,12 @@ const BookDetail: React.FC = () => {
     }
 
     try {
-      const response = await api.post(`/api/favorite/${id}`)
+      await addToFavorites({
+        variables: { bookId: Number(id) }
+      })
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || err.message || 'Erro ao adicionar aos favoritos'
+      const errorMsg = err.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
     }
   }
@@ -233,17 +189,19 @@ const BookDetail: React.FC = () => {
     }
 
     try {
-      await api.post('/api/reviews', {
-        book_id: Number(id),
-        rating: newReview.rating,
-        comment: newReview.comment
+      await createReview({
+        variables: {
+          bookId: Number(id),
+          rating: newReview.rating,
+          comment: newReview.comment
+        }
       })
       
       setNewReview({ rating: 5, comment: '' })
-      fetchReviews()
+      refetchReviews()
       setError('')
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Falha ao enviar a avaliação'
+      const errorMsg = err.message || 'Falha ao enviar a avaliação'
       setError(errorMsg)
     }
   }
@@ -378,9 +336,20 @@ const BookDetail: React.FC = () => {
               <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
             </div>
           </div>
+        ) : isBookRentedByOther ? (
+          <div className="book-actions">
+            <button 
+              disabled 
+              className="rented"
+              title={`❌ Livro alugado por outro usuário`}
+            >
+              Livro Indisponível
+            </button>
+            <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
+          </div>
         ) : (
           <div className="book-actions">
-            <button onClick={handleRentBook}>Alugar Livro</button>
+            <button onClick={handleRentBook} title="✅ Clique para alugar este livro">Alugar Livro</button>
             <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
           </div>
         )}
@@ -440,6 +409,13 @@ const BookDetail: React.FC = () => {
           </div>
         )}
       </section>
+
+      <ErrorModal
+        isOpen={showErrorModal}
+        title="Erro ao Alugar Livro"
+        message={errorModalMessage}
+        onClose={() => setShowErrorModal(false)}
+      />
     </Layout>
   )
 }

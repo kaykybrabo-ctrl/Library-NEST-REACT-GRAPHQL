@@ -71,10 +71,7 @@
 }
 
 .days-remaining {
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  margin: 1rem 0;
+  padding: 0.5rem 0;
   text-align: center;
 }
 
@@ -212,4 +209,33 @@
 .review-date {
   color: #666;
   font-size: 0.9em;
+}
+
+.book-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  background-color: #f5f5f5 !important;
+  color: #999 !important;
+  border-color: #ddd !important;
+}
+
+.book-actions button:disabled:hover {
+  background-color: #f5f5f5 !important;
+  color: #999 !important;
+  border-color: #ddd !important;
+  transform: none !important;
+}
+
+.book-actions button.rented {
+  background-color: #ffebee !important;
+  color: #f44336 !important;
+  border-color: #f44336 !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
+}
+
+.book-actions button.rented:hover {
+  background-color: #ffebee !important;
+  color: #f44336 !important;
+  border-color: #f44336 !important;
 }

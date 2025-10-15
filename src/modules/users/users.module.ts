@@ -4,6 +4,7 @@ import { diskStorage } from "multer";
 import { extname, join } from "path";
 import { UsersService } from "./users.service";
 import { UsersController } from "./users.controller";
+import { UsersResolver } from "./users.resolver";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 
 @Module({
@@ -30,7 +31,7 @@ import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UsersResolver],
   exports: [UsersService],
 })
 export class UsersModule {}

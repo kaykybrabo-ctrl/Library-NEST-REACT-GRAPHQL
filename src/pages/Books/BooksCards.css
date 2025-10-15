@@ -232,6 +232,25 @@
   color: #ccc !important;
 }
 
+.icon-button.rented {
+  background: #ffebee !important;
+  border-color: #f44336 !important;
+  color: #f44336 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.icon-button.rented:hover {
+  background: #ffebee !important;
+  border-color: #f44336 !important;
+  color: #f44336 !important;
+  transform: none !important;
+}
+
+.icon-button.rented svg {
+  opacity: 0.6;
+}
+
 @media (max-width: 768px) {
   .books-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
