@@ -158,7 +158,7 @@ export class AuthorsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {
-      throw new Error("No file uploaded");
+      throw new Error("Nenhum arquivo enviado");
     }
     await this.authorsService.updatePhoto(+id, file.filename);
     return { photo: file.filename };
@@ -192,7 +192,7 @@ export class AuthorsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {
-      throw new Error("No file uploaded");
+      throw new Error("Nenhum arquivo enviado");
     }
     try {
       await this.authorsService.updatePhoto(+id, file.filename);

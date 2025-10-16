@@ -74,17 +74,17 @@ export class BooksResolver {
     @Args('fileData') fileData: string
   ): Promise<Book> {
     if (!filename) {
-      throw new Error('Filename is required');
+      throw new Error('Nome do arquivo é obrigatório');
     }
     
     if (!fileData) {
-      throw new Error('File data is required');
+      throw new Error('Dados do arquivo são obrigatórios');
     }
     
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
     const fileExt = filename.toLowerCase().substring(filename.lastIndexOf('.'));
     if (!allowedExtensions.includes(fileExt)) {
-      throw new Error('Only image files are allowed');
+      throw new Error('Apenas arquivos de imagem são permitidos');
     }
 
     const extension = filename.split('.').pop();
