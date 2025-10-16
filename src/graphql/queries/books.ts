@@ -13,7 +13,6 @@ export const GET_BOOKS = gql`
         author_id
         name_author
         biography
-        photo
       }
     }
   }
@@ -33,13 +32,7 @@ export const GET_BOOK = gql`
         name_author
         biography
         photo
-      }
-      reviews {
-        id
-        rating
-        comment
-        created_at
-        user_id
+        deleted_at
       }
     }
   }
@@ -88,14 +81,20 @@ export const RESTORE_BOOK = gql`
 `;
 
 export const UPLOAD_BOOK_IMAGE = gql`
-  mutation UploadBookImage($bookId: Int!, $file: Upload!) {
-    uploadBookImage(bookId: $bookId, file: $file) {
+  mutation UploadBookImage($bookId: Int!, $filename: String!, $fileData: String!) {
+    uploadBookImage(bookId: $bookId, filename: $filename, fileData: $fileData) {
       book_id
       title
       description
       photo
+      deleted_at
+      author_id
       author {
+        author_id
         name_author
+        biography
+        photo
+        deleted_at
       }
     }
   }

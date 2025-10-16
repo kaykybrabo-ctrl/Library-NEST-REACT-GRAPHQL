@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@apollo/client'
-import { GET_BOOK } from '@/graphql/queries/books'
+import { GET_BOOK, UPLOAD_BOOK_IMAGE } from '@/graphql/queries/books'
 import { RENT_BOOK_MUTATION, MY_BOOK_LOAN_QUERY, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
 import { CREATE_REVIEW_MUTATION, BOOK_REVIEWS_QUERY } from '@/graphql/queries/reviews'
 import { ADD_TO_FAVORITES_MUTATION } from '@/graphql/queries/favorites'
@@ -58,6 +58,7 @@ const BookDetail: React.FC = () => {
   const [rentBook] = useMutation(RENT_BOOK_MUTATION)
   const [createReview] = useMutation(CREATE_REVIEW_MUTATION)
   const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION)
+  const [uploadBookImage] = useMutation(UPLOAD_BOOK_IMAGE)
 
   const book = bookData?.book
   const reviews = reviewsData?.bookReviews || []
@@ -73,7 +74,7 @@ const BookDetail: React.FC = () => {
     return `/api/uploads/${path}${imgVersion ? `?v=${imgVersion}` : ''}`
   }
 
-  const onSelectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onSelectImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
@@ -85,21 +86,27 @@ const BookDetail: React.FC = () => {
     setError('')
     const url = URL.createObjectURL(file)
     setPreviewUrl(url)
-    uploadImage(file)
+    await uploadImage(file)
   }
 
   const uploadImage = async (file: File) => {
-    if (!file || !id) return
     setUploading(true)
     setUploadStatus('Enviando imagem...')
     
     try {
-      const formData = new FormData()
-      formData.append('image', file)
-      formData.append('bookId', id)
+      const fileData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
       
-      await api.post('/api/upload-book-image', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      await uploadBookImage({
+        variables: {
+          bookId: Number(id),
+          filename: file.name,
+          fileData: fileData
+        }
       })
       
       refetchBook()
@@ -109,14 +116,13 @@ const BookDetail: React.FC = () => {
       setUploadStatus('Imagem atualizada com sucesso!')
       setError('')
     } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Falha ao enviar a imagem'
+      const msg = err?.message || 'Falha ao enviar a imagem'
       setError(msg)
-      setUploadStatus(`Erro: ${msg}`)
+      setUploadStatus('')
     } finally {
       setUploading(false)
     }
   }
-
   const handleUploadImageClick = async () => {
     if (!imageFile) return
     await uploadImage(imageFile)

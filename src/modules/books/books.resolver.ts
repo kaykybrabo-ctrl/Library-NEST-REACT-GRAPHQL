@@ -70,27 +70,34 @@ export class BooksResolver {
   @Mutation(() => Book)
   async uploadBookImage(
     @Args('bookId', { type: () => Int }) bookId: number,
-    @Args('file', { type: () => Upload }) file: any
+    @Args('filename') filename: string,
+    @Args('fileData') fileData: string
   ): Promise<Book> {
-    const { createReadStream, filename, mimetype } = await file;
-    
     if (!filename) {
       throw new Error('Filename is required');
     }
     
-    if (!mimetype || !mimetype.startsWith('image/')) {
+    if (!fileData) {
+      throw new Error('File data is required');
+    }
+    
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    const fileExt = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+    if (!allowedExtensions.includes(fileExt)) {
       throw new Error('Only image files are allowed');
     }
 
-    const fileExtension = filename.split('.').pop();
-    const uniqueFilename = `${uuid()}.${fileExtension}`;
+    const extension = filename.split('.').pop();
+    const uniqueFilename = `${uuid()}.${extension}`;
     const uploadPath = join(process.cwd(), 'FRONTEND', 'uploads', uniqueFilename);
 
-    const stream = createReadStream();
-    const writeStream = createWriteStream(uploadPath);
+    const base64Data = fileData.replace(/^data:image\/[a-z]+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
     
     await new Promise<void>((resolve, reject) => {
-      stream.pipe(writeStream);
+      const writeStream = createWriteStream(uploadPath);
+      writeStream.write(buffer);
+      writeStream.end();
       writeStream.on('finish', () => resolve());
       writeStream.on('error', reject);
     });

@@ -118,22 +118,26 @@ const Books: React.FC = () => {
 
   useEffect(() => {
     if (currentSlide >= slidesLength) {
-      setCurrentSlide(0)
     }
   }, [slidesLength])
 
   const fetchFeatured = async () => {
     try {
-      const latestResp = await api.get(`/api/books?limit=${9999}&page=1${includeDeleted ? '&includeDeleted=1' : ''}`)
-      const list: Book[] = Array.isArray(latestResp.data?.books) ? latestResp.data.books : []
+      const { data } = await apolloClient.query({
+        query: GET_BOOKS,
+        variables: { 
+          page: 1, 
+          limit: 9999,
+          includeDeleted: includeDeleted || undefined
+        },
+        fetchPolicy: 'network-only'
+      })
+      
+      const list: Book[] = Array.isArray(data?.books) ? data.books : []
       const sorted = [...list].sort((a: Book, b: Book) => b.book_id - a.book_id)
       if (sorted.length) {
         const next = sorted.slice(0, Math.min(8, sorted.length))
-        setFeatured(next)
         setCarouselItems(next)
-        if (prevFeaturedCount.current === 0) {
-          setCurrentSlide(0)
-        }
         prevFeaturedCount.current = next.length
         featuredInitialized.current = true
       }
