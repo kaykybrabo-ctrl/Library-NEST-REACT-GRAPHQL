@@ -54,7 +54,6 @@ const Login: React.FC = () => {
         alert('Se a conta existir, um e-mail de redefinição foi enviado.')
       }
     } catch (e) {
-      console.error('❌ Erro na requisição:', e)
       alert('Se a conta existir, um e-mail de redefinição foi enviado.')
     } finally {
       setLoading(false)

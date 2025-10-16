@@ -54,9 +54,15 @@ export class BooksService {
       title: book.title,
       description: this.getBookDescription(book.title),
       photo: book.photo,
-      author_name: book.author.name_author,
-      author_id: book.author.author_id,
+      author_id: book.author_id,
       deleted_at: book.deleted_at,
+      author: book.author ? {
+        author_id: book.author.author_id,
+        name_author: book.author.name_author,
+        biography: book.author.biography,
+        photo: book.author.photo,
+        deleted_at: book.author.deleted_at,
+      } : null,
     }));
 
     return {
@@ -90,8 +96,15 @@ export class BooksService {
       title: book.title,
       description: this.getBookDescription(book.title),
       photo: book.photo,
-      author_name: book.author.name_author,
-      author_id: book.author.author_id,
+      author_id: book.author_id,
+      deleted_at: book.deleted_at,
+      author: book.author ? {
+        author_id: book.author.author_id,
+        name_author: book.author.name_author,
+        biography: book.author.biography,
+        photo: book.author.photo,
+        deleted_at: book.author.deleted_at,
+      } : null,
       categories: book.book_categories.map((bc) => bc.categories.name_category),
       publishers: book.book_publishers.map((bp) => bp.publishers.publish_name),
     };

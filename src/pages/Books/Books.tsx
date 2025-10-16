@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import api from '@/api'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
+import ConfirmModal from '@/components/ConfirmModal'
 import { Book, Author } from '@/types'
 import './BooksCards.css'
 
@@ -27,6 +28,8 @@ const Books: React.FC = () => {
   const [includeDeleted, setIncludeDeleted] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorModalMessage, setErrorModalMessage] = useState('')
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [bookToRent, setBookToRent] = useState<Book | null>(null)
   const [featured, setFeatured] = useState<Book[]>([])
   const [carouselItems, setCarouselItems] = useState<Book[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -44,7 +47,7 @@ const Books: React.FC = () => {
       search: searchQuery || undefined,
       includeDeleted: includeDeleted || undefined
     },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'no-cache',
   });
   
   const { data: booksCountData } = useQuery(GET_BOOKS_COUNT, {
@@ -155,22 +158,32 @@ const Books: React.FC = () => {
             loanStatuses[book.book_id] = data.bookLoanStatus;
           }
         } catch (err) {
-          console.log(`Erro ao buscar status do livro ${book.book_id}:`, err);
         }
       }
       
       setBookLoans(loanStatuses);
     } catch (error) {
-      console.error('Erro ao buscar status dos empréstimos:', error);
     }
   };
 
-  const handleRentBook = async (bookId: number) => {
+  const handleRentBook = (bookId: number) => {
+    const book = books.find(b => b.book_id === bookId)
+    if (book) {
+      setBookToRent(book)
+      setShowConfirmModal(true)
+    }
+  };
+
+  const confirmRentBook = async () => {
+    if (!bookToRent) return
+    
+    setShowConfirmModal(false)
     try {
       await rentBookMutation({
-        variables: { bookId }
+        variables: { bookId: bookToRent.book_id }
       });
       fetchLoanStatuses();
+      setBookToRent(null)
     } catch (err: any) {
       let errorMessage = 'Erro ao alugar livro. Tente novamente.'
       
@@ -185,6 +198,7 @@ const Books: React.FC = () => {
       setErrorModalMessage(errorMessage)
       setShowErrorModal(true)
       setError('')
+      setBookToRent(null)
     }
   };
 
@@ -315,7 +329,7 @@ const Books: React.FC = () => {
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{bk.title}</div>
-                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Autor: {getAuthorName(bk) || 'Desconhecido'}</div>
+                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Autor: {getAuthorName(bk)}</div>
                       <div style={{ color: '#777', marginTop: 6, fontSize: 12, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 36 }}>
                         {bk.description || '—'}
                       </div>
@@ -349,7 +363,7 @@ const Books: React.FC = () => {
                     </div>
                     <div style={{ minWidth: 0, flex: 1, maxWidth: 620, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
                       <div style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 48 }}>{bk.title}</div>
-                      <div style={{ color: '#5a5a5a', fontSize: 13, lineHeight: 1.2 }}>Autor: {getAuthorName(bk) || 'Desconhecido'}</div>
+                      <div style={{ color: '#5a5a5a', fontSize: 13, lineHeight: 1.2 }}>Autor: {getAuthorName(bk)}</div>
                       <div style={{ color: '#777', fontSize: 13, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', minHeight: 56 }}>
                         {bk.description || '—'}
                       </div>
@@ -527,7 +541,7 @@ const Books: React.FC = () => {
                   ) : (
                     <>
                       <h3 className="book-card-title" title={book.title}>{book.title}</h3>
-                      <p className="book-card-author">por {getAuthorName(book) || 'Autor desconhecido'}</p>
+                      <p className="book-card-author">por {getAuthorName(book)}</p>
                       <p className="book-card-description">
                         {book.description || 'Sem descrição disponível para este livro.'}
                       </p>
@@ -676,6 +690,19 @@ const Books: React.FC = () => {
         title="Erro ao Alugar Livro"
         message={errorModalMessage}
         onClose={() => setShowErrorModal(false)}
+      />
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Confirmar Aluguel"
+        message={`Tem certeza que deseja alugar o livro "${bookToRent?.title}"?`}
+        onConfirm={confirmRentBook}
+        onCancel={() => {
+          setShowConfirmModal(false)
+          setBookToRent(null)
+        }}
+        confirmText="Sim, alugar"
+        cancelText="Cancelar"
       />
     </Layout>
   )

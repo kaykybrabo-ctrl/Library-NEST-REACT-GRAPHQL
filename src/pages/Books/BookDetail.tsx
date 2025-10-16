@@ -8,6 +8,8 @@ import { ADD_TO_FAVORITES_MUTATION } from '@/graphql/queries/favorites'
 import { ME_QUERY } from '@/graphql/queries/auth'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
+import SuccessModal from '@/components/SuccessModal'
+import ConfirmModal from '@/components/ConfirmModal'
 import { Rating, Typography, Box } from '@mui/material'
 import { useAuth } from '@/contexts/AuthContext'
 import { Book, Review } from '@/types'
@@ -27,6 +29,9 @@ const BookDetail: React.FC = () => {
   const [imgVersion, setImgVersion] = useState(0)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorModalMessage, setErrorModalMessage] = useState('')
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [successModalMessage, setSuccessModalMessage] = useState('')
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const { data: bookData, loading, refetch: refetchBook } = useQuery(GET_BOOK, {
     variables: { id: Number(id) },
@@ -129,7 +134,12 @@ const BookDetail: React.FC = () => {
 
     await uploadImage(imageFile)
   }
-  const handleRentBook = async () => {
+  const handleRentBook = () => {
+    setShowConfirmModal(true)
+  }
+
+  const confirmRentBook = async () => {
+    setShowConfirmModal(false)
     try {
       await rentBook({
         variables: { bookId: Number(id) }
@@ -174,6 +184,8 @@ const BookDetail: React.FC = () => {
         variables: { bookId: Number(id) }
       })
       setError('')
+      setSuccessModalMessage(`"${book?.title}" foi adicionado aos seus favoritos!`)
+      setShowSuccessModal(true)
     } catch (err: any) {
       const errorMsg = err.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
@@ -233,7 +245,7 @@ const BookDetail: React.FC = () => {
         </button>
         
         <h2>{book.title}</h2>
-        <p><strong>Autor:</strong> {book.author_name || 'Desconhecido'}</p>
+        <p><strong>Autor:</strong> {book.author?.name_author || 'Desconhecido'}</p>
         <p><strong>Descrição:</strong> {book.description || 'Sem descrição disponível'}</p>
         
         {book.categories && book.categories.length > 0 && (
@@ -415,6 +427,23 @@ const BookDetail: React.FC = () => {
         title="Erro ao Alugar Livro"
         message={errorModalMessage}
         onClose={() => setShowErrorModal(false)}
+      />
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        title="Livro Favoritado!"
+        message={successModalMessage}
+        onClose={() => setShowSuccessModal(false)}
+      />
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Confirmar Aluguel"
+        message={`Tem certeza que deseja alugar o livro "${book?.title}"?`}
+        onConfirm={confirmRentBook}
+        onCancel={() => setShowConfirmModal(false)}
+        confirmText="Sim, alugar"
+        cancelText="Cancelar"
       />
     </Layout>
   )
