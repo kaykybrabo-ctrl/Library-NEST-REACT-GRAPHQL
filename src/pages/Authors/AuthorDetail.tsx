@@ -173,11 +173,11 @@ const AuthorDetail: React.FC = () => {
                 e.currentTarget.src = '/api/uploads/default-user.png'
               }}
             />
-          ) : (
+          ) : isAdmin ? (
             <div className="image-placeholder">Nenhuma foto definida ainda. Selecione um arquivo abaixo para enviar.</div>
-          )}
+          ) : null}
           
-          {!author.photo && (
+          {isAdmin && !author.photo && (
             <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
               Nenhuma foto definida para este autor ainda.
             </div>

@@ -286,12 +286,12 @@ const BookDetail: React.FC = () => {
           />
         ) : null}
         
-        {!previewUrl && !book.photo && (
+        {isAdmin && !previewUrl && !book.photo && (
           <div className="image-placeholder">Nenhuma imagem definida ainda. Selecione um arquivo abaixo para enviar.</div>
         )}
 
         
-        {!book.photo && (
+        {isAdmin && !book.photo && (
           <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
             Nenhuma imagem definida para este livro ainda.
           </div>
