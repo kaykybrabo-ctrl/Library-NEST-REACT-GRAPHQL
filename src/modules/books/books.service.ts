@@ -1,20 +1,17 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/infrastructure/prisma/prisma.service";
+import { BooksRepository } from "./books.repository";
 import { CreateBookDto } from "./dto/create-book.dto";
 import { UpdateBookDto } from "./dto/update-book.dto";
 
 @Injectable()
 export class BooksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private booksRepository: BooksRepository) {}
 
   async create(createBookDto: CreateBookDto) {
-    return this.prisma.book.create({
-      data: {
-        title: createBookDto.title,
-        author_id: createBookDto.author_id,
-      },
-      include: {
-        author: true,
+    return this.booksRepository.create({
+      title: createBookDto.title,
+      author: {
+        connect: { author_id: createBookDto.author_id }
       },
     });
   }
@@ -35,21 +32,18 @@ export class BooksService {
         : {}),
     };
 
-    const books = await this.prisma.book.findMany({
+    const books = await this.booksRepository.findAll({
       where: whereClause,
       skip: offset,
       take: limitNum,
-      include: {
-        author: true,
-      },
       orderBy: {
         book_id: "asc",
       },
     });
 
-    const totalBooks = await this.prisma.book.count({ where: whereClause });
+    const totalBooks = await this.booksRepository.count(whereClause);
 
-    const transformedBooks = books.map((book) => ({
+    const transformedBooks = books.map((book: any) => ({
       book_id: book.book_id,
       title: book.title,
       description: this.getBookDescription(book.title),
@@ -72,22 +66,7 @@ export class BooksService {
   }
 
   async findOne(id: number): Promise<any> {
-    const book = await this.prisma.book.findFirst({
-      where: { book_id: id },
-      include: {
-        author: true,
-        book_categories: {
-          include: {
-            categories: true,
-          },
-        },
-        book_publishers: {
-          include: {
-            publishers: true,
-          },
-        },
-      },
-    });
+    const book: any = await this.booksRepository.findById(id);
 
     if (!book) return null;
 
@@ -105,69 +84,52 @@ export class BooksService {
         photo: book.author.photo,
         deleted_at: book.author.deleted_at,
       } : null,
-      categories: book.book_categories.map((bc) => bc.categories.name_category),
-      publishers: book.book_publishers.map((bp) => bp.publishers.publish_name),
+      categories: book.book_categories?.map((bc: any) => bc.categories.name_category) || [],
+      publishers: book.book_publishers?.map((bp: any) => bp.publishers.publish_name) || [],
     };
   }
 
   async update(id: number, updateBookDto: UpdateBookDto) {
-    const exists = await this.prisma.book.findFirst({ where: { book_id: id } });
+    const exists = await this.booksRepository.findById(id);
     if (!exists) {
       throw new Error("Livro não encontrado");
     }
-    return this.prisma.book.update({
-      where: { book_id: id },
-      data: {
-        title: updateBookDto.title,
-        author_id: updateBookDto.author_id,
-      },
-      include: {
-        author: true,
-      },
+    return this.booksRepository.update(id, {
+      title: updateBookDto.title,
+      author: updateBookDto.author_id ? {
+        connect: { author_id: updateBookDto.author_id }
+      } : undefined,
     });
   }
 
   async remove(id: number): Promise<void> {
-    const book = await this.prisma.book.findFirst({
-      where: { book_id: id },
-    });
+    const book = await this.booksRepository.findById(id);
 
     if (!book) {
       throw new Error(`Livro com ID ${id} não encontrado`);
     }
 
-    await this.prisma.book.update({
-      where: { book_id: id },
-      data: { deleted_at: new Date() },
-    });
+    await this.booksRepository.softDelete(id);
   }
 
   async count(): Promise<number> {
-    return this.prisma.book.count({
-      where: { deleted_at: null },
+    return this.booksRepository.count({
+      deleted_at: null,
     });
   }
 
   async updatePhoto(id: number, photo: string): Promise<void> {
-    await this.prisma.book.update({
-      where: { book_id: id },
-      data: { photo },
-    });
+    await this.booksRepository.updatePhoto(id, photo);
   }
 
   async restore(id: number): Promise<void> {
-    const book = await this.prisma.book.findFirst({ 
-      where: { book_id: id } 
-    });
+    const book = await this.booksRepository.findById(id);
 
     if (!book) {
       throw new Error('Livro não encontrado');
     }
 
-    await this.prisma.book.update({
-      where: { book_id: id },
-      data: { deleted_at: null },
-    });
+    await this.booksRepository.restore(id);
   }
 
   private getBookDescription(title: string): string {

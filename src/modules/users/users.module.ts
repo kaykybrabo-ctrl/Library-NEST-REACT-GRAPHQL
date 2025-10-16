@@ -5,6 +5,7 @@ import { extname, join } from "path";
 import { UsersService } from "./users.service";
 import { UsersController } from "./users.controller";
 import { UsersResolver } from "./users.resolver";
+import { UsersRepository } from "./users.repository";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 
 @Module({
@@ -31,7 +32,7 @@ import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, UsersResolver],
-  exports: [UsersService],
+  providers: [UsersService, UsersResolver, UsersRepository],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}
