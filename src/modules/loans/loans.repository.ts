@@ -46,7 +46,10 @@ export class LoansRepository {
   async findByUserId(userId: number): Promise<Loan[]> {
     try {
       return await this.prisma.loan.findMany({
-        where: { user_id: userId },
+        where: { 
+          user_id: userId,
+          returned_at: null
+        },
         include: {
           book: {
             include: {
@@ -118,6 +121,26 @@ export class LoansRepository {
       });
     } catch (error) {
       throw new DatabaseOperationException('buscar empréstimo ativo do livro', error.message);
+    }
+  }
+
+  async findByBookId(bookId: number): Promise<Loan[]> {
+    try {
+      return await this.prisma.loan.findMany({
+        where: { book_id: bookId },
+        include: {
+          book: {
+            include: {
+              author: true,
+            },
+          },
+        },
+        orderBy: {
+          loan_date: 'desc',
+        },
+      });
+    } catch (error) {
+      throw new DatabaseOperationException('buscar empréstimos do livro', error.message);
     }
   }
 

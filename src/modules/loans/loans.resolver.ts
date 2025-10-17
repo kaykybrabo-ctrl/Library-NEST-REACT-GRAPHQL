@@ -76,12 +76,12 @@ export class LoansResolver {
         days_remaining: 0,
         hours_remaining: 0,
         time_remaining: '',
-        username: loan.username || 'Usuário',
+        username: (loan as any).username || 'Usuário',
         user_id: loan.user_id,
         book_id: loan.book_id,
-        title: loan.book?.title || '',
-        photo: loan.book?.photo,
-        description: loan.book?.description,
+        title: (loan as any).book?.title || '',
+        photo: (loan as any).book?.photo,
+        description: (loan as any).book?.description,
       } : null,
     };
   }
@@ -96,23 +96,46 @@ export class LoansResolver {
     const loan = await this.loansService.findUserLoan(user.id, bookId);
     return {
       hasLoan: !!loan,
-      loan: loan ? {
-        loans_id: loan.loans_id,
-        loan_date: loan.loan_date,
-        due_date: loan.due_date,
-        returned_at: loan.returned_at,
-        is_overdue: loan.is_overdue,
-        fine_amount: Number(loan.fine_amount),
-        days_remaining: 0,
-        hours_remaining: 0,
-        time_remaining: '',
-        username: '',
-        user_id: loan.user_id,
-        book_id: loan.book_id,
-        title: loan.book?.title || '',
-        photo: loan.book?.photo,
-        description: loan.book?.description,
-      } : null,
+      loan: loan ? (() => {
+        const now = new Date();
+        const dueDate = new Date(loan.due_date);
+        const isOverdue = now > dueDate;
+        const timeDiff = dueDate.getTime() - now.getTime();
+        const daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
+        
+        const totalHours = Math.floor(hoursRemaining);
+        let remainingHours = totalHours - (daysRemaining * 24);
+        let adjustedDays = daysRemaining;
+        
+        if (remainingHours >= 24) {
+          adjustedDays += Math.floor(remainingHours / 24);
+          remainingHours = remainingHours % 24;
+        }
+        
+        const timeRemaining = isOverdue ? 'Vencido' : 
+          adjustedDays > 1 ? `${adjustedDays} dias e ${remainingHours}h` :
+          adjustedDays === 1 ? `1 dia e ${remainingHours}h` :
+          totalHours > 0 ? `${totalHours} hora${totalHours > 1 ? 's' : ''}` : 'Menos de 1 hora';
+
+        return {
+          loans_id: loan.loans_id,
+          loan_date: loan.loan_date,
+          due_date: loan.due_date,
+          user_id: loan.user_id,
+          book_id: loan.book_id,
+          title: (loan as any).book?.title || '',
+          photo: (loan as any).book?.photo,
+          description: (loan as any).book?.description,
+          returned_at: null,
+          is_overdue: isOverdue,
+          fine_amount: Number(loan.fine_amount) || 0,
+          days_remaining: Math.max(0, daysRemaining),
+          hours_remaining: Math.max(0, hoursRemaining),
+          time_remaining: timeRemaining,
+          username: '',
+        };
+      })() : null,
     };
   }
 

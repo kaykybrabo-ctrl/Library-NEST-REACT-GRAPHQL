@@ -1,16 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@/infrastructure/prisma/prisma.service";
+import { AuthorsRepository } from "./authors.repository";
 import { CreateAuthorDto } from "./dto/create-author.dto";
 import { UpdateAuthorDto } from "./dto/update-author.dto";
 
 @Injectable()
 export class AuthorsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private authorsRepository: AuthorsRepository) {}
 
   async create(createAuthorDto: CreateAuthorDto) {
-    return this.prisma.author.create({
-      data: createAuthorDto,
-    });
+    return this.authorsRepository.create(createAuthorDto);
   }
 
   async findAll(page?: number, limit?: number, includeDeleted: boolean = false): Promise<any> {
@@ -19,13 +17,13 @@ export class AuthorsService {
       const offset = (page - 1) * limit;
 
       const [authors, total] = await Promise.all([
-        this.prisma.author.findMany({
+        this.authorsRepository.findAll({
           where: whereClause,
           skip: offset,
           take: limit,
           orderBy: { author_id: "asc" },
         }),
-        this.prisma.author.count({ where: whereClause }),
+        this.authorsRepository.count(whereClause),
       ]);
 
       return {
@@ -37,7 +35,7 @@ export class AuthorsService {
       };
     }
 
-    const authors = await this.prisma.author.findMany({
+    const authors = await this.authorsRepository.findAll({
       where: whereClause,
       orderBy: { author_id: "asc" },
     });
@@ -51,62 +49,44 @@ export class AuthorsService {
   }
 
   async findOne(id: number) {
-    return this.prisma.author.findFirst({
-      where: { author_id: id },
-    });
+    return this.authorsRepository.findById(id);
   }
 
   async update(id: number, updateAuthorDto: UpdateAuthorDto) {
-    const exists = await this.prisma.author.findFirst({ where: { author_id: id } });
+    const exists = await this.authorsRepository.findById(id);
     if (!exists) {
       throw new Error("Autor não encontrado");
     }
-    return this.prisma.author.update({
-      where: { author_id: id },
-      data: updateAuthorDto,
-    });
+    return this.authorsRepository.update(id, updateAuthorDto);
   }
 
   async remove(id: number): Promise<void> {
-    const author = await this.prisma.author.findFirst({ 
-      where: { author_id: id } 
-    });
+    const author = await this.authorsRepository.findById(id);
 
     if (!author) {
       throw new Error('Autor não encontrado');
     }
 
-    await this.prisma.author.update({
-      where: { author_id: id },
-      data: { deleted_at: new Date() },
-    });
+    await this.authorsRepository.softDelete(id);
   }
 
   async count(): Promise<number> {
-    return this.prisma.author.count({
-      where: { deleted_at: null },
+    return this.authorsRepository.count({
+      deleted_at: null,
     });
   }
 
   async updatePhoto(id: number, photo: string): Promise<void> {
-    await this.prisma.author.update({
-      where: { author_id: id },
-      data: { photo },
-    });
+    await this.authorsRepository.updatePhoto(id, photo);
   }
 
   async restore(id: number): Promise<void> {
-    const author = await this.prisma.author.findFirst({ 
-      where: { author_id: id } 
-    });
+    const author = await this.authorsRepository.findById(id);
 
     if (!author) {
       throw new Error('Autor não encontrado');
     }
 
-    await this.prisma.author.update({
-      where: { author_id: id },
-      data: { deleted_at: null },
-    });
+    await this.authorsRepository.restore(id);
   }
 }

@@ -80,6 +80,8 @@ export const MY_BOOK_LOAN_QUERY = gql`
         due_date
         is_overdue
         days_remaining
+        hours_remaining
+        time_remaining
         fine_amount
       }
     }

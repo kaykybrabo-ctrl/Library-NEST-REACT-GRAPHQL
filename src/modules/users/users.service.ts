@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private usersRepository: UsersRepository,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.prisma.authUser.findUnique({
-      where: { username: createUserDto.username }
-    });
+    const existingUser = await this.usersRepository.findByUsername(createUserDto.username);
 
     if (existingUser) {
       throw new Error('Este nome de usuário já está em uso');
@@ -25,24 +27,22 @@ export class UsersService {
       },
     });
 
-    return this.prisma.authUser.create({
-      data: {
-        username: createUserDto.username,
-        password: createUserDto.password,
-        role: createUserDto.role,
-        user_id: newUser.user_id,
+    return this.usersRepository.create({
+      username: createUserDto.username,
+      password: createUserDto.password,
+      role: createUserDto.role,
+      user: {
+        connect: { user_id: newUser.user_id }
       },
     });
   }
 
   async findAll() {
-    return this.prisma.authUser.findMany();
+    return this.usersRepository.findAll();
   }
 
   async findOne(id: number) {
-    const user = await this.prisma.authUser.findUnique({
-      where: { id: id },
-    });
+    const user = await this.usersRepository.findById(id);
 
     if (!user) return null;
 
@@ -55,45 +55,29 @@ export class UsersService {
   }
 
   async findByUsername(username: string) {
-    const user = await this.prisma.authUser.findUnique({
-      where: { username: username },
-    });
-    
-    return user;
+    return this.usersRepository.findByUsername(username);
   }
 
   async findByIdRaw(id: number) {
-    return this.prisma.authUser.findUnique({
-      where: { id: id },
-    });
+    return this.usersRepository.findById(id);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     if (updateUserDto.username) {
-      const existingUser = await this.prisma.authUser.findFirst({
-        where: {
-          username: updateUserDto.username,
-          id: { not: id }
-        }
-      });
+      const existingUser = await this.usersRepository.findByUsername(updateUserDto.username);
 
-      if (existingUser) {
+      if (existingUser && existingUser.id !== id) {
         throw new Error('Este nome de usuário já está em uso');
       }
     }
 
-    return this.prisma.authUser.update({
-      where: { id: id },
-      data: {
-        username: updateUserDto.username,
-      },
+    return this.usersRepository.update(id, {
+      username: updateUserDto.username,
     });
   }
 
   async remove(id: number): Promise<void> {
-    await this.prisma.authUser.delete({
-      where: { id: id },
-    });
+    await this.usersRepository.delete(id);
   }
 
   async getFavoriteBook(username: string): Promise<any> {
@@ -117,52 +101,33 @@ export class UsersService {
   }
 
   async setFavoriteBook(userId: number, bookId: number): Promise<any> {
-    return this.prisma.authUser.update({
-      where: { id: userId },
-      data: {
-        favorite_book_id: bookId
-      },
-      include: {
-        user: true
-      }
+    return this.usersRepository.update(userId, {
+      favorite_book_id: bookId
     });
   }
 
   async updateDescription(userId: number, description: string): Promise<any> {
-    return this.prisma.authUser.update({
-      where: { id: userId },
-      data: {
-        description: description
-      }
+    return this.usersRepository.update(userId, {
+      description: description
     });
   }
 
   async updateDisplayName(userId: number, displayName: string): Promise<any> {
-    const existingUser = await this.prisma.authUser.findFirst({
-      where: {
-        display_name: displayName,
-        id: { not: userId }
-      }
-    });
+    const allUsers = await this.usersRepository.findAll();
+    const existingUser = allUsers.find(user => user.display_name === displayName && user.id !== userId);
 
     if (existingUser) {
       throw new Error('Este nome de exibição já está em uso por outro usuário');
     }
 
-    return this.prisma.authUser.update({
-      where: { id: userId },
-      data: {
-        display_name: displayName
-      }
+    return this.usersRepository.update(userId, {
+      display_name: displayName
     });
   }
 
   async updateProfileImage(userId: number, imagePath: string): Promise<any> {
-    return this.prisma.authUser.update({
-      where: { id: userId },
-      data: {
-        profile_image: imagePath
-      }
+    return this.usersRepository.update(userId, {
+      profile_image: imagePath
     });
   }
 
@@ -170,11 +135,13 @@ export class UsersService {
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
-    return this.prisma.authUser.update({
-      where: { username: username },
-      data: {
-        password: hashedPassword
-      }
+    const user = await this.usersRepository.findByUsername(username);
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+    
+    return this.usersRepository.update(user.id, {
+      password: hashedPassword
     });
   }
 }

@@ -24,7 +24,7 @@ export class ReviewsResolver {
       comment,
     };
 
-    const review = await this.reviewsService.create(user.id, createReviewDto);
+    const review = await this.reviewsService.create(user.id, createReviewDto) as any;
     
     return {
       id: review.id,
@@ -42,7 +42,7 @@ export class ReviewsResolver {
 
   @Query(() => [Review])
   async bookReviews(@Args('bookId', { type: () => Int }) bookId: number): Promise<Review[]> {
-    const reviews = await this.reviewsService.findByBook(bookId);
+    const reviews = await this.reviewsService.findByBook(bookId) as any[];
     
     return reviews.map(review => ({
       id: review.id,

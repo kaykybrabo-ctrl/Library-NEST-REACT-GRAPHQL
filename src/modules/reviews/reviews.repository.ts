@@ -34,6 +34,19 @@ export class ReviewsRepository {
               author: true,
             },
           },
+          user: {
+            select: {
+              id: true,
+              username: true,
+              photo: true,
+              user_id: true,
+              user: {
+                select: {
+                  email: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
           created_at: 'desc',

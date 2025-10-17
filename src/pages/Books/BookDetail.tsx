@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { GET_BOOK, UPLOAD_BOOK_IMAGE } from '@/graphql/queries/books'
-import { RENT_BOOK_MUTATION, MY_BOOK_LOAN_QUERY, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
+import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, MY_BOOK_LOAN_QUERY, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
 import { CREATE_REVIEW_MUTATION, BOOK_REVIEWS_QUERY } from '@/graphql/queries/reviews'
 import { ADD_TO_FAVORITES_MUTATION } from '@/graphql/queries/favorites'
 import { ME_QUERY } from '@/graphql/queries/auth'
@@ -19,6 +19,7 @@ import './BookDetail.css'
 const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const apolloClient = useApolloClient()
   const [error, setError] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -48,14 +49,17 @@ const BookDetail: React.FC = () => {
   const { data: userLoanData, refetch: refetchUserLoan } = useQuery(MY_BOOK_LOAN_QUERY, {
     variables: { bookId: Number(id) },
     skip: !id || !currentUserData?.me,
+    fetchPolicy: 'cache-and-network',
   })
 
-  const { data: bookLoanStatusData } = useQuery(BOOK_LOAN_STATUS_QUERY, {
+  const { data: bookLoanStatusData, refetch: refetchBookLoanStatus } = useQuery(BOOK_LOAN_STATUS_QUERY, {
     variables: { bookId: Number(id) },
     skip: !id,
+    fetchPolicy: 'cache-and-network',
   })
 
   const [rentBook] = useMutation(RENT_BOOK_MUTATION)
+  const [returnBook] = useMutation(RETURN_BOOK_MUTATION)
   const [createReview] = useMutation(CREATE_REVIEW_MUTATION)
   const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION)
   const [uploadBookImage] = useMutation(UPLOAD_BOOK_IMAGE)
@@ -176,7 +180,35 @@ const BookDetail: React.FC = () => {
       return
     }
 
-    setError('Devolução de livro ainda não implementada via GraphQL')
+    try {
+      await returnBook({
+        variables: { loanId: Number(userLoan.loans_id) },
+        refetchQueries: [
+          { query: MY_BOOK_LOAN_QUERY, variables: { bookId: Number(id) } },
+          { query: BOOK_LOAN_STATUS_QUERY, variables: { bookId: Number(id) } }
+        ],
+        awaitRefetchQueries: true
+      })
+      
+      setError('')
+      setSuccessModalMessage(`"${book?.title}" foi devolvido com sucesso!`)
+      setShowSuccessModal(true)
+      
+      await apolloClient.resetStore()
+      
+      setTimeout(async () => {
+        await refetchUserLoan()
+        await refetchBookLoanStatus()
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      }, 100)
+    } catch (err: any) {
+      const errorMsg = err.message || 'Erro ao devolver livro'
+      setError(errorMsg)
+      setErrorModalMessage(errorMsg)
+      setShowErrorModal(true)
+    }
   }
 
   const handleFavoriteBook = async () => {
@@ -332,15 +364,41 @@ const BookDetail: React.FC = () => {
               <div className="loan-details">
                 <p><strong>Alugado em:</strong> {new Date(userLoan.loan_date).toLocaleDateString('pt-BR')}</p>
                 <p><strong>Vencimento:</strong> {new Date(userLoan.due_date).toLocaleDateString('pt-BR')}</p>
-                <div className={`days-remaining ${userLoan.is_overdue ? 'overdue' : userLoan.days_remaining <= 1 ? 'urgent' : userLoan.days_remaining <= 3 ? 'warning' : 'normal'}`}>
-                  {userLoan.is_overdue 
-                    ? `⚠️ Atrasado há ${Math.abs(userLoan.days_remaining)} dias`
-                    : userLoan.days_remaining === 0 
-                      ? '⏰ Vence hoje!'
-                      : userLoan.days_remaining === 1
-                        ? '⏰ Vence amanhã'
-                        : `📅 ${userLoan.days_remaining} dias restantes`
+                <div className={`days-remaining ${(() => {
+                  if (userLoan.is_overdue) return 'overdue';
+                  
+                  const totalHours = Math.floor(userLoan.hours_remaining);
+                  let remainingHours = totalHours - (userLoan.days_remaining * 24);
+                  let adjustedDays = userLoan.days_remaining;
+                  
+                  if (remainingHours >= 24) {
+                    adjustedDays += Math.floor(remainingHours / 24);
                   }
+                  
+                  return adjustedDays <= 1 ? 'urgent' : adjustedDays <= 3 ? 'warning' : 'normal';
+                })()}`}>
+                  {(() => {
+                    if (userLoan.is_overdue) {
+                      return '⚠️ Atrasado!';
+                    }
+                    
+                    const totalHours = Math.floor(userLoan.hours_remaining);
+                    let remainingHours = totalHours - (userLoan.days_remaining * 24);
+                    let adjustedDays = userLoan.days_remaining;
+                    
+                    if (remainingHours >= 24) {
+                      adjustedDays += Math.floor(remainingHours / 24);
+                      remainingHours = remainingHours % 24;
+                    }
+                    
+                    if (adjustedDays === 0) {
+                      return '⏰ Vence hoje!';
+                    } else if (adjustedDays === 1) {
+                      return `⏰ Vence amanhã (${remainingHours}h restantes)`;
+                    } else {
+                      return `📅 ${adjustedDays} dias e ${remainingHours}h restantes`;
+                    }
+                  })()}
                 </div>
                 {userLoan.is_overdue && (
                   <div className="fine-amount">

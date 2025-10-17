@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useMutation } from '@apollo/client'
+import { RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
 import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
@@ -186,6 +188,8 @@ const UserProfile: React.FC = () => {
     }
   }
 
+  const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION)
+
   const handleReturnBook = async (loanId: number, bookTitle?: string) => {
     const confirmMessage = bookTitle 
       ? `Tem certeza que deseja devolver o livro "${bookTitle}"?`
@@ -196,17 +200,15 @@ const UserProfile: React.FC = () => {
     }
 
     try {
-      const response = await api.post(`/api/return/${loanId}`, {}, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      await returnBookMutation({
+        variables: { loanId }
       })
 
       fetchLoans()
       alert('Livro devolvido com sucesso!')
       setError('')
     } catch (e: any) {
-      const errorMessage = e.response?.data?.message || 'Falha ao devolver o livro'
+      const errorMessage = e.message || 'Falha ao devolver o livro'
       setError(errorMessage)
       alert(errorMessage)
     }

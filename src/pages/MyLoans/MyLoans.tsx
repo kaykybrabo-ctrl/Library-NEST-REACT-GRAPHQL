@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation, useApolloClient } from '@apollo/client'
+import { MY_LOANS_QUERY, RETURN_BOOK_MUTATION, OVERDUE_LOANS_QUERY } from '@/graphql/queries/loans'
 import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
@@ -29,33 +31,25 @@ interface OverdueLoan {
 
 const MyLoans: React.FC = () => {
   const { user } = useAuth()
-  const [loans, setLoans] = useState<Loan[]>([])
+  const apolloClient = useApolloClient()
   const [overdueLoans, setOverdueLoans] = useState<OverdueLoan[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showOverdueModal, setShowOverdueModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const navigate = useNavigate()
 
+  const { data: loansData, loading, refetch: refetchLoans } = useQuery(MY_LOANS_QUERY, {
+    fetchPolicy: 'cache-and-network',
+    skip: !user,
+  })
+
+  const loans = loansData?.myLoans || []
+
   useEffect(() => {
     if (user) {
-      fetchMyLoans()
       checkOverdueLoans()
     }
   }, [user])
-
-  const fetchMyLoans = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get('/api/loans')
-      setLoans(response.data)
-      setError('')
-    } catch (err: any) {
-      setError('Erro ao carregar seus empréstimos')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const checkOverdueLoans = async () => {
     try {
@@ -68,19 +62,31 @@ const MyLoans: React.FC = () => {
     }
   }
 
+  const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION)
+
   const handleReturnBook = async (loanId: number, bookTitle: string) => {
     if (!confirm(`Tem certeza de que deseja devolver o livro "${bookTitle}"?`)) {
       return
     }
 
     try {
-      const response = await api.post(`/api/return/${loanId}`)
+      await returnBookMutation({
+        variables: { loanId: Number(loanId) },
+        refetchQueries: [
+          { query: MY_LOANS_QUERY }
+        ]
+      })
+      
+      await apolloClient.resetStore()
       setSuccessMessage(`Livro "${bookTitle}" devolvido com sucesso! 🎉`)
       setTimeout(() => setSuccessMessage(''), 5000)
-      fetchMyLoans()
-      checkOverdueLoans()
+      
+      setTimeout(async () => {
+        await refetchLoans()
+        checkOverdueLoans()
+      }, 100)
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Erro ao devolver livro'
+      const errorMsg = err.message || 'Erro ao devolver livro'
       setError(errorMsg)
       setTimeout(() => setError(''), 5000)
     }
@@ -94,15 +100,24 @@ const MyLoans: React.FC = () => {
     })
   }
 
-  const getDaysRemainingText = (daysRemaining: number, isOverdue: boolean) => {
-    if (isOverdue) {
-      return `Atrasado há ${Math.abs(daysRemaining)} dias`
-    } else if (daysRemaining === 0) {
-      return 'Vence hoje!'
-    } else if (daysRemaining === 1) {
-      return 'Vence amanhã'
+  const getDaysRemainingText = (loan: any) => {
+    const { days_remaining, hours_remaining, is_overdue } = loan;
+    
+    if (is_overdue) {
+      return `Atrasado há ${Math.abs(days_remaining)} dias`
+    } else if (days_remaining === 0) {
+      const hoursLeft = hours_remaining % 24;
+      if (hoursLeft <= 0) {
+        return 'Vence hoje!'
+      } else {
+        return `Vence hoje! (${hoursLeft}h restantes)`
+      }
+    } else if (days_remaining === 1) {
+      const hoursLeft = hours_remaining % 24;
+      return `Vence amanhã (${hoursLeft}h restantes)`
     } else {
-      return `${daysRemaining} dias restantes`
+      const hoursLeft = hours_remaining % 24;
+      return `${days_remaining} dias e ${hoursLeft}h restantes`
     }
   }
 
@@ -121,7 +136,15 @@ const MyLoans: React.FC = () => {
     } else if (loan.days_remaining === 1) {
       return '⏰ Vence Amanhã'
     } else {
-      return `📅 ${loan.days_remaining}d`
+      const totalHours = Math.floor(loan.hours_remaining);
+      let remainingHours = totalHours - (loan.days_remaining * 24);
+      let adjustedDays = loan.days_remaining;
+      
+      if (remainingHours >= 24) {
+        adjustedDays += Math.floor(remainingHours / 24);
+      }
+      
+      return `📅 ${adjustedDays}d`
     }
   }
 
@@ -265,7 +288,7 @@ const MyLoans: React.FC = () => {
                     
                     <button
                       type="button"
-                      onClick={() => handleReturnBook(loan.loans_id, loan.title)}
+                      onClick={() => handleReturnBook(Number(loan.loans_id), loan.title)}
                       className="btn-primary"
                     >
                       Devolver Livro

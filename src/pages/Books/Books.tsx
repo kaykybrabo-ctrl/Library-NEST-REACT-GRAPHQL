@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
 import { GET_AUTHORS } from '@/graphql/queries/authors'
-import { RENT_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
+import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
 import { useAuth } from '@/contexts/AuthContext'
 import api from '@/api'
 import Layout from '@/components/Layout'
@@ -63,6 +63,7 @@ const Books: React.FC = () => {
   const [removeBookMutation] = useMutation(REMOVE_BOOK);
   const [restoreBookMutation] = useMutation(RESTORE_BOOK);
   const [rentBookMutation] = useMutation(RENT_BOOK_MUTATION);
+  const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION);
   
   const displayedItems = useMemo(() => (
     carouselItems.length > 0
@@ -211,7 +212,34 @@ const Books: React.FC = () => {
       return;
     }
 
-    setError('Devolução de livro ainda não implementada via GraphQL');
+    try {
+      const response = await api.get(`/api/books/${bookId}/my-loan`);
+      const userLoan = response.data;
+      
+      if (!userLoan || !userLoan.loans_id) {
+        setError('Empréstimo não encontrado');
+        return;
+      }
+
+      await returnBookMutation({
+        variables: { loanId: Number(userLoan.loans_id) }
+      });
+      
+      setError('');
+      await apolloClient.resetStore();
+      
+      setTimeout(async () => {
+        await fetchBooks();
+        await fetchLoanStatuses();
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000);
+      }, 200);
+      
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || err.message || 'Erro ao devolver livro';
+      setError(errorMsg);
+    }
   };
 
   const handleRestoreBook = async (bookId: number) => {

@@ -42,8 +42,7 @@ export class LoansService {
     }
 
     const now = new Date();
-    const dueDate = new Date(now);
-    dueDate.setDate(dueDate.getDate() + 7);
+    const dueDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
     
     const loan = await this.prisma.loan.create({
       data: {
@@ -99,8 +98,8 @@ export class LoansService {
         const dueDate = new Date(loan.due_date);
         const isOverdue = now > dueDate;
         const timeDiff = dueDate.getTime() - now.getTime();
-        const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-        const hoursRemaining = Math.ceil(timeDiff / (1000 * 60 * 60));
+        const daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
 
         return {
           loans_id: loan.loans_id,
@@ -152,8 +151,8 @@ export class LoansService {
         const dueDate = new Date(loan.due_date);
         const isOverdue = now > dueDate;
         const timeDiff = dueDate.getTime() - now.getTime();
-        const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-        const hoursRemaining = Math.ceil(timeDiff / (1000 * 60 * 60));
+        const daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
 
         const authUserResult = await this.prisma.$queryRaw`
           SELECT display_name, username 
@@ -371,10 +370,21 @@ export class LoansService {
   }
 
   private formatTimeRemaining(days: number, hours: number): string {
-    if (days > 0) {
-      return `${days} dia${days > 1 ? 's' : ''}`;
-    } else if (hours > 0) {
-      return `${hours} hora${hours > 1 ? 's' : ''}`;
+    const totalHours = Math.floor(hours);
+    let remainingHours = totalHours - (days * 24);
+    let adjustedDays = days;
+    
+    if (remainingHours >= 24) {
+      adjustedDays += Math.floor(remainingHours / 24);
+      remainingHours = remainingHours % 24;
+    }
+    
+    if (adjustedDays > 1) {
+      return `${adjustedDays} dias e ${remainingHours}h`;
+    } else if (adjustedDays === 1) {
+      return `1 dia e ${remainingHours}h`;
+    } else if (totalHours > 0) {
+      return `${totalHours} hora${totalHours > 1 ? 's' : ''}`;
     } else {
       return 'Menos de 1 hora';
     }
