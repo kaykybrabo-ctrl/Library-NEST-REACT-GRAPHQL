@@ -17,6 +17,7 @@ import { ReviewsModule } from "@/modules/reviews/reviews.module";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
 import { UploadsController } from "@/infrastructure/uploads.controller";
 import { MailModule } from "@/infrastructure/mail/mail.module";
+import { CloudinaryModule } from "@/common/cloudinary/cloudinary.module";
 import * as nodemailer from 'nodemailer';
 
 @Module({
@@ -75,16 +76,7 @@ import * as nodemailer from 'nodemailer';
     }),
     PrismaModule,
     MailModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), "FRONTEND", "uploads"),
-      serveRoot: "/api/uploads",
-      serveStaticOptions: {
-        cacheControl: false,
-        etag: false,
-        lastModified: false,
-        maxAge: 0,
-      },
-    }),
+    CloudinaryModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "FRONTEND", "react-dist"),
       exclude: ["/api*", "/api/*", "/graphql*"],

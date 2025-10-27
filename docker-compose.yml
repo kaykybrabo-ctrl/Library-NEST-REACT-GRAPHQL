@@ -9,6 +9,9 @@ services:
       - SMTP_SECURE=false
       - MAIL_FROM=pedbook <no-reply@pedbook.local>
       - PUBLIC_WEB_URL=http://localhost:8080
+      - CLOUDINARY_CLOUD_NAME=ddfgsoh5g
+      - CLOUDINARY_API_KEY=877612776229599
+      - CLOUDINARY_API_SECRET=pDivBkF6G2A5PWLY_XihAA592kQ
     depends_on:
       db:
         condition: service_healthy
@@ -19,10 +22,10 @@ services:
     command: >
       sh -c "
         echo 'Aguardando banco de dados...' &&
-        npx prisma db push --accept-data-loss &&
+        npx prisma db push &&
         echo 'Schema sincronizado com sucesso!' &&
         echo 'Populando banco com dados iniciais...' &&
-        npx prisma db seed &&
+        # npx prisma db seed &&
         echo 'Iniciando aplicação...' &&
         npm run start:prod
       "

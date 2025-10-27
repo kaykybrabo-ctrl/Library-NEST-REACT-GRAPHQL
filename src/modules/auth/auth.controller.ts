@@ -80,12 +80,39 @@ export class AuthController {
 
   @Post("register")
   async register(@Body() registerDto: RegisterDto) {
-    return await this.authService.register(registerDto);
+    try {
+      const newUser = await this.authService.register(registerDto);
+      
+      const loginData = await this.authService.login(newUser);
+      return {
+        token: loginData.access_token,
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          role: newUser.role
+        },
+        message: 'Conta criada e login realizado com sucesso!'
+      };
+    } catch (error) {
+      console.error('Erro no registro:', error);
+      throw error;
+    }
   }
 
   @Post("register-duplicate")
   async registerApi(@Body() registerDto: RegisterDto) {
-    return await this.authService.register(registerDto);
+    const newUser = await this.authService.register(registerDto);
+    
+    const loginData = await this.authService.login(newUser);
+    return {
+      token: loginData.access_token,
+      user: {
+        id: newUser.id,
+        username: newUser.username,
+        role: newUser.role
+      },
+      message: 'Conta criada e login realizado com sucesso!'
+    };
   }
 
   @UseGuards(JwtAuthGuard)

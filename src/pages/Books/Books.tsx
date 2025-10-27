@@ -10,6 +10,7 @@ import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
 import ConfirmModal from '@/components/ConfirmModal'
 import { Book, Author } from '@/types'
+import { getImageUrl } from '@/utils/imageUtils'
 import './BooksCards.css'
 
 const Books: React.FC = () => {
@@ -353,11 +354,24 @@ const Books: React.FC = () => {
                 {books.slice(0, 8).map((bk) => (
                   <div key={`fallback-${bk.book_id}`} style={{ display: 'flex', gap: 14, alignItems: 'center', border: '1px solid #e0e0e0', borderRadius: 10, padding: 12, background: '#fff' }}>
                     <div style={{ width: 70, height: 100, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, overflow: 'hidden', flex: '0 0 auto', alignSelf: 'center' }}>
-                      {bk.photo ? (
-                        <img src={bk.photo.startsWith('http') || bk.photo.startsWith('/') ? bk.photo : `/api/uploads/${bk.photo}`} alt={bk.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <span style={{ color: '#999', fontSize: 11 }}>Sem imagem</span>
-                      )}
+                      <img 
+                        src={getImageUrl(bk.photo, 'book', false, bk.title)} 
+                        alt={bk.title} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector('.fallback-text')) {
+                            const fallbackSpan = document.createElement('span');
+                            fallbackSpan.className = 'fallback-text';
+                            fallbackSpan.style.color = '#999';
+                            fallbackSpan.style.fontSize = '11px';
+                            fallbackSpan.textContent = 'Sem imagem';
+                            parent.appendChild(fallbackSpan);
+                          }
+                        }}
+                      />
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{bk.title}</div>
@@ -387,11 +401,24 @@ const Books: React.FC = () => {
                   <div onClick={() => navigate(`/books/${bk.book_id}`)}
                     style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', alignItems: 'center', columnGap: 18, width: '100%', maxWidth: 920, cursor: 'pointer', margin: '0 auto' }}>
                     <div style={{ width: 96, height: 136, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                      {bk.photo ? (
-                        <img src={bk.photo.startsWith('http') || bk.photo.startsWith('/') ? bk.photo : `/api/uploads/${bk.photo}`} alt={bk.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <span style={{ color: '#999', fontSize: 12 }}>Sem imagem</span>
-                      )}
+                      <img 
+                        src={getImageUrl(bk.photo, 'book', false, bk.title)} 
+                        alt={bk.title} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector('.fallback-text')) {
+                            const fallbackSpan = document.createElement('span');
+                            fallbackSpan.className = 'fallback-text';
+                            fallbackSpan.style.color = '#999';
+                            fallbackSpan.style.fontSize = '12px';
+                            fallbackSpan.textContent = 'Sem imagem';
+                            parent.appendChild(fallbackSpan);
+                          }
+                        }}
+                      />
                     </div>
                     <div style={{ minWidth: 0, flex: 1, maxWidth: 620, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
                       <div style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 48 }}>{bk.title}</div>
@@ -523,9 +550,9 @@ const Books: React.FC = () => {
                 className={`book-card ${book.deleted_at ? 'deleted' : ''} ${editingBook === book.book_id ? 'editing' : ''}`}
               >
                 <div className="book-card-image">
-                  {book.photo ? (
+                  {getImageUrl(book.photo, 'book', false, book.title) ? (
                     <img 
-                      src={book.photo.startsWith('http') || book.photo.startsWith('/') ? book.photo : `/api/uploads/${book.photo}`} 
+                      src={getImageUrl(book.photo, 'book', false, book.title)} 
                       alt={book.title}
                       onError={(e) => {
                         const target = e.currentTarget as HTMLImageElement;
@@ -540,9 +567,7 @@ const Books: React.FC = () => {
                       }}
                     />
                   ) : (
-                    <div className="no-image">
-                      Sem imagem
-                    </div>
+                    <div className="no-image">Sem imagem</div>
                   )}
                 </div>
                 

@@ -170,7 +170,7 @@ const AuthorDetail: React.FC = () => {
               className="author-image"
               onError={(e) => {
                 e.currentTarget.onerror = null
-                e.currentTarget.src = '/api/uploads/default-user.png'
+                e.currentTarget.src = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062934/pedbook/profiles/default-author.svg'
               }}
             />
           ) : isAdmin ? (

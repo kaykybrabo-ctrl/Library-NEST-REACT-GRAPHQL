@@ -4,9 +4,10 @@ import { AuthorsController } from "./authors.controller";
 import { AuthorsRepository } from "./authors.repository";
 import { AuthorsResolver } from "./authors.resolver";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
+import { CloudinaryModule } from "@/common/cloudinary/cloudinary.module";
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, CloudinaryModule],
   controllers: [AuthorsController],
   providers: [AuthorsService, AuthorsRepository, AuthorsResolver],
   exports: [AuthorsService, AuthorsRepository],

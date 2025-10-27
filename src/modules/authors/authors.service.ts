@@ -2,10 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { AuthorsRepository } from "./authors.repository";
 import { CreateAuthorDto } from "./dto/create-author.dto";
 import { UpdateAuthorDto } from "./dto/update-author.dto";
+import { CloudinaryService } from "@/common/services/cloudinary.service";
 
 @Injectable()
 export class AuthorsService {
-  constructor(private authorsRepository: AuthorsRepository) {}
+  constructor(
+    private authorsRepository: AuthorsRepository,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   async create(createAuthorDto: CreateAuthorDto) {
     return this.authorsRepository.create(createAuthorDto);
@@ -76,8 +80,13 @@ export class AuthorsService {
     });
   }
 
-  async updatePhoto(id: number, photo: string): Promise<void> {
-    await this.authorsRepository.updatePhoto(id, photo);
+  async updatePhoto(id: number, file: Express.Multer.File): Promise<void> {
+    try {
+      const cloudinaryUrl = await this.cloudinaryService.uploadProfileImage(file);
+      await this.authorsRepository.updatePhoto(id, cloudinaryUrl);
+    } catch (error) {
+      throw new Error(`Erro ao fazer upload da imagem: ${error.message}`);
+    }
   }
 
   async restore(id: number): Promise<void> {

@@ -3,12 +3,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
+import { CloudinaryService } from '@/common/services/cloudinary.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private usersRepository: UsersRepository,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -125,10 +127,15 @@ export class UsersService {
     });
   }
 
-  async updateProfileImage(userId: number, imagePath: string): Promise<any> {
-    return this.usersRepository.update(userId, {
-      profile_image: imagePath
-    });
+  async updateProfileImage(userId: number, file: Express.Multer.File): Promise<any> {
+    try {
+      const cloudinaryUrl = await this.cloudinaryService.uploadProfileImage(file);
+      return this.usersRepository.update(userId, {
+        profile_image: cloudinaryUrl
+      });
+    } catch (error) {
+      throw new Error(`Erro ao fazer upload da imagem: ${error.message}`);
+    }
   }
 
   async updatePassword(username: string, newPassword: string): Promise<any> {

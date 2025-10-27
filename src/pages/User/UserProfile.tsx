@@ -5,6 +5,7 @@ import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { User, Loan } from '@/types'
+import { getImageUrl } from '@/utils/imageUtils'
 import './UserProfile.css'
 
 interface FavoriteBook {
@@ -31,11 +32,9 @@ const UserProfile: React.FC = () => {
   const [displayName, setDisplayName] = useState('')
   const [editingDisplayName, setEditingDisplayName] = useState(false)
 
-  const buildImageSrc = (path?: string | null) => {
-    if (!path) return ''
-    if (path.startsWith('http')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
-    if (path.startsWith('/')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
-    return `/api/uploads/${path}${imgVersion ? `?v=${imgVersion}` : ''}`
+  const buildImageSrc = (path?: string | null, type: 'book' | 'profile' = 'book', name?: string) => {
+    const baseUrl = getImageUrl(path, type, false, name)
+    return imgVersion ? (baseUrl.includes('?') ? `${baseUrl}&v=${imgVersion}` : `${baseUrl}?v=${imgVersion}`) : baseUrl
   }
 
   useEffect(() => {
@@ -303,7 +302,7 @@ const UserProfile: React.FC = () => {
               <div className="profile-image-display">
                 {profile?.profile_image ? (
                   <img
-                    src={buildImageSrc(profile.profile_image)}
+                    src={buildImageSrc(profile.profile_image, 'profile')}
                     key={`${profile?.profile_image}-${imgVersion}`}
                     alt="Perfil"
                     className="profile-image"
@@ -317,7 +316,7 @@ const UserProfile: React.FC = () => {
                     }}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
-                      e.currentTarget.src = '/api/uploads/default-user.png';
+                      e.currentTarget.src = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg';
                     }}
                   />
                 ) : (
@@ -408,7 +407,7 @@ const UserProfile: React.FC = () => {
                     <div className="loan-actions">
                       {loan.photo && (
                         <img
-                          src={buildImageSrc(loan.photo)}
+                          src={buildImageSrc(loan.photo, 'book', loan.title)}
                           alt={loan.title}
                           className="loan-book-image"
                         />
@@ -444,7 +443,7 @@ const UserProfile: React.FC = () => {
               <div className="favorite-book-card">
                 {favoriteBook.photo && (
                   <img
-                    src={buildImageSrc(favoriteBook.photo)}
+                    src={buildImageSrc(favoriteBook.photo, 'book', favoriteBook.title)}
                     alt={favoriteBook.title}
                     className="favorite-book-image"
                   />

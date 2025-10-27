@@ -7,10 +7,12 @@ import { UsersController } from "./users.controller";
 import { UsersResolver } from "./users.resolver";
 import { UsersRepository } from "./users.repository";
 import { PrismaModule } from "@/infrastructure/prisma/prisma.module";
+import { CloudinaryModule } from "@/common/cloudinary/cloudinary.module";
 
 @Module({
   imports: [
     PrismaModule,
+    CloudinaryModule,
     MulterModule.register({
       storage: diskStorage({
         destination: join(__dirname, "..", "..", "FRONTEND", "uploads"),

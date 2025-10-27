@@ -6,6 +6,7 @@ import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { Author } from '@/types'
+import { getImageUrl } from '@/utils/imageUtils'
 import './AuthorsCards.css'
 
 const Authors: React.FC = () => {
@@ -203,27 +204,21 @@ const Authors: React.FC = () => {
               
               <div className="author-card-header">
                 <div className="author-card-avatar">
-                  {author.photo && author.photo.trim() !== '' ? (
-                    <img 
-                      src={author.photo.startsWith('http') || author.photo.startsWith('/') ? author.photo : `/api/uploads/${author.photo}`} 
-                      alt={author.name_author}
-                      onError={(e) => {
-                        const target = e.currentTarget as HTMLImageElement;
-                        target.style.display = 'none';
-                        const parent = target.parentElement;
-                        if (parent && !parent.querySelector('.avatar-fallback')) {
-                          const fallbackDiv = document.createElement('div');
-                          fallbackDiv.className = 'avatar-fallback';
-                          fallbackDiv.textContent = author.name_author.charAt(0).toUpperCase();
-                          parent.appendChild(fallbackDiv);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="avatar-fallback">
-                      {author.name_author.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <img 
+                    src={getImageUrl(author.photo, 'author', false, author.name_author)} 
+                    alt={author.name_author}
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector('.avatar-fallback')) {
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'avatar-fallback';
+                        fallbackDiv.textContent = author.name_author.charAt(0).toUpperCase();
+                        parent.appendChild(fallbackDiv);
+                      }
+                    }}
+                  />
                 </div>
                 <h3 className="author-card-name">{author.name_author}</h3>
               </div>

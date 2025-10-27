@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { MY_LOANS_QUERY, RETURN_BOOK_MUTATION, OVERDUE_LOANS_QUERY } from '@/graphql/queries/loans'
-import api from '@/api'
+import { MY_LOANS_QUERY, RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
+import { getImageUrl } from '@/utils/imageUtils'
+import api from '@/api'
 import './MyLoans.css'
 
-interface Loan {
+interface LoanData {
   loans_id: number
   loan_date: string
   due_date: string
@@ -128,7 +129,7 @@ const MyLoans: React.FC = () => {
     return 'normal'
   }
 
-  const getDueDateBadgeText = (loan: Loan) => {
+  const getDueDateBadgeText = (loan: LoanData) => {
     if (loan.is_overdue) {
       return `⚠️ Vencido`
     } else if (loan.days_remaining === 0) {
@@ -219,27 +220,21 @@ const MyLoans: React.FC = () => {
             {loans.map(loan => (
               <div key={loan.loans_id} className={`loan-card ${loan.is_overdue ? 'overdue-card' : ''}`}>
                 <div className="loan-card-image">
-                  {loan.photo ? (
-                    <img 
-                      src={loan.photo.startsWith('http') || loan.photo.startsWith('/') ? loan.photo : `/api/uploads/${loan.photo}`} 
-                      alt={loan.title}
-                      onError={(e) => {
-                        const target = e.currentTarget as HTMLImageElement;
-                        target.style.display = 'none';
-                        const parent = target.parentElement;
-                        if (parent && !parent.querySelector('.no-image')) {
-                          const noImageDiv = document.createElement('div');
-                          noImageDiv.className = 'no-image';
-                          noImageDiv.textContent = 'Sem imagem';
-                          parent.appendChild(noImageDiv);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="no-image">
-                      Sem imagem
-                    </div>
-                  )}
+                  <img 
+                    src={getImageUrl(loan.photo, 'book', false, loan.title)} 
+                    alt={loan.title}
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector('.no-image')) {
+                        const noImageDiv = document.createElement('div');
+                        noImageDiv.className = 'no-image';
+                        noImageDiv.textContent = 'Sem imagem';
+                        parent.appendChild(noImageDiv);
+                      }
+                    }}
+                  />
                 </div>
                 
                 <div className="loan-card-content">

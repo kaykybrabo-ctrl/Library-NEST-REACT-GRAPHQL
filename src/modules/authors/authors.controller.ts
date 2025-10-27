@@ -160,8 +160,8 @@ export class AuthorsController {
     if (!file) {
       throw new Error("Nenhum arquivo enviado");
     }
-    await this.authorsService.updatePhoto(+id, file.filename);
-    return { photo: file.filename };
+    await this.authorsService.updatePhoto(+id, file);
+    return { success: true, message: 'Foto atualizada com sucesso' };
   }
 
   @Post("api/authors/:id/image")
@@ -195,8 +195,8 @@ export class AuthorsController {
       throw new Error("Nenhum arquivo enviado");
     }
     try {
-      await this.authorsService.updatePhoto(+id, file.filename);
-      return { photo: file.filename };
+      await this.authorsService.updatePhoto(+id, file);
+      return { success: true, message: 'Foto atualizada com sucesso' };
     } catch (err) {
       throw err;
     }

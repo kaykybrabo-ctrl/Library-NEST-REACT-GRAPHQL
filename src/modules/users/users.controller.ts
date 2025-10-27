@@ -31,7 +31,7 @@ export class UsersController {
   private getUserProfile(username: string) {
     if (!UsersController.userProfiles.has(username)) {
       UsersController.userProfiles.set(username, {
-        image: "default-user.png",
+        image: "https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg",
         description: "Usuário do sistema"
       });
     }
@@ -142,7 +142,7 @@ export class UsersController {
     const dbUser = await this.usersService.findByUsername(username);
     
     if (dbUser && file) {
-      await this.usersService.updateProfileImage(dbUser.id, file.filename);
+      await this.usersService.updateProfileImage(dbUser.id, file);
     }
 
     const updatedUser = await this.usersService.findByUsername(username);
@@ -153,7 +153,7 @@ export class UsersController {
       email: username,
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
-      profile_image: updatedUser?.profile_image || 'default-user.png',
+      profile_image: updatedUser?.profile_image || 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg',
       display_name: updatedUser?.display_name || '',
       timestamp: Date.now(),
       success: true
@@ -197,7 +197,7 @@ export class UsersController {
       email: username,
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
-      profile_image: updatedUser?.profile_image || 'default-user.png',
+      profile_image: updatedUser?.profile_image || 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg',
       display_name: updatedUser?.display_name || updatedUser?.photo || ''
     };
   }
@@ -241,7 +241,7 @@ export class UsersController {
       email: username,
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
-      profile_image: updatedUser?.profile_image || 'default-user.png',
+      profile_image: updatedUser?.profile_image || 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg',
       display_name: updatedUser?.display_name || updatedUser?.photo || ''
     };
   }
@@ -287,7 +287,7 @@ export class UsersController {
         email: dbUser.username,
         role: dbUser.role,
         description: dbUser.description || '',
-        profile_image: dbUser.profile_image || 'default-user.png',
+        profile_image: dbUser.profile_image || 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg',
         display_name: dbUser.display_name || '',
         timestamp: Date.now()
       };

@@ -13,6 +13,7 @@ import ConfirmModal from '@/components/ConfirmModal'
 import { Rating, Typography, Box } from '@mui/material'
 import { useAuth } from '@/contexts/AuthContext'
 import { Book, Review } from '@/types'
+import { getImageUrl } from '@/utils/imageUtils'
 import api from '@/api'
 import './BookDetail.css'
 
@@ -72,10 +73,8 @@ const BookDetail: React.FC = () => {
   const isBookRentedByOther = bookLoanStatus?.isRented && !userLoan
 
   const buildImageSrc = (path?: string | null) => {
-    if (!path) return ''
-    if (path.startsWith('http')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
-    if (path.startsWith('/')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
-    return `/api/uploads/${path}${imgVersion ? `?v=${imgVersion}` : ''}`
+    const baseUrl = getImageUrl(path, 'book', false, book?.title)
+    return imgVersion ? (baseUrl.includes('?') ? `${baseUrl}&v=${imgVersion}` : `${baseUrl}?v=${imgVersion}`) : baseUrl
   }
 
   const onSelectImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,7 +312,7 @@ const BookDetail: React.FC = () => {
                 }
               } catch {}
               e.currentTarget.onerror = null
-              e.currentTarget.src = '/api/uploads/default-user.png'
+              e.currentTarget.src = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg'
             }}
           />
         ) : null}

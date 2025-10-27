@@ -66,6 +66,12 @@ export class AuthService {
       role: "user",
     });
 
-    return { message: "Conta criada com sucesso" };
+    const userForLogin = {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    };
+
+    return userForLogin;
   }
 }

@@ -63,6 +63,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await api.post('/api/register', { username, password });
+      
+      if (response.data.token) {
+        const { token, user } = response.data;
+        setToken(token);
+        setUser(user);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
+      
       return true;
     } catch (error: any) {
       throw error;

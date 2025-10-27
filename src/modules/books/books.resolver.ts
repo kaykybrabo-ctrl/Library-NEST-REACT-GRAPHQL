@@ -5,19 +5,18 @@ import { Book } from './entities/book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
+import { CloudinaryService } from '@/common/services/cloudinary.service';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { GqlAdminGuard } from '@/common/guards/gql-admin.guard';
 import { Upload } from '@/common/scalars/upload.scalar';
 import { Author } from '../authors/entities/author.entity';
-import { createWriteStream } from 'fs';
-import { join } from 'path';
-import { v4 as uuid } from 'uuid';
 
 @Resolver(() => Book)
 export class BooksResolver {
   constructor(
     private readonly booksService: BooksService,
     private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Query(() => [Book], { name: 'books' })
@@ -87,44 +86,46 @@ export class BooksResolver {
       throw new Error('Apenas arquivos de imagem são permitidos');
     }
 
-    const extension = filename.split('.').pop();
-    const uniqueFilename = `${uuid()}.${extension}`;
-    const uploadPath = join(process.cwd(), 'FRONTEND', 'uploads', uniqueFilename);
-
     const base64Data = fileData.replace(/^data:image\/[a-z]+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
     
-    await new Promise<void>((resolve, reject) => {
-      const writeStream = createWriteStream(uploadPath);
-      writeStream.write(buffer);
-      writeStream.end();
-      writeStream.on('finish', () => resolve());
-      writeStream.on('error', reject);
-    });
+    const mockFile = {
+      buffer,
+      mimetype: `image/${filename.split('.').pop()}`,
+      originalname: filename,
+    } as Express.Multer.File;
 
-    const updatedBook = await this.prisma.book.update({
-      where: { book_id: bookId },
-      data: { photo: uniqueFilename },
-      include: {
-        author: true,
-      },
-    });
+    try {
+      const cloudinaryUrl = await this.cloudinaryService.uploadImage(
+        mockFile,
+        'pedbook/books'
+      );
+      const updatedBook = await this.prisma.book.update({
+        where: { book_id: bookId },
+        data: { photo: cloudinaryUrl },
+        include: {
+          author: true,
+        },
+      });
 
-    return {
-      book_id: updatedBook.book_id,
-      title: updatedBook.title,
-      description: updatedBook.description,
-      photo: updatedBook.photo,
-      deleted_at: updatedBook.deleted_at,
-      author_id: updatedBook.author_id,
-      author: updatedBook.author ? {
-        author_id: updatedBook.author.author_id,
-        name_author: updatedBook.author.name_author,
-        biography: updatedBook.author.biography,
-        photo: updatedBook.author.photo,
-        deleted_at: updatedBook.author.deleted_at,
-      } : undefined,
-    };
+      return {
+        book_id: updatedBook.book_id,
+        title: updatedBook.title,
+        description: updatedBook.description,
+        photo: updatedBook.photo,
+        deleted_at: updatedBook.deleted_at,
+        author_id: updatedBook.author_id,
+        author: updatedBook.author ? {
+          author_id: updatedBook.author.author_id,
+          name_author: updatedBook.author.name_author,
+          biography: updatedBook.author.biography,
+          photo: updatedBook.author.photo,
+          deleted_at: updatedBook.author.deleted_at,
+        } : undefined,
+      };
+    } catch (error) {
+      throw new Error(`Erro no upload da imagem: ${error.message}`);
+    }
   }
 
   @ResolveField('author', () => Author, { nullable: true })

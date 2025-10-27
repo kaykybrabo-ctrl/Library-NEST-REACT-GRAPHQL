@@ -46,7 +46,16 @@ export class UploadsController {
         }
       } catch {}
     }
-    if (!found) return res.status(404).send("Not found");
+    if (!found) {
+      if (filename.includes('default-user') || filename.includes('user')) {
+        return res.redirect('https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg');
+      } else if (filename.includes('default-author') || filename.includes('author')) {
+        return res.redirect('https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062934/pedbook/profiles/default-author.svg');
+      } else if (filename.includes('default-book') || filename.includes('book')) {
+        return res.redirect('https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062932/pedbook/books/default-book.svg');
+      }
+      return res.status(404).send("Not found");
+    }
 
     res.setHeader("Cache-Control", "no-store");
     return res.sendFile(found);

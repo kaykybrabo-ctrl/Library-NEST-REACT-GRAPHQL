@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/home.css';
 import styles from './HomeHeader.module.css';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Home: React.FC = () => {
   const [featured, setFeatured] = useState<Array<{ book_id: number; title: string; description: string; photo: string | null; author_name: string }>>([]);
@@ -79,7 +80,7 @@ const Home: React.FC = () => {
       <section className="hero">
         <div className="hero-gradient" />
         <div className="carousel">
-          <div className="slide active" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600')" }}>
+          <div className="slide active" style={{ backgroundImage: "url('https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761154649/pedbook/carousel/carousel-1.jpg')" }}>
             <div className="overlay" style={{ paddingLeft: '60px' }}>
               <h2>Explore livros incríveis</h2>
               <p>Descubra autores, leia sinopses e gerencie seus favoritos.</p>
@@ -89,7 +90,7 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1600')" }}>
+          <div className="slide" style={{ backgroundImage: "url('https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761154650/pedbook/carousel/carousel-2.jpg')" }}>
             <div className="overlay" style={{ paddingLeft: '60px' }}>
               <h2>Descubra novos livros</h2>
               <p>Explore nosso acervo e encontre sua próxima leitura.</p>
@@ -99,7 +100,7 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1600')" }}>
+          <div className="slide" style={{ backgroundImage: "url('https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761154651/pedbook/carousel/carousel-3.jpg')" }}>
             <div className="overlay" style={{ paddingLeft: '60px' }}>
               <h2>Leituras para todos</h2>
               <p>Ficção, romance, crônicas e muito mais.</p>
@@ -147,16 +148,24 @@ const Home: React.FC = () => {
         ) : (
           <div className="cards">
             {[
-              { title: 'Life in Silence', author_name: 'Guilherme Biondo', description: 'Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.', photoUrl: '/api/uploads/Life%20in%20Silence.jpeg?v=1' },
-              { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Pequenos momentos que compõem a grandeza da existência humana.', photoUrl: '/api/uploads/Fragments%20of%20Everyday%20Life.jpg?v=1' },
-              { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Contos místicos que navegam entre realidade e fantasia.', photoUrl: '/api/uploads/stor.jpeg?v=1' },
-              { title: 'Between Noise and Calm', author_name: 'Manoel Leite', description: 'Uma jornada filosófica sobre encontrar equilíbrio na vida moderna.', photoUrl: '/api/uploads/Between%20Noise%20and%20Calm.jpg?v=1' },
-              { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'Romance épico que explora os limites do amor e da aventura.', photoUrl: '/api/uploads/The%20Horizon%20and%20the%20Sea.jpg?v=1' },
-              { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'Drama histórico sobre transformações sociais e pessoais.', photoUrl: '/api/uploads/Winds%20of%20Change.jpg?v=1' },
+              { title: 'Life in Silence', author_name: 'Guilherme Biondo', description: 'Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.', photo: null },
+              { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Pequenos momentos que compõem a grandeza da existência humana.', photo: null },
+              { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Contos místicos que navegam entre realidade e fantasia.', photo: null },
+              { title: 'Between Noise and Calm', author_name: 'Manoel Leite', description: 'Uma jornada filosófica sobre encontrar equilíbrio na vida moderna.', photo: null },
+              { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'Romance épico que explora os limites do amor e da aventura.', photo: null },
+              { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'Drama histórico sobre transformações sociais e pessoais.', photo: null },
             ].map(book => (
               <div key={`featured-${book.title}`} className="card">
                 <div className="thumb">
-                  <img src={book.photoUrl} alt={book.title} loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1524578271613-d550eacf6090?q=80&w=1200'; }} />
+                  <img 
+                    src={getImageUrl(book.photo, 'book', false, book.title)} 
+                    alt={book.title} 
+                    loading="eager" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                    onError={(e) => { 
+                      (e.currentTarget as HTMLImageElement).src = getImageUrl(null, 'book'); 
+                    }} 
+                  />
                 </div>
                 <div className="card-body">
                   <h4 title={book.title}>{book.title}</h4>

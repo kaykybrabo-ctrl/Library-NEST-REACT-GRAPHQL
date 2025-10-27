@@ -3,6 +3,28 @@ import * as bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+// Função para gerar URL do Cloudinary baseada no título do livro
+const getBookImageUrl = (title: string): string => {
+  // Converte o título para o formato usado no Cloudinary
+  const slug = title.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+  
+  // Mapeamento específico para livros que têm nomes diferentes no Cloudinary
+  const specificMappings: { [key: string]: string } = {
+    'fragments-of-everyday-life': 'book-interrupted-seasons',
+  };
+  
+  const cloudinaryName = specificMappings[slug] || `book-${slug}`;
+  return `https://res.cloudinary.com/ddfgsoh5g/image/upload/pedbook/books/${cloudinaryName}`;
+}
+
+// URLs de imagens do Cloudinary para os autores (pasta pedbook/)
+const AUTHOR_IMAGES = {
+  'Guilherme Biondo': 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065250/pedbook/profiles/author-guilherme-biondo.jpg',
+  'Manoel Leite': 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065252/pedbook/profiles/author-manoel-leite.jpg',
+}
+
 async function main() {
   await prisma.review.deleteMany()
   await prisma.loan.deleteMany()
@@ -20,7 +42,7 @@ async function main() {
         author_id: 1,
         name_author: 'Guilherme Biondo',
         biography: 'Guilherme Biondo é um escritor que começou a escrever desde jovem, movido pela curiosidade e pela paixão por contar histórias. Seus livros falam sobre pessoas, sentimentos e tudo o que faz parte do cotidiano, mas com uma perspectiva única e sincera.',
-        photo: null,
+        photo: AUTHOR_IMAGES['Guilherme Biondo'],
       },
     }),
     prisma.author.create({
@@ -28,7 +50,7 @@ async function main() {
         author_id: 2,
         name_author: 'Manoel Leite',
         biography: 'Manoel Leite é um autor e observador atento da vida cotidiana. Suas histórias surgem de experiências simples, mas cheias de significado. Com um estilo de escrita direto e humano, Manoel busca tocar o leitor com temas sobre memória, afeto e identidade.',
-        photo: null,
+        photo: AUTHOR_IMAGES['Manoel Leite'],
       },
     }),
   ])
@@ -74,7 +96,7 @@ async function main() {
           author_id: book.author_id,
           title: book.title,
           description: book.description,
-          photo: null,
+          photo: getBookImageUrl(book.title),
         },
       })
     )

@@ -33,8 +33,8 @@ const Register: React.FC = () => {
     try {
       const success = await register(username, password)
       if (success) {
-        setSuccess('Registro realizado com sucesso! Você já pode entrar.')
-        setTimeout(() => navigate('/'), 2000)
+        setSuccess('Conta criada e login realizado com sucesso!')
+        setTimeout(() => navigate('/books'), 1500)
       }
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Falha no registro. Tente novamente.'
