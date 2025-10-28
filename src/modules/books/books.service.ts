@@ -16,7 +16,7 @@ export class BooksService {
     });
   }
 
-  async findAll(page?: number, limit?: number, search?: string, includeDeleted: boolean = false): Promise<any> {
+  async findAll(page?: number, limit?: number, search?: string, includeDeleted: boolean = false, authorId?: number): Promise<any> {
     const pageNum = page || 1;
     const limitNum = limit || 5;
     const offset = (pageNum - 1) * limitNum;
@@ -30,6 +30,7 @@ export class BooksService {
             },
           }
         : {}),
+      ...(authorId ? { author_id: authorId } : {}),
     };
 
     const books = await this.booksRepository.findAll({

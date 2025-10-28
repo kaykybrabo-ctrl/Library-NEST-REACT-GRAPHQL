@@ -146,16 +146,21 @@ const Home: React.FC = () => {
         ) : error ? (
           <div className="error">{error}</div>
         ) : (
-          <div className="cards">
+          <>
+            <div className="cards">
             {[
               { title: 'Life in Silence', author_name: 'Guilherme Biondo', description: 'Uma narrativa profunda sobre a busca pela paz interior em meio ao caos urbano.', photo: null },
               { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Pequenos momentos que compõem a grandeza da existência humana.', photo: null },
               { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Contos místicos que navegam entre realidade e fantasia.', photo: null },
-              { title: 'Between Noise and Calm', author_name: 'Manoel Leite', description: 'Uma jornada filosófica sobre encontrar equilíbrio na vida moderna.', photo: null },
               { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'Romance épico que explora os limites do amor e da aventura.', photo: null },
               { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'Drama histórico sobre transformações sociais e pessoais.', photo: null },
-            ].map(book => (
-              <div key={`featured-${book.title}`} className="card">
+            ].map((book, index) => (
+              <div 
+                key={`featured-${book.title}`} 
+                className="card clickable-card"
+                onClick={() => navigate(`/public/books/${index + 1}`)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="thumb">
                   <img 
                     src={getImageUrl(book.photo, 'book', false, book.title)} 
@@ -169,12 +174,42 @@ const Home: React.FC = () => {
                 </div>
                 <div className="card-body">
                   <h4 title={book.title}>{book.title}</h4>
-                  <p className="author">{book.author_name}</p>
+                  <p 
+                    className="author clickable-author" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const authorId = book.author_name === 'Guilherme Biondo' ? 1 : 2;
+                      navigate(`/public/authors/${authorId}`);
+                    }}
+                  >
+                    {book.author_name}
+                  </p>
                   <p className="desc">{book.description}</p>
+                  <div className="card-actions">
+                    <small className="view-hint">📖 Clique para ver detalhes</small>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+          
+          <div className="view-all-container">
+            <div className="view-all-buttons">
+              <button 
+                onClick={() => navigate('/public/books')}
+                className="view-all-button"
+              >
+                📚 Ver Todos os Livros
+              </button>
+              <button 
+                onClick={() => navigate('/public/authors')}
+                className="view-all-button secondary"
+              >
+                👥 Ver Todos os Autores
+              </button>
+            </div>
+          </div>
+          </>
         )}
       </section>
 

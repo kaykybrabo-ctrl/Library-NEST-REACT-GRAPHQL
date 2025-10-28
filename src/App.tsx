@@ -12,6 +12,10 @@ import UserProfile from '@/pages/User/UserProfile'
 import Loans from '@/pages/Loans/Loans'
 import MyLoans from '@/pages/MyLoans/MyLoans'
 import ResetPassword from './components/ResetPassword'
+import PublicBookDetail from './components/public/PublicBookDetail'
+import PublicAuthorDetail from './components/public/PublicAuthorDetail'
+import PublicBooks from './components/public/PublicBooks'
+import PublicAuthors from './components/public/PublicAuthors'
 
 function App() {
   return (
@@ -22,6 +26,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/reset" element={<ResetPassword />} />
+          
+          <Route path="/public/books" element={<PublicBooks />} />
+          <Route path="/public/books/:id" element={<PublicBookDetail />} />
+          <Route path="/public/authors" element={<PublicAuthors />} />
+          <Route path="/public/authors/:id" element={<PublicAuthorDetail />} />
+          
           <Route path="/books" element={
             <ProtectedRoute>
               <Books />

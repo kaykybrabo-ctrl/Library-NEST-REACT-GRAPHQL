@@ -91,12 +91,14 @@ export class BooksController {
     @Query("page") page: string = "1",
     @Query("limit") limit: string = "5",
     @Query("search") search?: string,
+    @Query("author_id") authorId?: string,
     @Query("includeDeleted") includeDeleted?: string,
   ) {
     const pageNum = Number(page);
     const limitNum = Number(limit);
+    const authorIdNum = authorId ? Number(authorId) : undefined;
 
-    const result = await this.booksService.findAll(pageNum, limitNum, search, includeDeleted === '1' || includeDeleted === 'true');
+    const result = await this.booksService.findAll(pageNum, limitNum, search, includeDeleted === '1' || includeDeleted === 'true', authorIdNum);
     return result;
   }
 
