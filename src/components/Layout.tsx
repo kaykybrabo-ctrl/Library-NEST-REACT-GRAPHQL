@@ -1,37 +1,109 @@
-import React, { ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { useState, useEffect, ReactNode } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { getImageUrl, getFallbackImageUrl } from '../utils/imageUtils'
+import api from '../api'
 
 interface LayoutProps {
   children: ReactNode
   title: string
 }
 
+interface UserProfile {
+  profile_image?: string
+  username: string
+}
+
 const Layout: React.FC<LayoutProps> = ({ children, title }) => {
-  const { logout, isAdmin } = useAuth()
+  const { logout, user, isAuthenticated, isAdmin } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [showDropdown, setShowDropdown] = useState(false)
+
+  useEffect(() => {
+    if (user?.username) {
+      fetchUserProfile()
+    }
+  }, [user])
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get(`/api/get-profile?username=${user?.username}&t=${Date.now()}`)
+      setUserProfile(response.data)
+    } catch (err) {
+    }
+  }
 
   const handleLogout = () => {
     logout()
+    window.location.replace('/')
   }
 
   return (
-    <>
-      <header>
-        <h1>{title}</h1>
-        <button id="logout-button" onClick={handleLogout} aria-label="Sair da conta">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            aria-hidden="true"
+    <div className="page-wrapper">
+      <div className="content-wrapper">
+        <header>
+          <h1 
+            onClick={() => navigate('/')}
+            className="clickable-header"
+            title="Voltar para o início"
           >
-            <path fill="currentColor" d="M10 3a1 1 0 0 1 1 1v4h-2V5H6v14h3v-3h2v4a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5Zm6.293 6.293 1.414 1.414L15.414 13H21v2h-5.586l2.293 2.293-1.414 1.414L12 14l4.293-4.293Z" />
-          </svg>
-          <span>Sair</span>
-        </button>
-      </header>
+            {title}
+          </h1>
+          <div className="header-user-menu">
+            {isAuthenticated ? (
+              <div className="user-menu">
+                <img
+                  src={getImageUrl(userProfile?.profile_image, 'profile')}
+                  alt="Perfil"
+                  className="user-avatar"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = getFallbackImageUrl('profile')
+                  }}
+                />
+                {showDropdown && (
+                  <div className="dropdown-menu">
+                    <Link 
+                      to="/profile" 
+                      className="dropdown-link"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span>👤</span>
+                      <span>Ir ao Perfil</span>
+                    </Link>
+                    <button 
+                      onClick={() => {
+                        handleLogout()
+                        setShowDropdown(false)
+                      }}
+                      className="dropdown-button"
+                    >
+                      <span>🚪</span>
+                      <span>Sair</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link 
+                  to="/login"
+                  className="auth-link-login"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/register"
+                  className="auth-link-register"
+                >
+                  Registrar
+                </Link>
+              </>
+            )}
+          </div>
+        </header>
 
       <nav>
         <Link 
@@ -68,12 +140,13 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         )}
       </nav>
 
-      <main>{children}</main>
+        <main>{children}</main>
+      </div>
 
       <footer>
         <p>&copy; 2025 PedBook</p>
       </footer>
-    </>
+    </div>
   )
 }
 

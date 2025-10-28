@@ -1,13 +1,8 @@
--- Script para corrigir todas as imagens do Cloudinary
--- Execute este script sempre que o seed sobrescrever as URLs
-
--- Corrigir títulos dos livros
 UPDATE library1.books SET title = 'Fragments of Hope' WHERE book_id = 17;
 UPDATE library1.books SET title = 'Trails and Scars' WHERE book_id = 18;
 UPDATE library1.books SET title = 'From the Other Side of the Street' WHERE book_id = 19;
 UPDATE library1.books SET title = 'Interrupted Seasons' WHERE book_id = 20;
 
--- Atualizar URLs dos livros
 UPDATE library1.books SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065256/pedbook/books/book-life-in-silence.jpg' WHERE title = 'Life in Silence';
 UPDATE library1.books SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065258/pedbook/books/book-fragments-of-everyday-life.jpg' WHERE title = 'Fragments of Everyday Life';
 UPDATE library1.books SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065260/pedbook/books/book-stories-of-the-wind.jpg' WHERE title = 'Stories of the Wind';
@@ -29,11 +24,9 @@ UPDATE library1.books SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/up
 UPDATE library1.books SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065292/pedbook/books/book-from-the-other-side-of-the-street.jpg' WHERE title = 'From the Other Side of the Street';
 UPDATE library1.books SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065294/pedbook/books/book-interrupted-seasons.jpg' WHERE title = 'Interrupted Seasons';
 
--- Atualizar URLs dos autores
 UPDATE library1.authors SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065250/pedbook/profiles/author-guilherme-biondo.jpg' WHERE name_author = 'Guilherme Biondo';
 UPDATE library1.authors SET photo = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065252/pedbook/profiles/author-manoel-leite.jpg' WHERE name_author = 'Manoel Leite';
 
--- Verificar resultado
 SELECT 'LIVROS:' as tipo, COUNT(*) as total, COUNT(photo) as with_photos FROM library1.books
 UNION ALL
 SELECT 'AUTORES:' as tipo, COUNT(*) as total, COUNT(photo) as with_photos FROM library1.authors;

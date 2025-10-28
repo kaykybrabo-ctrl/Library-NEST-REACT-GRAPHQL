@@ -1,8 +1,10 @@
 .authors-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
   margin-top: 20px;
+  padding: 0;
+  width: 100%;
 }
 
 .author-card {
@@ -35,7 +37,7 @@
 .author-card-header {
   background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   color: white;
-  padding: 20px;
+  padding: 25px 20px;
   text-align: center;
   position: relative;
 }
@@ -82,7 +84,7 @@
 }
 
 .author-card-content {
-  padding: 20px;
+  padding: 25px;
 }
 
 .author-card-biography {
@@ -110,9 +112,10 @@
 
 .author-card-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 20px;
 }
 
 .edit-form {

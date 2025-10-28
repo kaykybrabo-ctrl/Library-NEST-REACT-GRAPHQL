@@ -16,7 +16,7 @@
   background:#162c74 !important;
   box-shadow:0 2px 10px rgba(0,0,0,.08) !important;
 }
-.home-header .container{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;width:100%}
+.home-header .container{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 20px}
 .home-header .brand{display:flex;align-items:center;gap:12px}
 .home-header .logo{color:#fff !important;font-size:24px}
 .home-header h1{color:#fff !important;font-weight:800;font-size:20px;letter-spacing:.2px;margin:0}

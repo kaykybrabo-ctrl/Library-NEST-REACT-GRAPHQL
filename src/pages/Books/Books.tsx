@@ -350,7 +350,7 @@ const Books: React.FC = () => {
         {slidesLength === 0 ? (
           books.length > 0 ? (
             <div style={{ padding: 16, background: '#fff', borderRadius: 10, border: '2px solid #1976d2' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
                 {books.slice(0, 8).map((bk) => (
                   <div key={`fallback-${bk.book_id}`} style={{ display: 'flex', gap: 14, alignItems: 'center', border: '1px solid #e0e0e0', borderRadius: 10, padding: 12, background: '#fff' }}>
                     <div style={{ width: 70, height: 100, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, overflow: 'hidden', flex: '0 0 auto', alignSelf: 'center' }}>
