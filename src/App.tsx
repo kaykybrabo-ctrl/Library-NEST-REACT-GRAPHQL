@@ -9,6 +9,7 @@ import Authors from '@/pages/Authors/Authors'
 import BookDetail from '@/pages/Books/BookDetail'
 import AuthorDetail from '@/pages/Authors/AuthorDetail'
 import UserProfile from '@/pages/User/UserProfile'
+import Users from '@/pages/Users/Users'
 import Loans from '@/pages/Loans/Loans'
 import MyLoans from '@/pages/MyLoans/MyLoans'
 import ResetPassword from './components/ResetPassword'
@@ -55,6 +56,16 @@ function App() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <UserProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile/:username" element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/users" element={
+            <ProtectedRoute>
+              <Users />
             </ProtectedRoute>
           } />
           <Route path="/loans" element={

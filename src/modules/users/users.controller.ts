@@ -162,6 +162,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post("api/save-description")
   async saveDescription(
     @Body() body: any, 
@@ -183,6 +184,16 @@ export class UsersController {
     
     username = username !== "guest" ? username : (queryUsername || body?.username || "guest");
     
+    const currentUser = req.user;
+    const targetUsername = body?.username || queryUsername || username;
+    
+    if (currentUser.username !== targetUsername && currentUser.role !== 'admin') {
+      throw new HttpException(
+        'Você não tem permissão para editar este perfil',
+        HttpStatus.FORBIDDEN
+      );
+    }
+    
     const dbUser = await this.usersService.findByUsername(username);
     
     if (dbUser && body.description !== undefined) {
@@ -202,6 +213,7 @@ export class UsersController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post("api/save-display-name")
   async saveDisplayName(
     @Body() body: any,
@@ -220,7 +232,18 @@ export class UsersController {
     } catch (error) {
     }
     
-    const dbUser = await this.usersService.findByUsername(username);
+    const targetUsername = body.username || username;
+    
+    const currentUser = req.user;
+    
+    if (currentUser.username !== targetUsername && currentUser.role !== 'admin') {
+      throw new HttpException(
+        'Você não tem permissão para editar este perfil',
+        HttpStatus.FORBIDDEN
+      );
+    }
+    
+    const dbUser = await this.usersService.findByUsername(targetUsername);
     
     if (dbUser && body.display_name !== undefined) {
       try {
@@ -233,12 +256,12 @@ export class UsersController {
       }
     }
 
-    const updatedUser = await this.usersService.findByUsername(username);
+    const updatedUser = await this.usersService.findByUsername(targetUsername);
 
     return {
       id: updatedUser?.id || 1,
-      username: username,
-      email: username,
+      username: targetUsername,
+      email: targetUsername,
       role: updatedUser?.role || "user",
       description: updatedUser?.description || '',
       profile_image: updatedUser?.profile_image || 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg',
@@ -261,6 +284,27 @@ export class UsersController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get("api/users")
+  async getAllUsers(@Request() req) {
+    try {
+      const users = await this.usersService.findAll();
+      return users.map(user => ({
+        user_id: user.id,
+        username: user.username,
+        role: user.role,
+        profile_image: user.profile_image || 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg',
+        display_name: user.display_name || user.username,
+        description: user.description || ''
+      }));
+    } catch (error) {
+      throw new HttpException(
+        'Erro ao buscar usuários',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   @Get("api/get-profile")
   async getProfileApi(@Request() req?: any) {
     let username = "guest";
@@ -276,7 +320,10 @@ export class UsersController {
     } catch (error) {
     }
     
-    username = username !== "guest" ? username : (req?.query?.username || "guest");
+    const queryUsername = req?.query?.username;
+    if (queryUsername) {
+      username = queryUsername;
+    }
     
     const dbUser = await this.usersService.findByUsername(username);
     

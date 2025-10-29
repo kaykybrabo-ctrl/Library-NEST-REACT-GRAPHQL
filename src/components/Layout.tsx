@@ -130,6 +130,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         >
           Perfil
         </Link>
+        <Link 
+          to="/users" 
+          className={location.pathname === '/users' ? 'active' : ''}
+        >
+          Usuários
+        </Link>
         {isAdmin && (
           <Link 
             to="/loans" 

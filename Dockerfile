@@ -7,6 +7,7 @@ RUN npm install
 COPY src/ ./src/
 COPY tsconfig.json ./
 COPY tsconfig.backend.json ./
+COPY nest-cli.json ./
 COPY prisma/ ./prisma/
 COPY index.html ./
 COPY vite.config.ts ./
@@ -28,7 +29,7 @@ RUN npm run react-build
 
 RUN npm run build
 
-RUN cp -R FRONTEND/ dist/FRONTEND/
+RUN mkdir -p dist/FRONTEND/ && cp -R FRONTEND/ dist/
 RUN mkdir -p dist/infrastructure/mail/templates \
  && cp -R src/infrastructure/mail/templates/* dist/infrastructure/mail/templates/ || true
 

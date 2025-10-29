@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
+import { useParams } from 'react-router-dom'
 import { RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
 import api from '@/api'
 import Layout from '@/components/Layout'
@@ -18,7 +19,9 @@ interface FavoriteBook {
 
 const UserProfile: React.FC = () => {
   const { user } = useAuth()
+  const { username: paramUsername } = useParams<{ username: string }>()
   const [profile, setProfile] = useState<User | null>(null)
+  const [viewingUser, setViewingUser] = useState<User | null>(null)
   const [loans, setLoans] = useState<Loan[]>([])
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null)
   const [loading, setLoading] = useState(true)
@@ -32,6 +35,13 @@ const UserProfile: React.FC = () => {
   const [displayName, setDisplayName] = useState('')
   const [editingDisplayName, setEditingDisplayName] = useState(false)
 
+  const canEdit = user && (
+    (!paramUsername) ||
+    (paramUsername === user.username) ||
+    (user.role === 'admin')
+  )
+  const targetUsername = paramUsername || user?.username
+
   const buildImageSrc = (path?: string | null, type: 'book' | 'profile' = 'book', name?: string) => {
     const baseUrl = getImageUrl(path, type, false, name)
     return imgVersion ? (baseUrl.includes('?') ? `${baseUrl}&v=${imgVersion}` : `${baseUrl}?v=${imgVersion}`) : baseUrl
@@ -40,10 +50,17 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
+    
+    setProfile(null)
+    setViewingUser(null)
+    setLoans([])
+    setFavoriteBook(null)
+    setLoading(true)
+    
     fetchProfile()
     fetchLoans()
     fetchFavoriteBook()
-  }, [])
+  }, [paramUsername, user?.username])
 
   useEffect(() => {
     if (profile?.description !== undefined) {
@@ -56,30 +73,39 @@ const UserProfile: React.FC = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get('/api/get-profile')
+      const url = targetUsername && targetUsername !== user?.username 
+        ? `/api/get-profile?username=${targetUsername}`
+        : '/api/get-profile'
+      
+      const response = await api.get(url)
       setProfile(response.data)
+      
+      if (targetUsername && targetUsername !== user?.username) {
+        setViewingUser(response.data)
+      }
+      
       setError('')
     } catch (e) {
-      setError('Falha ao carregar o perfil. Faça login novamente.')
+      setError('Falha ao carregar o perfil.')
     } finally {
       setLoading(false)
     }
   }
 
   const fetchLoans = async () => {
-    if (!user?.username) return
+    if (!targetUsername) return
 
-    const response = await api.get(`/api/loans?username=${user.username}`)
+    const response = await api.get(`/api/loans?username=${targetUsername}`)
     setLoans(response.data)
   }
 
   const fetchFavoriteBook = async () => {
-    if (!user?.username) {
+    if (!targetUsername) {
       return
     }
 
     try {
-      const response = await api.get(`/api/users/favorite?username=${user.username}`)
+      const response = await api.get(`/api/users/favorite?username=${targetUsername}`)
       if (response.data) {
         const favoriteData = {
           ...response.data,
@@ -101,20 +127,18 @@ const UserProfile: React.FC = () => {
   }
 
   const handleUploadImage = async () => {
-    if (!imageFile) return
+    if (!imageFile || !canEdit) {
+      if (!canEdit) {
+        setError('Você não tem permissão para editar este perfil')
+      }
+      return
+    }
+    
     setUploading(true)
     try {
       const formData = new FormData()
       formData.append('image', imageFile)
-      
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-          formData.append('username', user.username || user.email || 'guest');
-        } catch (e) {
-        }
-      }
+      formData.append('username', targetUsername || 'guest')
       
       const resp = await api.post('/api/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -134,20 +158,15 @@ const UserProfile: React.FC = () => {
   }
 
   const handleUpdateDescription = async () => {
-    setUploading(true)
-
-    let username = 'guest';
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        username = user.username || user.email || 'guest';
-      } catch (e) {
-      }
+    if (!canEdit) {
+      setError('Você não tem permissão para editar este perfil')
+      return
     }
 
+    setUploading(true)
+
     const response = await api.post('/api/save-description', {
-      username: username,
+      username: targetUsername,
       description: description
     })
 
@@ -163,11 +182,17 @@ const UserProfile: React.FC = () => {
   }
 
   const handleUpdateDisplayName = async () => {
+    if (!canEdit) {
+      setError('Você não tem permissão para editar este perfil')
+      return
+    }
+
     setUploading(true)
 
     try {
       await api.post('/api/save-display-name', {
-        display_name: displayName
+        display_name: displayName,
+        username: targetUsername
       })
 
       setProfile(prev => prev ? {
@@ -221,9 +246,22 @@ const UserProfile: React.FC = () => {
     )
   }
 
+  const displayedUser = viewingUser || profile
+  const isViewingOtherUser = paramUsername && paramUsername !== user?.username
+  const pageTitle = isViewingOtherUser 
+    ? `Perfil de ${displayedUser?.display_name || displayedUser?.username || 'Usuário'}` 
+    : 'Meu Perfil'
+
   return (
-    <Layout title="Perfil do Usuário">
+    <Layout title={pageTitle}>
       {error && <div className="error-message">{error}</div>}
+      
+      {isViewingOtherUser && (
+        <div className="viewing-other-user-notice">
+          <p>📋 Visualizando perfil de <strong>{displayedUser?.display_name || displayedUser?.username}</strong></p>
+          {!canEdit && <p>⚠️ Você não pode editar este perfil</p>}
+        </div>
+      )}
 
       <div className="tabs">
         <button
@@ -236,7 +274,7 @@ const UserProfile: React.FC = () => {
           className={`tab ${activeTab === 'loans' ? 'active' : ''}`}
           onClick={() => setActiveTab('loans')}
         >
-          Meus Empréstimos
+          {isViewingOtherUser ? 'Empréstimos' : 'Meus Empréstimos'}
         </button>
         <button
           className={`tab ${activeTab === 'favorite' ? 'active' : ''}`}
@@ -253,12 +291,12 @@ const UserProfile: React.FC = () => {
         {activeTab === 'profile' && (
           <section className="profile-section">
             <h2>Informações do Perfil</h2>
-            <p><strong>E-mail:</strong> {user?.username || 'Desconhecido'}</p>
-            <p><strong>Função:</strong> {user?.role || 'Usuário'}</p>
+            <p><strong>E-mail:</strong> {displayedUser?.username || 'Desconhecido'}</p>
+            <p><strong>Função:</strong> {displayedUser?.role || 'Usuário'}</p>
 
             <div className="display-name-section">
               <h3>Nome de Exibição</h3>
-              {editingDisplayName ? (
+              {editingDisplayName && canEdit ? (
                 <div>
                   <input
                     type="text"
@@ -287,9 +325,11 @@ const UserProfile: React.FC = () => {
               ) : (
                 <div>
                   <p>{displayName || 'Nenhum nome definido'}</p>
-                  <button onClick={() => setEditingDisplayName(true)}>
-                    {profile?.display_name ? 'Editar Nome' : 'Adicionar Nome'}
-                  </button>
+                  {canEdit && (
+                    <button onClick={() => setEditingDisplayName(true)}>
+                      {profile?.display_name ? 'Editar Nome' : 'Adicionar Nome'}
+                    </button>
+                  )}
                 </div>
               )}
               <p style={{fontSize: '0.9em', color: '#666', marginTop: '5px'}}>
@@ -339,7 +379,7 @@ const UserProfile: React.FC = () => {
 
             <div className="description-section">
               <h3>Descrição</h3>
-              {editingDescription ? (
+              {editingDescription && canEdit ? (
                 <div>
                   <textarea
                     value={description}
@@ -365,36 +405,40 @@ const UserProfile: React.FC = () => {
                 </div>
               ) : (
                 <div>
-                  <p>{profile?.description || 'Nenhuma descrição adicionada ainda.'}</p>
-                  <button onClick={() => setEditingDescription(true)}>
-                    Editar Descrição
-                  </button>
+                  <p>{displayedUser?.description || 'Nenhuma descrição adicionada ainda.'}</p>
+                  {canEdit && (
+                    <button onClick={() => setEditingDescription(true)}>
+                      Editar Descrição
+                    </button>
+                  )}
                 </div>
               )}
             </div>
 
-            <div className="image-upload">
-              <h3>Atualizar Imagem de Perfil</h3>
-                <div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={onSelectImage}
-                    disabled={uploading}
-                  />
-                  <button onClick={handleUploadImage} disabled={!imageFile || uploading}>
-                    {uploading ? 'Enviando...' : 'Enviar'}
-                  </button>
-                </div>
-            </div>
+            {canEdit && (
+              <div className="image-upload">
+                <h3>Atualizar Imagem de Perfil</h3>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={onSelectImage}
+                      disabled={uploading}
+                    />
+                    <button onClick={handleUploadImage} disabled={!imageFile || uploading}>
+                      {uploading ? 'Enviando...' : 'Enviar'}
+                    </button>
+                  </div>
+              </div>
+            )}
           </section>
         )}
 
         {activeTab === 'loans' && (
           <section className="profile-section">
-            <h2>Meus Livros Emprestados</h2>
+            <h2>{isViewingOtherUser ? 'Livros Emprestados' : 'Meus Livros Emprestados'}</h2>
             {loans.length === 0 ? (
-              <p>Você ainda não emprestou nenhum livro.</p>
+              <p>{isViewingOtherUser ? 'Este usuário não emprestou nenhum livro.' : 'Você ainda não emprestou nenhum livro.'}</p>
             ) : (
               <div>
                 {loans.map(loan => (
@@ -412,15 +456,17 @@ const UserProfile: React.FC = () => {
                           className="loan-book-image"
                         />
                       )}
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handleReturnBook(loan.loans_id, loan.title)
-                        }}
-                        className="return-button"
-                      >
-                        Devolver Livro
-                      </button>
+                      {canEdit && (
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleReturnBook(loan.loans_id, loan.title)
+                          }}
+                          className="return-button"
+                        >
+                          Devolver Livro
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

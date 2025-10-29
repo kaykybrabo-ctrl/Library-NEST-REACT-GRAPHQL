@@ -12,6 +12,19 @@
   background-color: #0056b3;
 }
 
+.admin-view-only {
+  background-color: #f59e0b !important;
+  color: white !important;
+  border: 2px solid #f59e0b !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
+}
+
+.admin-view-only:hover {
+  background-color: #d97706 !important;
+  border-color: #d97706 !important;
+}
+
 .book-image {
   width: 200px;
   height: 250px;

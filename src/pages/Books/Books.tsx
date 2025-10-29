@@ -173,6 +173,12 @@ const Books: React.FC = () => {
   };
 
   const handleRentBook = (bookId: number) => {
+    if (user?.role === 'admin') {
+      setErrorModalMessage('Administradores não podem alugar livros. Apenas visualizar e gerenciar empréstimos.')
+      setShowErrorModal(true)
+      return
+    }
+    
     const book = books.find(b => b.book_id === bookId)
     if (book) {
       setBookToRent(book)
@@ -656,6 +662,19 @@ const Books: React.FC = () => {
                               >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z" fill="currentColor" />
+                                </svg>
+                              </button>
+                            ) : user?.role === 'admin' ? (
+                              <button
+                                type="button"
+                                disabled
+                                aria-label="Modo administrador"
+                                title="👑 Administradores não podem alugar livros"
+                                className="icon-button admin-view"
+                                style={{borderColor: '#f59e0b', color: '#f59e0b'}}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
                                 </svg>
                               </button>
                             ) : (

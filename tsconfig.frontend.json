@@ -12,8 +12,8 @@
         "strictNullChecks": true
     },
     "include": [
-        "FRONTEND/assets/**/*.ts",
-        "FRONTEND/interface/assets/**/*.ts"
+        "FRONTEND/assets*.ts",
+        "FRONTEND/interface/assets*.ts"
     ],
     "exclude": [
         "node_modules"

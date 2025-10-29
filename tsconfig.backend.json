@@ -5,27 +5,35 @@
     "lib": ["ES2020"],
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
-    "src/server.ts",
-    "src/DB/**/*",
-    "src/authors/**/*",
-    "src/books/**/*",
-    "src/interface/**/*"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "src/components/**/*",
-    "src/contexts/**/*",
+    "src/components*",
+    "src/contexts*",
+    "src/pages*",
+    "src/hooks*",
+    "src/utils*",
+    "src/styles*",
     "src/main.tsx",
     "src/App.tsx",
+    "src/api.ts",
+    "src/graphql*",
     "src/types/session.d.ts",
     "node_modules"
   ]

@@ -16,6 +16,10 @@ export class LoansResolver {
     @Context() context
   ): Promise<Loan> {
     const user = context.req.user;
+    
+    if (user.role === 'admin') {
+      throw new Error('Administradores não podem alugar livros. Apenas visualizar e gerenciar empréstimos.');
+    }
     const loan = await this.loansService.create({
       user_id: user.id,
       book_id: bookId,

@@ -27,7 +27,7 @@ const BookDetail: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
-  const { isAdmin } = useAuth()
+  const { isAdmin, user } = useAuth()
   const [imgVersion, setImgVersion] = useState(0)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorModalMessage, setErrorModalMessage] = useState('')
@@ -144,6 +144,11 @@ const BookDetail: React.FC = () => {
     await uploadImage(imageFile)
   }
   const handleRentBook = () => {
+    if (user?.role === 'admin') {
+      setErrorModalMessage('Administradores não podem alugar livros. Apenas visualizar e gerenciar empréstimos.')
+      setShowErrorModal(true)
+      return
+    }
     setShowConfirmModal(true)
   }
 
@@ -424,7 +429,17 @@ const BookDetail: React.FC = () => {
           </div>
         ) : (
           <div className="book-actions">
-            <button onClick={handleRentBook} title="✅ Clique para alugar este livro">Alugar Livro</button>
+            {user?.role === 'admin' ? (
+              <button 
+                className="admin-view-only" 
+                disabled 
+                title="Administradores não podem alugar livros"
+              >
+                👑 Modo Administrador - Apenas Visualização
+              </button>
+            ) : (
+              <button onClick={handleRentBook} title="✅ Clique para alugar este livro">Alugar Livro</button>
+            )}
             <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
           </div>
         )}
