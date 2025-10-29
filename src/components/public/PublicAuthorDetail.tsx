@@ -27,7 +27,6 @@ const PublicAuthorDetail: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Biografias hardcoded para autores específicos
   const biografias = {
     1: "Guilherme Biondo é um escritor contemporâneo brasileiro conhecido por suas obras que exploram temas profundos da condição humana. Nascido em São Paulo, desenvolveu desde cedo uma paixão pela literatura e pela filosofia. Suas obras são caracterizadas por uma prosa elegante e reflexiva, que convida o leitor a questionar aspectos fundamentais da existência. Com formação em Letras pela USP, Biondo tem se destacado no cenário literário nacional por sua capacidade de criar narrativas envolventes que combinam elementos do realismo contemporâneo com toques de introspecção psicológica.",
     2: "Manoel Leite é um renomado autor brasileiro especializado em ficção histórica e romance. Natural do Nordeste, suas obras frequentemente retratam a rica cultura e as tradições de sua região natal. Com mais de duas décadas de carreira literária, Leite é reconhecido por sua habilidade em entrelaçar fatos históricos com narrativas ficcionais cativantes. Formado em História pela UFPE, ele utiliza seu conhecimento acadêmico para criar obras que não apenas entretêm, mas também educam os leitores sobre aspectos importantes da cultura brasileira. Seus livros já foram traduzidos para diversos idiomas e receberam vários prêmios literários nacionais."
@@ -56,7 +55,6 @@ const PublicAuthorDetail: React.FC = () => {
       const response = await axios.get(`/api/books?author_id=${id}&limit=1000`)
       setBooks(response.data.books || response.data)
     } catch (err) {
-      // Silently handle error for public viewing
       setBooks([])
     }
   }
@@ -74,7 +72,7 @@ const PublicAuthorDetail: React.FC = () => {
           <div className="public-nav">
             <div className="brand" onClick={() => navigate('/')}>
               <span className="logo">📚</span>
-              <h1 className="title">Library NEST</h1>
+              <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
               <button onClick={() => navigate('/')} className="nav-link">Início</button>
@@ -94,7 +92,7 @@ const PublicAuthorDetail: React.FC = () => {
           <div className="public-nav">
             <div className="brand" onClick={() => navigate('/')}>
               <span className="logo">📚</span>
-              <h1 className="title">Library NEST</h1>
+              <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
               <button onClick={() => navigate('/')} className="nav-link">Início</button>
@@ -114,7 +112,7 @@ const PublicAuthorDetail: React.FC = () => {
         <div className="public-nav">
           <div className="brand" onClick={() => navigate('/')}>
             <span className="logo">📚</span>
-            <h1 className="title">Library NEST</h1>
+            <h1 className="title">PedBook</h1>
           </div>
           <div className="nav-links">
             <button onClick={() => navigate('/')} className="nav-link">Início</button>
@@ -198,48 +196,6 @@ const PublicAuthorDetail: React.FC = () => {
         )}
       </section>
 
-      {books.length > 0 && (
-        <section className="form-section">
-          <h3>Lista Completa de Livros</h3>
-          <div className="books-table-container">
-            <table className="books-table">
-              <thead>
-                <tr>
-                  <th>Título</th>
-                  <th>Descrição</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {books.map(book => (
-                  <tr key={book.book_id}>
-                    <td className="book-title-cell">
-                      <strong>{book.title}</strong>
-                    </td>
-                    <td className="book-description-cell">
-                      {book.description ? 
-                        (book.description.length > 80 ? 
-                          book.description.substring(0, 80) + '...' : 
-                          book.description
-                        ) : 
-                        'Descrição não disponível'
-                      }
-                    </td>
-                    <td className="book-actions-cell">
-                      <button 
-                        onClick={() => navigate(`/public/books/${book.book_id}`)}
-                        className="table-action-btn"
-                      >
-                        📖 Ver Detalhes
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
     </div>
   )
 }

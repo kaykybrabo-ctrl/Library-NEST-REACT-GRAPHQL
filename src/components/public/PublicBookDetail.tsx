@@ -48,7 +48,6 @@ const PublicBookDetail: React.FC = () => {
 
   const checkAuthStatus = async () => {
     try {
-      // Verificar se há token no localStorage
       const token = localStorage.getItem('token')
       if (!token) {
         setCurrentUser(null)
@@ -61,7 +60,6 @@ const PublicBookDetail: React.FC = () => {
       setCurrentUser(response.data)
     } catch {
       setCurrentUser(null)
-      // Limpar token inválido
       localStorage.removeItem('token')
       localStorage.removeItem('user')
     }
@@ -86,7 +84,6 @@ const PublicBookDetail: React.FC = () => {
       )
       setReviews(bookReviews)
     } catch (err) {
-      // Silently handle error for public viewing
     }
   }
   const handleRentBook = () => {
@@ -94,7 +91,6 @@ const PublicBookDetail: React.FC = () => {
       showModal('Para alugar este livro, você precisa estar logado no sistema.')
       return
     }
-    // Lógica para usuários logados (se necessário)
   }
 
   const handleFavoriteBook = () => {
@@ -102,7 +98,6 @@ const PublicBookDetail: React.FC = () => {
       showModal('Para adicionar este livro aos favoritos, você precisa estar logado no sistema.')
       return
     }
-    // Lógica para usuários logados (se necessário)
   }
 
   const handleWriteReview = () => {
@@ -110,7 +105,6 @@ const PublicBookDetail: React.FC = () => {
       showModal('Para escrever uma avaliação, você precisa estar logado no sistema.')
       return
     }
-    // Redirect to authenticated book detail for actions
     navigate(`/books/${id}`)
   }
 
@@ -127,7 +121,7 @@ const PublicBookDetail: React.FC = () => {
           <div className="public-nav">
             <div className="brand" onClick={() => navigate('/')}>
               <span className="logo">📚</span>
-              <h1 className="title">Library NEST</h1>
+              <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
               <button onClick={() => navigate('/')} className="nav-link">Início</button>
@@ -147,7 +141,7 @@ const PublicBookDetail: React.FC = () => {
           <div className="public-nav">
             <div className="brand" onClick={() => navigate('/')}>
               <span className="logo">📚</span>
-              <h1 className="title">Library NEST</h1>
+              <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
               <button onClick={() => navigate('/')} className="nav-link">Início</button>
@@ -167,7 +161,7 @@ const PublicBookDetail: React.FC = () => {
         <div className="public-nav">
           <div className="brand" onClick={() => navigate('/')}>
             <span className="logo">📚</span>
-            <h1 className="title">Library NEST</h1>
+            <h1 className="title">PedBook</h1>
           </div>
           <div className="nav-links">
             <button onClick={() => navigate('/')} className="nav-link">Início</button>

@@ -57,7 +57,7 @@ const PublicBooks: React.FC = () => {
           <div className="public-nav">
             <div className="brand" onClick={() => navigate('/')}>
               <span className="logo">📚</span>
-              <h1 className="title">Library NEST</h1>
+              <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
               <button onClick={() => navigate('/')} className="nav-link">Início</button>
@@ -77,7 +77,7 @@ const PublicBooks: React.FC = () => {
         <div className="public-nav">
           <div className="brand" onClick={() => navigate('/')}>
             <span className="logo">📚</span>
-            <h1 className="title">Library NEST</h1>
+            <h1 className="title">PedBook</h1>
           </div>
           <div className="nav-links">
             <button onClick={() => navigate('/')} className="nav-link">Início</button>

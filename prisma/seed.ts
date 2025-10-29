@@ -3,14 +3,11 @@ import * as bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-// Função para gerar URL do Cloudinary baseada no título do livro
 const getBookImageUrl = (title: string): string => {
-  // Converte o título para o formato usado no Cloudinary
   const slug = title.toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '');
   
-  // Mapeamento específico para livros que têm nomes diferentes no Cloudinary
   const specificMappings: { [key: string]: string } = {
     'fragments-of-everyday-life': 'book-interrupted-seasons',
   };
@@ -19,7 +16,6 @@ const getBookImageUrl = (title: string): string => {
   return `https://res.cloudinary.com/ddfgsoh5g/image/upload/pedbook/books/${cloudinaryName}`;
 }
 
-// URLs de imagens do Cloudinary para os autores (pasta pedbook/)
 const AUTHOR_IMAGES = {
   'Guilherme Biondo': 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065250/pedbook/profiles/author-guilherme-biondo.jpg',
   'Manoel Leite': 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761065252/pedbook/profiles/author-manoel-leite.jpg',

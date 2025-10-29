@@ -178,7 +178,6 @@
   margin: 0;
 }
 
-/* Form Section Styles */
 .form-section {
   max-width: 1000px;
   margin: 30px auto;
@@ -284,7 +283,6 @@
   background: #0d1a3d;
 }
 
-/* Books Table */
 .books-table-container {
   overflow-x: auto;
   margin-top: 20px;
@@ -355,7 +353,6 @@
   background: #0d1a3d;
 }
 
-/* Loading and Error States */
 .loading {
   text-align: center;
   padding: 60px 20px;

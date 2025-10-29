@@ -197,7 +197,6 @@
 
 .home-footer .copyright{text-align:center;padding:12px 20px;color:#6b7280;border-top:1px solid #eaeaea}
 
-/* Clickable Cards Styles */
 .clickable-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -230,7 +229,6 @@
   font-size: 12px;
 }
 
-/* View All Buttons */
 .view-all-container {
   text-align: center;
   margin-top: 40px;
