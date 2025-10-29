@@ -554,6 +554,8 @@ const Books: React.FC = () => {
               <div 
                 key={book.book_id} 
                 className={`book-card ${book.deleted_at ? 'deleted' : ''} ${editingBook === book.book_id ? 'editing' : ''}`}
+                onClick={() => editingBook !== book.book_id && navigate(`/books/${book.book_id}`)}
+                style={{ cursor: editingBook === book.book_id ? 'default' : 'pointer' }}
               >
                 <div className="book-card-image">
                   {getImageUrl(book.photo, 'book', false, book.title) ? (
@@ -627,7 +629,7 @@ const Books: React.FC = () => {
                       <div className="book-card-actions">
                         <button
                           type="button"
-                          onClick={() => navigate(`/books/${book.book_id}`)}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/books/${book.book_id}`); }}
                           aria-label="Ver detalhes"
                           title="Ver detalhes"
                           className="icon-button"
@@ -642,7 +644,7 @@ const Books: React.FC = () => {
                             {userLoans[book.book_id]?.hasLoan ? (
                               <button
                                 type="button"
-                                onClick={() => handleReturnBook(book.book_id)}
+                                onClick={(e) => { e.stopPropagation(); handleReturnBook(book.book_id); }}
                                 aria-label="Devolver livro"
                                 title="Devolver livro"
                                 className="icon-button"
@@ -680,7 +682,7 @@ const Books: React.FC = () => {
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => handleRentBook(book.book_id)}
+                                onClick={(e) => { e.stopPropagation(); handleRentBook(book.book_id); }}
                                 aria-label="Alugar livro"
                                 title="✅ Clique para alugar este livro"
                                 className="icon-button"
@@ -698,7 +700,7 @@ const Books: React.FC = () => {
                           <>
                             <button
                               type="button"
-                              onClick={() => handleEditBook(book)}
+                              onClick={(e) => { e.stopPropagation(); handleEditBook(book); }}
                               aria-label="Editar"
                               title="Editar"
                               className="icon-button"
@@ -711,7 +713,7 @@ const Books: React.FC = () => {
                             {book.deleted_at ? (
                               <button
                                 type="button"
-                                onClick={() => handleRestoreBook(book.book_id)}
+                                onClick={(e) => { e.stopPropagation(); handleRestoreBook(book.book_id); }}
                                 aria-label="Restaurar"
                                 title="Restaurar"
                                 className="icon-button"
@@ -724,7 +726,7 @@ const Books: React.FC = () => {
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => handleDeleteBook(book.book_id)}
+                                onClick={(e) => { e.stopPropagation(); handleDeleteBook(book.book_id); }}
                                 aria-label="Excluir"
                                 title="Excluir"
                                 className="icon-button"

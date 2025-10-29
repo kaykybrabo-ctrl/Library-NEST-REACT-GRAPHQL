@@ -26,11 +26,11 @@
 }
 
 .book-image {
-  width: 200px;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 4px;
-  box-shadow: none;
+  max-width: 150px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: none;
   display: block !important;
   float: none !important;

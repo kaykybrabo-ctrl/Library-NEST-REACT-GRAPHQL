@@ -199,6 +199,8 @@ const Authors: React.FC = () => {
             <div 
               key={author.author_id} 
               className={`author-card ${author.deleted_at ? 'deleted' : ''} ${editingAuthor === author.author_id ? 'editing' : ''}`}
+              onClick={() => editingAuthor !== author.author_id && navigate(`/authors/${author.author_id}`)}
+              style={{ cursor: editingAuthor === author.author_id ? 'default' : 'pointer' }}
             >
               {author.deleted_at && <div className="deleted-badge">Excluído</div>}
               
@@ -257,7 +259,7 @@ const Authors: React.FC = () => {
                     <div className="author-card-actions">
                       <button
                         type="button"
-                        onClick={() => navigate(`/authors/${author.author_id}`)}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/authors/${author.author_id}`); }}
                         aria-label="Ver detalhes"
                         title="Ver detalhes"
                         className="icon-button"
@@ -271,7 +273,7 @@ const Authors: React.FC = () => {
                         <>
                           <button
                             type="button"
-                            onClick={() => handleEditAuthor(author)}
+                            onClick={(e) => { e.stopPropagation(); handleEditAuthor(author); }}
                             aria-label="Editar"
                             title="Editar"
                             className="icon-button"
@@ -284,7 +286,7 @@ const Authors: React.FC = () => {
                           {author.deleted_at ? (
                             <button
                               type="button"
-                              onClick={() => handleRestoreAuthor(author.author_id)}
+                              onClick={(e) => { e.stopPropagation(); handleRestoreAuthor(author.author_id); }}
                               aria-label="Restaurar"
                               title="Restaurar"
                               className="icon-button"
@@ -297,7 +299,7 @@ const Authors: React.FC = () => {
                           ) : (
                             <button
                               type="button"
-                              onClick={() => handleDeleteAuthor(author.author_id)}
+                              onClick={(e) => { e.stopPropagation(); handleDeleteAuthor(author.author_id); }}
                               aria-label="Excluir"
                               title="Excluir"
                               className="icon-button"

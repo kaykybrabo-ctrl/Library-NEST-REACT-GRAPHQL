@@ -305,6 +305,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get("api/get-profile")
   async getProfileApi(@Request() req?: any) {
     let username = "guest";

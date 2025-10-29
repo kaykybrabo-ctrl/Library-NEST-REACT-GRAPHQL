@@ -85,8 +85,14 @@ const UserProfile: React.FC = () => {
       }
       
       setError('')
-    } catch (e) {
-      setError('Falha ao carregar o perfil.')
+    } catch (e: any) {
+      if (e.response?.status === 404) {
+        setError('Usuário não encontrado.')
+      } else if (e.response?.status === 403) {
+        setError('Você não tem permissão para visualizar este perfil.')
+      } else {
+        setError('Falha ao carregar o perfil. Verifique sua conexão.')
+      }
     } finally {
       setLoading(false)
     }
@@ -251,6 +257,14 @@ const UserProfile: React.FC = () => {
   const pageTitle = isViewingOtherUser 
     ? `Perfil de ${displayedUser?.display_name || displayedUser?.username || 'Usuário'}` 
     : 'Meu Perfil'
+  
+  const shouldShowLoansTab = () => {
+    if (isViewingOtherUser) {
+      return user?.role === 'admin'
+    } else {
+      return user?.role !== 'admin'
+    }
+  }
 
   return (
     <Layout title={pageTitle}>
@@ -270,12 +284,14 @@ const UserProfile: React.FC = () => {
         >
           Perfil
         </button>
-        <button
-          className={`tab ${activeTab === 'loans' ? 'active' : ''}`}
-          onClick={() => setActiveTab('loans')}
-        >
-          {isViewingOtherUser ? 'Empréstimos' : 'Meus Empréstimos'}
-        </button>
+        {shouldShowLoansTab() && (
+          <button
+            className={`tab ${activeTab === 'loans' ? 'active' : ''}`}
+            onClick={() => setActiveTab('loans')}
+          >
+            {isViewingOtherUser ? 'Empréstimos' : 'Meus Empréstimos'}
+          </button>
+        )}
         <button
           className={`tab ${activeTab === 'favorite' ? 'active' : ''}`}
           onClick={() => {
@@ -434,7 +450,7 @@ const UserProfile: React.FC = () => {
           </section>
         )}
 
-        {activeTab === 'loans' && (
+        {activeTab === 'loans' && shouldShowLoansTab() && (
           <section className="profile-section">
             <h2>{isViewingOtherUser ? 'Livros Emprestados' : 'Meus Livros Emprestados'}</h2>
             {loans.length === 0 ? (
