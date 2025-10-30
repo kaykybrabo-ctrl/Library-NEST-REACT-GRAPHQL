@@ -14,6 +14,7 @@ import { Rating, Typography, Box } from '@mui/material'
 import { useAuth } from '@/contexts/AuthContext'
 import { Book, Review } from '@/types'
 import { getImageUrl } from '@/utils/imageUtils'
+import { ClickableUser } from '../../components/ClickableNames'
 import api from '@/api'
 import './BookDetail.css'
 
@@ -300,33 +301,15 @@ const BookDetail: React.FC = () => {
 
         {previewUrl ? (
           <img src={previewUrl} alt="Pré-visualização selecionada" className="book-image" />
-        ) : book.photo ? (
+        ) : (
           <img
             src={buildImageSrc(book.photo)}
             key={`${book.photo}-${imgVersion}`}
             alt={book.title}
             className="book-image"
-            onError={(e) => {
-              try {
-                const current = e.currentTarget.getAttribute('src') || ''
-                const file = (current.split('?')[0].split('/').pop() || '').trim()
-                if (file) {
-                  e.currentTarget.onerror = null
-                  e.currentTarget.src = `/api/uploads/${file}`
-                  return
-                }
-              } catch {}
-              e.currentTarget.onerror = null
-              e.currentTarget.src = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg'
-            }}
           />
-        ) : null}
-        
-        {isAdmin && !previewUrl && !book.photo && (
-          <div className="image-placeholder">Nenhuma imagem definida ainda. Selecione um arquivo abaixo para enviar.</div>
         )}
 
-        
         {isAdmin && !book.photo && (
           <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
             Nenhuma imagem definida para este livro ainda.
@@ -487,7 +470,13 @@ const BookDetail: React.FC = () => {
             {reviews.map(review => (
               <div key={review.id} className="review-card">
                 <div className="review-header">
-                  <strong>{review.user?.username || 'Usuário'}</strong>
+                  <strong>
+                    <ClickableUser
+                      username={review.user?.username || 'usuario'}
+                      displayName={review.user?.display_name}
+                      className="clickable-user"
+                    />
+                  </strong>
                   <span>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
                 </div>
                 <p>{review.comment}</p>

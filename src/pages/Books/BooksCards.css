@@ -84,6 +84,38 @@
   font-weight: 500;
 }
 
+.clickable-author {
+  color: #1976d2 !important;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.clickable-author:hover {
+  color: #0d47a1 !important;
+  text-decoration: none;
+  background-color: rgba(25, 118, 210, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.clickable-user {
+  color: #4caf50 !important;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.clickable-user:hover {
+  color: #2e7d32 !important;
+  text-decoration: none;
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
 .book-card-description {
   color: #777;
   font-size: 13px;

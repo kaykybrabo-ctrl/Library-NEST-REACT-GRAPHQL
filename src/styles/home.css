@@ -218,6 +218,22 @@
   color: #0d1a3d !important;
 }
 
+.clickable-user {
+  color: #4caf50 !important;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.clickable-user:hover {
+  color: #2e7d32 !important;
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
 .card-actions {
   margin-top: 10px;
   text-align: center;

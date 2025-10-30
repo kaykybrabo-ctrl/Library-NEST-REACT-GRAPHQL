@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import { getImageUrl } from '../../utils/imageUtils'
 import { useAuth } from '../../contexts/AuthContext'
+import { ClickableUser } from '../../components/ClickableNames'
 import './Users.css'
 
 interface User {
@@ -128,8 +129,12 @@ const Users: React.FC = () => {
               </div>
 
               <div className="user-info">
-                <h3 className="user-name" onClick={() => handleViewProfile(user.username)}>
-                  {getDisplayName(user)}
+                <h3 className="user-name">
+                  <ClickableUser
+                    username={user.username}
+                    displayName={user.display_name}
+                    className="clickable-user"
+                  />
                 </h3>
                 <span className="user-role">
                   {user.role === 'admin' ? 'Administrador' : 'Usuário'}

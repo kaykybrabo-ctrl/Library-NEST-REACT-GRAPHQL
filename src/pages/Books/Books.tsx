@@ -11,6 +11,7 @@ import ErrorModal from '@/components/ErrorModal'
 import ConfirmModal from '@/components/ConfirmModal'
 import { Book, Author } from '@/types'
 import { getImageUrl } from '@/utils/imageUtils'
+import { ClickableUser } from '../../components/ClickableNames'
 import './BooksCards.css'
 
 const Books: React.FC = () => {
@@ -381,7 +382,19 @@ const Books: React.FC = () => {
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{bk.title}</div>
-                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>Autor: {getAuthorName(bk)}</div>
+                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                        Autor:{' '}
+                        <span 
+                          className="clickable-author"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/authors/${bk.author_id}`);
+                          }}
+                          style={{ cursor: 'pointer', textDecoration: 'underline', color: '#1976d2' }}
+                        >
+                          {getAuthorName(bk)}
+                        </span>
+                      </div>
                       <div style={{ color: '#777', marginTop: 6, fontSize: 12, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 36 }}>
                         {bk.description || '—'}
                       </div>
@@ -428,7 +441,19 @@ const Books: React.FC = () => {
                     </div>
                     <div style={{ minWidth: 0, flex: 1, maxWidth: 620, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
                       <div style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 48 }}>{bk.title}</div>
-                      <div style={{ color: '#5a5a5a', fontSize: 13, lineHeight: 1.2 }}>Autor: {getAuthorName(bk)}</div>
+                      <div style={{ color: '#5a5a5a', fontSize: 13, lineHeight: 1.2 }}>
+                        Autor:{' '}
+                        <span 
+                          className="clickable-author"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/authors/${bk.author_id}`);
+                          }}
+                          style={{ cursor: 'pointer', textDecoration: 'underline', color: '#1976d2' }}
+                        >
+                          {getAuthorName(bk)}
+                        </span>
+                      </div>
                       <div style={{ color: '#777', fontSize: 13, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', minHeight: 56 }}>
                         {bk.description || '—'}
                       </div>
@@ -606,7 +631,18 @@ const Books: React.FC = () => {
                   ) : (
                     <>
                       <h3 className="book-card-title" title={book.title}>{book.title}</h3>
-                      <p className="book-card-author">por {getAuthorName(book)}</p>
+                      <p className="book-card-author">
+                        por{' '}
+                        <span 
+                          className="clickable-author"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/authors/${book.author_id}`);
+                          }}
+                        >
+                          {getAuthorName(book)}
+                        </span>
+                      </p>
                       <p className="book-card-description">
                         {book.description || 'Sem descrição disponível para este livro.'}
                       </p>
@@ -616,7 +652,13 @@ const Books: React.FC = () => {
                         {book.deleted_at && <span style={{color: '#ff9800', fontWeight: 'bold'}}>EXCLUÍDO</span>}
                         {!book.deleted_at && bookLoans[book.book_id]?.isRented && (
                           <span style={{color: '#f44336', fontWeight: 'bold'}}>
-                            ALUGADO POR: {bookLoans[book.book_id]?.loan?.username || 'Usuário'}
+                            ALUGADO POR:{' '}
+                            <ClickableUser
+                              username={bookLoans[book.book_id]?.loan?.username || 'usuario'}
+                              displayName={bookLoans[book.book_id]?.loan?.display_name}
+                              className="clickable-user"
+                              style={{ color: '#f44336' }}
+                            />
                           </span>
                         )}
                         {!book.deleted_at && userLoans[book.book_id]?.hasLoan && (

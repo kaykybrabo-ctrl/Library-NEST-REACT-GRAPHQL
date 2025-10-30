@@ -190,12 +190,9 @@ const PublicBookDetail: React.FC = () => {
         
         <div className="book-image-container">
           <img 
-            src={getImageUrl(book.photo, 'book')} 
+            src={getImageUrl(book.photo, 'book', true, book.title)} 
             alt={book.title}
             className="book-image-enhanced"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = getFallbackImageUrl('book')
-            }}
           />
         </div>
       </section>

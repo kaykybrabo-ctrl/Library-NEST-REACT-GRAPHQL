@@ -4,6 +4,7 @@ import api from '@/api'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { Author } from '@/types'
+import { getImageUrl } from '../../utils/imageUtils'
 import './AuthorDetail.css'
 
 const AuthorDetail: React.FC = () => {
@@ -162,20 +163,14 @@ const AuthorDetail: React.FC = () => {
         <div className="author-info">
           {previewUrl ? (
             <img src={previewUrl} alt="Pré-visualização selecionada" className="author-image" />
-          ) : author.photo ? (
+          ) : (
             <img
-              src={buildImageSrc(author.photo)}
+              src={getImageUrl(author.photo, 'author', false, author.name_author)}
               key={`${author.photo}-${imgVersion}`}
               alt={author.name_author}
               className="author-image"
-              onError={(e) => {
-                e.currentTarget.onerror = null
-                e.currentTarget.src = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062934/pedbook/profiles/default-author.svg'
-              }}
             />
-          ) : isAdmin ? (
-            <div className="image-placeholder">Nenhuma foto definida ainda. Selecione um arquivo abaixo para enviar.</div>
-          ) : null}
+          )}
           
           {isAdmin && !author.photo && (
             <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
