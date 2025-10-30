@@ -124,11 +124,11 @@ const PublicAuthors: React.FC = () => {
               >
                 <div className="author-image-container">
                   <img 
-                    src={getImageUrl(author.photo, 'profile')} 
+                    src={getImageUrl(author.photo, 'author')} 
                     alt={author.name_author}
                     className="author-image"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = getFallbackImageUrl('profile')
+                      (e.target as HTMLImageElement).src = getFallbackImageUrl('author')
                     }}
                   />
                 </div>

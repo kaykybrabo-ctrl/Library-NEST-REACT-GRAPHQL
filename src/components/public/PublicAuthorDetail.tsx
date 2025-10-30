@@ -162,11 +162,11 @@ const PublicAuthorDetail: React.FC = () => {
                 className="book-card clickable"
                 onClick={() => navigate(`/public/books/${book.book_id}`)}
               >
-                <div className="book-image-container">
+                <div className="author-book-image-container">
                   <img 
                     src={getImageUrl(book.photo, 'book')} 
                     alt={book.title}
-                    className="book-image"
+                    className="author-book-image"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getFallbackImageUrl('book')
                     }}

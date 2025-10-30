@@ -1,26 +1,31 @@
 .public-layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: #1f2937;
 }
 
 .public-header {
-  background: #162c74;
-  color: white;
-  padding: 15px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px !important;
+  background: #162c74 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08) !important;
 }
 
 .public-nav {
-  max-width: 1400px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 0 20px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 20px;
 }
 
 .brand {
@@ -36,50 +41,66 @@
 }
 
 .logo {
-  font-size: 28px;
+  color: #fff !important;
+  font-size: 24px;
 }
 
 .title {
-  font-size: 24px;
-  font-weight: 700;
+  color: #fff !important;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: .2px;
   margin: 0;
-  color: white;
 }
 
 .nav-links {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  justify-content: flex-end;
 }
+
 .nav-link {
-  background: none;
+  color: #fff !important;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: transparent !important;
   border: none;
-  color: white;
-  font-size: 16px;
   cursor: pointer;
-  padding: 8px 16px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
 }
 
 .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,.12) !important;
 }
 
 .login-btn {
-  background: #162c74;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff !important;
+  border: 2px solid rgba(255,255,255,.9) !important;
+  text-decoration: none;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .login-btn:hover {
-  background: #0d1a3d;
+  background: rgba(255,255,255,.14);
+  border-color: #fff !important;
+}
+
+.profile-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
 }
 
 .navigation-section {
@@ -114,9 +135,9 @@
   margin-top: 20px;
 }
 
-.author-image-container *,
-.author-image-container *::before,
-.author-image-container *::after {
+.author-header .author-image-container *,
+.author-header .author-image-container *::before,
+.author-header .author-image-container *::after {
   box-sizing: border-box !important;
   border: none !important;
   outline: none !important;
@@ -125,7 +146,7 @@
   background-color: transparent !important;
 }
 
-.author-image-container {
+.author-header .author-image-container {
   flex-shrink: 0;
   background: transparent !important;
   border: none !important;
@@ -139,7 +160,7 @@
   position: relative !important;
 }
 
-.author-image-enhanced {
+.author-header .author-image-enhanced {
   width: 120px !important;
   height: 120px !important;
   border-radius: 50% !important;
@@ -160,7 +181,7 @@
   bottom: 0 !important;
 }
 
-.author-image-enhanced:hover {
+.author-header .author-image-enhanced:hover {
   transform: scale(1.05);
 }
 
@@ -179,12 +200,12 @@
 }
 
 .form-section {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
 }
 
 .form-section h3 {
@@ -210,10 +231,11 @@
 }
 
 .books-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 10px !important;
   margin-top: 20px;
+  width: 100% !important;
 }
 
 .book-card {
@@ -223,6 +245,8 @@
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
+  min-width: 0;
+  width: 100%;
 }
 
 .book-card:hover {
@@ -230,49 +254,52 @@
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
-.book-card .book-image-container {
-  height: 160px;
+.book-card .author-book-image-container {
+  height: 180px;
   overflow: hidden;
   background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.book-card .book-image {
+.book-card .author-book-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
-.book-card:hover .book-image {
+.book-card:hover .author-book-image {
   transform: scale(1.05);
 }
 
 .book-info {
-  padding: 15px;
+  padding: 10px;
 }
 
 .book-title {
   color: #162c74;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  line-height: 1.3;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
 }
 
 .book-description {
   color: #6c757d;
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0 0 15px 0;
+  font-size: 11px;
+  line-height: 1.3;
+  margin: 0 0 8px 0;
 }
 
 .view-book-btn {
   background: #162c74;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -402,8 +429,8 @@
   }
   
   .books-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 15px !important;
   }
   
   .books-table-container {

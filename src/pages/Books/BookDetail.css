@@ -26,28 +26,41 @@
 }
 
 .book-image {
-  max-width: 150px;
-  max-height: 200px;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: none;
+  width: 150px !important;
+  height: 200px !important;
+  max-width: 150px !important;
+  max-height: 200px !important;
+  min-width: 150px !important;
+  min-height: 200px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  object-fit: cover !important;
   display: block !important;
-  float: none !important;
-  clear: both !important;
-  position: static !important;
-  margin-top: 10px;
+  flex-shrink: 0 !important;
 }
 
 .image-frame {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 !important;
-  margin-bottom: 10px;
-  background: transparent !important;
+  text-align: left;
+  margin: 30px 0;
+  display: inline-block !important;
+  width: 150px !important;
+  height: 200px !important;
   border: none !important;
-  border-radius: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  flex-shrink: 0 !important;
+}
+
+.image-frame * {
+  border: none !important;
+  outline: none !important;
   box-shadow: none !important;
 }
 

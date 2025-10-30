@@ -121,11 +121,11 @@ const PublicBooks: React.FC = () => {
                 className="book-card clickable"
                 onClick={() => navigate(`/public/books/${book.book_id}`)}
               >
-                <div className="book-image-container">
+                <div className="public-books-image-container">
                   <img 
                     src={getImageUrl(book.photo, 'book')} 
                     alt={book.title}
-                    className="book-image"
+                    className="public-books-image"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getFallbackImageUrl('book')
                     }}
@@ -141,15 +141,6 @@ const PublicBooks: React.FC = () => {
                     }}
                   >
                     👤 {getAuthorName(book)}
-                  </p>
-                  <p className="book-description">
-                    {book.description ? 
-                      (book.description.length > 120 ? 
-                        book.description.substring(0, 120) + '...' : 
-                        book.description
-                      ) : 
-                      'Descrição não disponível'
-                    }
                   </p>
                   <div className="book-actions">
                     <button className="view-btn">

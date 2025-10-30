@@ -153,7 +153,6 @@ const Home: React.FC = () => {
               { title: 'Fragments of Everyday Life', author_name: 'Guilherme Biondo', description: 'Pequenos momentos que compõem a grandeza da existência humana.', photo: null },
               { title: 'Stories of the Wind', author_name: 'Manoel Leite', description: 'Contos místicos que navegam entre realidade e fantasia.', photo: null },
               { title: 'The Horizon and the Sea', author_name: 'Guilherme Biondo', description: 'Romance épico que explora os limites do amor e da aventura.', photo: null },
-              { title: 'Winds of Change', author_name: 'Guilherme Biondo', description: 'Drama histórico sobre transformações sociais e pessoais.', photo: null },
             ].map((book, index) => (
               <div 
                 key={`featured-${book.title}`} 
@@ -253,7 +252,6 @@ const Home: React.FC = () => {
           <div>
             <h4>Links</h4>
             <ul className="footer-links">
-              <li><a href="#features">Funcionalidades</a></li>
               <li><a href="#contato">Contato</a></li>
               <li><Link to="/login">Entrar</Link></li>
               <li><Link to="/register">Criar conta</Link></li>
