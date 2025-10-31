@@ -40,11 +40,13 @@ export class BooksResolver {
     return this.booksService.count();
   }
 
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
   @Mutation(() => Book)
   async createBook(@Args('createBookInput') createBookDto: CreateBookDto) {
     return this.booksService.create(createBookDto);
   }
 
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
   @Mutation(() => Book)
   async updateBook(
     @Args('id', { type: () => Int }) id: number,
@@ -53,12 +55,14 @@ export class BooksResolver {
     return this.booksService.update(id, updateBookDto);
   }
 
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
   @Mutation(() => Boolean)
   async removeBook(@Args('id', { type: () => Int }) id: number) {
     await this.booksService.remove(id);
     return true;
   }
 
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
   @Mutation(() => Boolean)
   async restoreBook(@Args('id', { type: () => Int }) id: number) {
     await this.booksService.restore(id);

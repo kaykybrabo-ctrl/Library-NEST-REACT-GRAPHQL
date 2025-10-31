@@ -279,16 +279,39 @@ const Books: React.FC = () => {
     e.preventDefault()
     if (!newBook.title.trim() || !newBook.author_id) return
 
-    await createBookMutation({
-      variables: {
-        createBookInput: {
-          title: capitalizeFirst(newBook.title.trim()),
-          author_id: Number(newBook.author_id)
-        }
+    try {
+      await createBookMutation({
+        variables: {
+          createBookInput: {
+            title: capitalizeFirst(newBook.title.trim()),
+            author_id: Number(newBook.author_id)
+          }
+        },
+        refetchQueries: [
+          { query: GET_BOOKS, variables: { 
+            page: currentPage + 1, 
+            limit,
+            search: searchQuery || undefined,
+            includeDeleted: includeDeleted || undefined
+          }},
+          { query: GET_BOOKS_COUNT }
+        ]
+      })
+      setNewBook({ title: '', author_id: '' })
+      setError('')
+      await fetchBooks()
+    } catch (err: any) {
+      let errorMessage = 'Erro ao criar livro. Tente novamente.'
+      
+      if (err.graphQLErrors && err.graphQLErrors.length > 0) {
+        errorMessage = err.graphQLErrors[0].message
+      } else if (err.message) {
+        errorMessage = err.message
       }
-    })
-    setNewBook({ title: '', author_id: '' })
-    fetchBooks()
+      
+      setErrorModalMessage(errorMessage)
+      setShowErrorModal(true)
+    }
   }
 
   const handleEditBook = (book: Book) => {
