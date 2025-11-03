@@ -47,18 +47,32 @@ import * as nodemailer from 'nodemailer';
         let transport;
         
         if (user && pass) {
+          console.log('📧 Usando credenciais SMTP configuradas');
           transport = { host, port, secure, auth: { user, pass } };
         } else {
-          const testAccount = await nodemailer.createTestAccount();
-          transport = {
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            auth: {
-              user: testAccount.user,
-              pass: testAccount.pass,
-            },
-          };
+          console.log('📧 Criando conta de teste Ethereal...');
+          try {
+            const testAccount = await nodemailer.createTestAccount();
+            console.log('✅ Conta de teste criada:', testAccount.user);
+            transport = {
+              host: "smtp.ethereal.email",
+              port: 587,
+              secure: false,
+              auth: {
+                user: testAccount.user,
+                pass: testAccount.pass,
+              },
+            };
+          } catch (error) {
+            console.warn('⚠️ Falha ao criar conta Ethereal, usando configuração local');
+            transport = {
+              host: "localhost",
+              port: 1025,
+              secure: false,
+              ignoreTLS: true,
+              auth: false,
+            };
+          }
         }
 
         return {
