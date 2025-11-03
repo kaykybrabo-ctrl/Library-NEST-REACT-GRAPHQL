@@ -299,22 +299,97 @@ const BookDetail: React.FC = () => {
           <p><strong>Editoras:</strong> {book.publishers.join(', ')}</p>
         )}
 
-        {previewUrl ? (
-          <img src={previewUrl} alt="Pré-visualização selecionada" className="book-image" />
-        ) : (
-          <img
-            src={buildImageSrc(book.photo)}
-            key={`${book.photo}-${imgVersion}`}
-            alt={book.title}
-            className="book-image"
-          />
-        )}
+        <div className="book-detail-layout">
+          <div className="book-image-section">
+            {previewUrl ? (
+              <img src={previewUrl} alt="Pré-visualização selecionada" className="book-image" />
+            ) : (
+              <img
+                src={buildImageSrc(book.photo)}
+                key={`${book.photo}-${imgVersion}`}
+                alt={book.title}
+                className="book-image"
+              />
+            )}
 
-        {isAdmin && !book.photo && (
-          <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-            Nenhuma imagem definida para este livro ainda.
+            {isAdmin && !book.photo && (
+              <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+                Nenhuma imagem definida para este livro ainda.
+              </div>
+            )}
           </div>
-        )}
+          
+          <div className="book-actions-section">
+            <h4>Ações do Livro</h4>
+            {userLoan ? (
+              <>
+                <div className="loan-status-info">
+                  <p><strong>📚 Você tem este livro alugado</strong></p>
+                  <p><strong>Alugado em:</strong> {new Date(userLoan.loan_date).toLocaleDateString('pt-BR')}</p>
+                  <p><strong>Vencimento:</strong> {new Date(userLoan.due_date).toLocaleDateString('pt-BR')}</p>
+                  <div className={`days-remaining ${(() => {
+                    if (userLoan.is_overdue) return 'overdue';
+                    
+                    const totalHours = Math.floor(userLoan.hours_remaining);
+                    let remainingHours = totalHours - (userLoan.days_remaining * 24);
+                    let adjustedDays = userLoan.days_remaining;
+                    
+                    if (remainingHours >= 24) {
+                      adjustedDays += Math.floor(remainingHours / 24);
+                    }
+                    
+                    return adjustedDays <= 1 ? 'urgent' : adjustedDays <= 3 ? 'warning' : 'normal';
+                  })()}`}>
+                    {(() => {
+                      if (userLoan.is_overdue) {
+                        return '⚠️ Atrasado!';
+                      }
+                      
+                      const totalHours = Math.floor(userLoan.hours_remaining);
+                      let remainingHours = totalHours - (userLoan.days_remaining * 24);
+                      let adjustedDays = userLoan.days_remaining;
+                      
+                      if (remainingHours >= 24) {
+                        adjustedDays += Math.floor(remainingHours / 24);
+                        remainingHours = remainingHours % 24;
+                      }
+                      
+                      if (adjustedDays === 0) {
+                        return '⏰ Vence hoje!';
+                      } else if (adjustedDays === 1) {
+                        return `⏰ Vence amanhã (${remainingHours}h restantes)`;
+                      } else {
+                        return `📅 ${adjustedDays} dias e ${remainingHours}h restantes`;
+                      }
+                    })()}
+                  </div>
+                  {userLoan.is_overdue && (
+                    <div className="fine-amount">
+                      <strong>💰 Multa: R$ {userLoan.fine_amount.toFixed(2)}</strong>
+                    </div>
+                  )}
+                </div>
+                <button onClick={handleReturnBook} className="action-btn primary">Devolver Livro</button>
+                <button onClick={handleFavoriteBook} className="action-btn primary">⭐ Adicionar aos Favoritos</button>
+              </>
+            ) : isBookRentedByOther ? (
+              <>
+                <p>❌ Este livro está alugado por outro usuário.</p>
+                <button disabled className="action-btn disabled">Livro Indisponível</button>
+                <button onClick={handleFavoriteBook} className="action-btn primary">⭐ Adicionar aos Favoritos</button>
+              </>
+            ) : (
+              <>
+                {user?.role === 'admin' ? (
+                  <button disabled className="action-btn disabled">👑 Modo Administrador - Apenas Visualização</button>
+                ) : (
+                  <button onClick={handleRentBook} className="action-btn primary">📚 Alugar Livro</button>
+                )}
+                <button onClick={handleFavoriteBook} className="action-btn primary">⭐ Adicionar aos Favoritos</button>
+              </>
+            )}
+          </div>
+        </div>
 
         {isAdmin && (
           <div className="image-upload">
@@ -338,92 +413,6 @@ const BookDetail: React.FC = () => {
         {uploadStatus && (
           <div style={{ marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Erro') ? '#c00' : '#0a0' }}>
             {uploadStatus}
-          </div>
-        )}
-      </section>
-
-      <section className="form-section">
-        <h3>Ações do Livro</h3>
-        {userLoan ? (
-          <div className="loan-info">
-            <div className="loan-status">
-              <h4>📚 Você tem este livro alugado</h4>
-              <div className="loan-details">
-                <p><strong>Alugado em:</strong> {new Date(userLoan.loan_date).toLocaleDateString('pt-BR')}</p>
-                <p><strong>Vencimento:</strong> {new Date(userLoan.due_date).toLocaleDateString('pt-BR')}</p>
-                <div className={`days-remaining ${(() => {
-                  if (userLoan.is_overdue) return 'overdue';
-                  
-                  const totalHours = Math.floor(userLoan.hours_remaining);
-                  let remainingHours = totalHours - (userLoan.days_remaining * 24);
-                  let adjustedDays = userLoan.days_remaining;
-                  
-                  if (remainingHours >= 24) {
-                    adjustedDays += Math.floor(remainingHours / 24);
-                  }
-                  
-                  return adjustedDays <= 1 ? 'urgent' : adjustedDays <= 3 ? 'warning' : 'normal';
-                })()}`}>
-                  {(() => {
-                    if (userLoan.is_overdue) {
-                      return '⚠️ Atrasado!';
-                    }
-                    
-                    const totalHours = Math.floor(userLoan.hours_remaining);
-                    let remainingHours = totalHours - (userLoan.days_remaining * 24);
-                    let adjustedDays = userLoan.days_remaining;
-                    
-                    if (remainingHours >= 24) {
-                      adjustedDays += Math.floor(remainingHours / 24);
-                      remainingHours = remainingHours % 24;
-                    }
-                    
-                    if (adjustedDays === 0) {
-                      return '⏰ Vence hoje!';
-                    } else if (adjustedDays === 1) {
-                      return `⏰ Vence amanhã (${remainingHours}h restantes)`;
-                    } else {
-                      return `📅 ${adjustedDays} dias e ${remainingHours}h restantes`;
-                    }
-                  })()}
-                </div>
-                {userLoan.is_overdue && (
-                  <div className="fine-amount">
-                    <strong>💰 Multa: R$ {userLoan.fine_amount.toFixed(2)}</strong>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="book-actions">
-              <button onClick={handleReturnBook} className="return-button">Devolver Livro</button>
-              <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
-            </div>
-          </div>
-        ) : isBookRentedByOther ? (
-          <div className="book-actions">
-            <button 
-              disabled 
-              className="rented"
-              title={`❌ Livro alugado por outro usuário`}
-            >
-              Livro Indisponível
-            </button>
-            <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
-          </div>
-        ) : (
-          <div className="book-actions">
-            {user?.role === 'admin' ? (
-              <button 
-                className="admin-view-only" 
-                disabled 
-                title="Administradores não podem alugar livros"
-              >
-                👑 Modo Administrador - Apenas Visualização
-              </button>
-            ) : (
-              <button onClick={handleRentBook} title="✅ Clique para alugar este livro">Alugar Livro</button>
-            )}
-            <button onClick={handleFavoriteBook}>Adicionar aos Favoritos</button>
           </div>
         )}
       </section>

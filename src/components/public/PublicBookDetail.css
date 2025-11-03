@@ -136,47 +136,53 @@
   color: #0d1a3d;
 }
 
-.book-image-container {
-  text-align: left;
-  margin: 30px 0;
+.book-detail-layout {
   display: flex;
-  justify-content: flex-start;
-  border: none !important;
-  padding: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-  outline: none !important;
+  gap: 40px;
+  margin: 30px 0;
+  align-items: flex-start;
 }
 
-.book-image-container * {
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
+.book-image-section {
+  flex: 0 0 280px;
 }
 
 .book-image-enhanced {
-  max-width: 280px;
-  max-height: 420px;
-  width: auto;
-  height: auto;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  -webkit-border-radius: 0 !important;
-  -moz-border-radius: 0 !important;
-  background: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  width: 280px !important;
+  height: 420px !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.book-actions-section {
+  flex: 1;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  min-height: 200px;
+}
+
+.book-actions-section h4 {
+  color: #162c74;
+  font-size: 18px;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
 }
 
 .form-section {
   max-width: 900px;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 24px 20px;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  clear: both;
 }
 
 .form-section h3 {
@@ -188,24 +194,18 @@
   padding-bottom: 10px;
 }
 
-.book-actions {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  padding: 12px 24px;
+.book-actions-section .action-btn {
+  width: 100%;
+  padding: 14px 20px;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+  display: block;
 }
 
 .action-btn.primary {
@@ -230,10 +230,25 @@
   transform: translateY(-2px);
 }
 
+
 .login-prompt {
   color: #6c757d;
   font-style: italic;
-  margin-top: 10px;
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #162c74;
+}
+
+.admin-notice {
+  color: #856404;
+  font-style: italic;
+  margin-top: 15px;
+  padding: 12px;
+  background: #fff3cd;
+  border-radius: 6px;
+  border-left: 4px solid #ffc107;
 }
 
 .login-prompt-section {
@@ -361,13 +376,18 @@
     font-size: 24px;
   }
   
-  .book-actions {
+  .book-detail-layout {
     flex-direction: column;
+    gap: 20px;
   }
   
-  .action-btn {
-    width: 100%;
-    justify-content: center;
+  .book-image-section {
+    flex: none;
+    text-align: center;
+  }
+  
+  .book-actions-section {
+    min-height: auto;
   }
   
   .review-header {
@@ -395,7 +415,8 @@
   }
   
   .book-image-enhanced {
-    max-width: 220px;
-    max-height: 330px;
+    width: 220px !important;
+    height: 330px !important;
+    object-fit: cover !important;
   }
 }

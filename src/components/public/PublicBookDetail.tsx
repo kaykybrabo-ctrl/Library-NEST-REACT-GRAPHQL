@@ -188,38 +188,37 @@ const PublicBookDetail: React.FC = () => {
         </p>
         <p><strong>Descrição:</strong> {book.description || 'Nenhuma descrição disponível'}</p>
         
-        <div className="book-image-container">
-          <img 
-            src={getImageUrl(book.photo, 'book', true, book.title)} 
-            alt={book.title}
-            className="book-image-enhanced"
-          />
+        <div className="book-detail-layout">
+          <div className="book-image-section">
+            <img 
+              src={getImageUrl(book.photo, 'book', true, book.title)} 
+              alt={book.title}
+              className="book-image-enhanced"
+            />
+          </div>
+          
+          <div className="book-actions-section">
+            <h4>Ações Disponíveis</h4>
+            
+            {currentUser?.role !== 'admin' && (
+              <button onClick={handleRentBook} className="action-btn primary">
+                📚 Alugar Livro
+              </button>
+            )}
+            
+            <button onClick={handleFavoriteBook} className="action-btn primary">
+              ⭐ Adicionar aos Favoritos
+            </button>
+
+            {currentUser?.role === 'admin' && (
+              <div className="admin-notice">
+                <small>👨‍💼 Administradores não podem alugar livros</small>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      <section className="form-section">
-        <h3>Ações do Livro</h3>
-        <div className="book-actions">
-          {currentUser?.role !== 'admin' && (
-            <button onClick={handleRentBook} className="action-btn primary">
-              📚 Alugar Livro
-            </button>
-          )}
-          <button onClick={handleFavoriteBook} className="action-btn secondary">
-            ⭐ Adicionar aos Favoritos
-          </button>
-        </div>
-        {!currentUser && (
-          <p className="login-prompt">
-            <small>Faça login para {currentUser?.role !== 'admin' ? 'alugar livros e ' : ''}adicionar aos favoritos</small>
-          </p>
-        )}
-        {currentUser?.role === 'admin' && (
-          <p className="admin-notice">
-            <small>👨‍💼 Como administrador, você não pode alugar livros</small>
-          </p>
-        )}
-      </section>
 
       <section className="form-section">
         <h3>Escrever uma Avaliação</h3>

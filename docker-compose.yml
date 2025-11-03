@@ -25,7 +25,7 @@ services:
         npx prisma db push &&
         echo 'Schema sincronizado com sucesso!' &&
         echo 'Populando banco com dados iniciais...' &&
-        # npx prisma db seed &&
+        npx prisma db seed &&
         echo 'Iniciando aplicação...' &&
         npm run start:prod
       "

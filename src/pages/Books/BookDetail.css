@@ -204,24 +204,9 @@
   }
 }
 
-.book-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.review-textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-family: inherit;
-  resize: vertical;
-}
-
 .review-card {
   border: 1px solid #ddd;
   padding: 15px;
-  margin-bottom: 10px;
   border-radius: 4px;
   background-color: #fff;
 }
