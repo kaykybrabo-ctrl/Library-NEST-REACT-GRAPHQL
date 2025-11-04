@@ -56,6 +56,23 @@ export const CREATE_BOOK = gql`
   }
 `;
 
+export const CREATE_BOOK_WITH_AUTHOR = gql`
+  mutation CreateBookWithAuthor($createBookWithAuthorInput: CreateBookWithAuthorDto!) {
+    createBookWithAuthor(createBookWithAuthorInput: $createBookWithAuthorInput) {
+      book_id
+      title
+      description
+      photo
+      author_id
+      author {
+        author_id
+        name_author
+        biography
+      }
+    }
+  }
+`;
+
 export const UPDATE_BOOK = gql`
   mutation UpdateBook($id: Int!, $updateBookInput: UpdateBookDto!) {
     updateBook(id: $id, updateBookInput: $updateBookInput) {

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { MY_LOANS_QUERY, RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
+import { useMutation, useQuery, useApolloClient } from '@apollo/client'
+import { RETURN_BOOK_MUTATION, MY_LOANS_QUERY, OVERDUE_LOANS_QUERY } from '@/graphql/queries/loans'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { getImageUrl } from '@/utils/imageUtils'
-import api from '@/api'
 import './MyLoans.css'
 
 interface LoanData {
@@ -33,7 +32,6 @@ interface OverdueLoan {
 const MyLoans: React.FC = () => {
   const { user } = useAuth()
   const apolloClient = useApolloClient()
-  const [overdueLoans, setOverdueLoans] = useState<OverdueLoan[]>([])
   const [error, setError] = useState('')
   const [showOverdueModal, setShowOverdueModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -44,24 +42,19 @@ const MyLoans: React.FC = () => {
     skip: !user,
   })
 
+  const { data: overdueData, refetch: refetchOverdue } = useQuery(OVERDUE_LOANS_QUERY, {
+    fetchPolicy: 'cache-and-network',
+    skip: !user,
+  })
+
   const loans = loansData?.myLoans || []
+  const overdueLoans = overdueData?.overdueLoans || []
 
   useEffect(() => {
-    if (user) {
-      checkOverdueLoans()
+    if (user && overdueLoans.length > 0) {
+      setShowOverdueModal(true)
     }
-  }, [user])
-
-  const checkOverdueLoans = async () => {
-    try {
-      const response = await api.get('/api/loans/overdue')
-      setOverdueLoans(response.data)
-      if (response.data.length > 0) {
-        setShowOverdueModal(true)
-      }
-    } catch (err: any) {
-    }
-  }
+  }, [user, overdueLoans])
 
   const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION)
 
@@ -84,7 +77,7 @@ const MyLoans: React.FC = () => {
       
       setTimeout(async () => {
         await refetchLoans()
-        checkOverdueLoans()
+        await refetchOverdue()
       }, 100)
     } catch (err: any) {
       const errorMsg = err.message || 'Erro ao devolver livro'

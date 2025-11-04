@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
+import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, CREATE_BOOK_WITH_AUTHOR, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
 import { GET_AUTHORS } from '@/graphql/queries/authors'
 import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
 import { useAuth } from '@/contexts/AuthContext'
-import api from '@/api'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
 import ConfirmModal from '@/components/ConfirmModal'
@@ -23,10 +22,12 @@ const Books: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
-  const [newBook, setNewBook] = useState({ title: '', author_id: '' })
+  const [newBook, setNewBook] = useState({ title: '', author_id: '', author_name: '' })
+  const [useNewAuthor, setUseNewAuthor] = useState(false)
   const [editingBook, setEditingBook] = useState<number | null>(null)
   const [editData, setEditData] = useState({ title: '', author_id: '' })
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [includeDeleted, setIncludeDeleted] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorModalMessage, setErrorModalMessage] = useState('')
@@ -61,6 +62,7 @@ const Books: React.FC = () => {
   });
   
   const [createBookMutation] = useMutation(CREATE_BOOK);
+  const [createBookWithAuthorMutation] = useMutation(CREATE_BOOK_WITH_AUTHOR);
   const [updateBookMutation] = useMutation(UPDATE_BOOK);
   const [removeBookMutation] = useMutation(REMOVE_BOOK);
   const [restoreBookMutation] = useMutation(RESTORE_BOOK);
@@ -221,16 +223,20 @@ const Books: React.FC = () => {
     }
 
     try {
-      const response = await api.get(`/api/books/${bookId}/my-loan`);
-      const userLoan = response.data;
+      // Buscar o empréstimo do usuário usando GraphQL
+      const { data: loanData } = await apolloClient.query({
+        query: BOOK_LOAN_STATUS_QUERY,
+        variables: { bookId },
+        fetchPolicy: 'network-only'
+      });
       
-      if (!userLoan || !userLoan.loans_id) {
+      if (!loanData?.myBookLoan?.hasLoan || !loanData.myBookLoan.loan?.loans_id) {
         setError('Empréstimo não encontrado');
         return;
       }
 
       await returnBookMutation({
-        variables: { loanId: Number(userLoan.loans_id) }
+        variables: { loanId: Number(loanData.myBookLoan.loan.loans_id) }
       });
       
       setError('');
@@ -277,29 +283,58 @@ const Books: React.FC = () => {
 
   const handleCreateBook = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newBook.title.trim() || !newBook.author_id) return
+    
+    if (!newBook.title.trim()) return
+    if (useNewAuthor && !newBook.author_name.trim()) return
+    if (!useNewAuthor && !newBook.author_id) return
 
     try {
-      await createBookMutation({
-        variables: {
-          createBookInput: {
-            title: capitalizeFirst(newBook.title.trim()),
-            author_id: Number(newBook.author_id)
-          }
-        },
-        refetchQueries: [
-          { query: GET_BOOKS, variables: { 
-            page: currentPage + 1, 
-            limit,
-            search: searchQuery || undefined,
-            includeDeleted: includeDeleted || undefined
-          }},
-          { query: GET_BOOKS_COUNT }
-        ]
-      })
-      setNewBook({ title: '', author_id: '' })
+      if (useNewAuthor) {
+        await createBookWithAuthorMutation({
+          variables: {
+            createBookWithAuthorInput: {
+              title: capitalizeFirst(newBook.title.trim()),
+              author_name: newBook.author_name.trim()
+            }
+          },
+          refetchQueries: [
+            { query: GET_BOOKS, variables: { 
+              page: currentPage + 1, 
+              limit,
+              search: searchQuery || undefined,
+              includeDeleted: includeDeleted || undefined
+            }},
+            { query: GET_BOOKS_COUNT }
+          ]
+        })
+        setSuccessMessage('Livro criado com sucesso! Novo autor foi criado automaticamente.')
+      } else {
+        await createBookMutation({
+          variables: {
+            createBookInput: {
+              title: capitalizeFirst(newBook.title.trim()),
+              author_id: Number(newBook.author_id)
+            }
+          },
+          refetchQueries: [
+            { query: GET_BOOKS, variables: { 
+              page: currentPage + 1, 
+              limit,
+              search: searchQuery || undefined,
+              includeDeleted: includeDeleted || undefined
+            }},
+            { query: GET_BOOKS_COUNT }
+          ]
+        })
+        setSuccessMessage('Livro criado com sucesso!')
+      }
+      
+      setNewBook({ title: '', author_id: '', author_name: '' })
+      setUseNewAuthor(false)
       setError('')
       await fetchBooks()
+      
+      setTimeout(() => setSuccessMessage(''), 3000)
     } catch (err: any) {
       let errorMessage = 'Erro ao criar livro. Tente novamente.'
       
@@ -374,20 +409,20 @@ const Books: React.FC = () => {
   return (
     <Layout title="Livros">
       {error && <div className="error-message">{error}</div>}
+      {successMessage && <div className="success-message">{successMessage}</div>}
 
-      <section className="featured-carousel" style={{ marginBottom: 24 }}>
-        <h2 style={{ marginBottom: 12 }}>Novidades</h2>
+      <section className="featured-carousel">
+        <h2>Novidades</h2>
         {slidesLength === 0 ? (
           books.length > 0 ? (
-            <div style={{ padding: 16, background: '#fff', borderRadius: 10, border: '2px solid #1976d2' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+            <div className="carousel-fallback-container">
+              <div className="carousel-fallback-grid">
                 {books.slice(0, 8).map((bk) => (
-                  <div key={`fallback-${bk.book_id}`} style={{ display: 'flex', gap: 14, alignItems: 'center', border: '1px solid #e0e0e0', borderRadius: 10, padding: 12, background: '#fff' }}>
-                    <div style={{ width: 70, height: 100, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, overflow: 'hidden', flex: '0 0 auto', alignSelf: 'center' }}>
+                  <div key={`fallback-${bk.book_id}`} className="carousel-fallback-item">
+                    <div className="carousel-fallback-image">
                       <img 
                         src={getImageUrl(bk.photo, 'book', false, bk.title)} 
                         alt={bk.title} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         onError={(e) => {
                           const target = e.currentTarget as HTMLImageElement;
                           target.style.display = 'none';
@@ -403,9 +438,9 @@ const Books: React.FC = () => {
                         }}
                       />
                     </div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: 16, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{bk.title}</div>
-                      <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                    <div className="carousel-fallback-content">
+                      <div className="carousel-fallback-title">{bk.title}</div>
+                      <div className="carousel-fallback-author">
                         Autor:{' '}
                         <span 
                           className="clickable-author"
@@ -413,12 +448,11 @@ const Books: React.FC = () => {
                             e.stopPropagation();
                             navigate(`/authors/${bk.author_id}`);
                           }}
-                          style={{ cursor: 'pointer', textDecoration: 'underline', color: '#1976d2' }}
                         >
                           {getAuthorName(bk)}
                         </span>
                       </div>
-                      <div style={{ color: '#777', marginTop: 6, fontSize: 12, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', minHeight: 36 }}>
+                      <div className="carousel-fallback-description">
                         {bk.description || '—'}
                       </div>
                     </div>
@@ -427,8 +461,8 @@ const Books: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div style={{ padding: 20, background: '#fff', borderRadius: 8, border: '2px solid #1976d2' }}>
-              <div style={{ textAlign: 'center', color: '#666' }}>Sem livros para exibir no carrossel.</div>
+            <div className="carousel-empty-state">
+              <div className="carousel-empty-text">Sem livros para exibir no carrossel.</div>
             </div>
           )
         ) : (
@@ -530,21 +564,6 @@ const Books: React.FC = () => {
         <section className="form-section">
           <h2>Adicionar Livro</h2>
           <form onSubmit={handleCreateBook}>
-            <label htmlFor="author-select">Autor:</label>
-            <select
-              id="author-select"
-              value={newBook.author_id}
-              onChange={(e) => setNewBook({ ...newBook, author_id: e.target.value })}
-              required
-            >
-              <option value="">Selecione um autor</option>
-              {authors.map(author => (
-                <option key={author.author_id} value={author.author_id}>
-                  {author.name_author}
-                </option>
-              ))}
-            </select>
-
             <label htmlFor="book-title">Título:</label>
             <input
               type="text"
@@ -554,7 +573,75 @@ const Books: React.FC = () => {
               required
             />
 
-            <button type="submit">Adicionar</button>
+            <fieldset className="fieldset-author-type">
+              <legend>Tipo de Autor:</legend>
+              
+              <div className="radio-option">
+                <label>
+                  <input
+                    type="radio"
+                    name="authorType"
+                    checked={!useNewAuthor}
+                    onChange={() => {
+                      setUseNewAuthor(false)
+                      setNewBook({ ...newBook, author_name: '' })
+                    }}
+                  />
+                  <span className="radio-label">Usar autor existente</span>
+                </label>
+              </div>
+
+              <div className="radio-option">
+                <label>
+                  <input
+                    type="radio"
+                    name="authorType"
+                    checked={useNewAuthor}
+                    onChange={() => {
+                      setUseNewAuthor(true)
+                      setNewBook({ ...newBook, author_id: '' })
+                    }}
+                  />
+                  <span className="radio-label">Criar novo autor</span>
+                </label>
+              </div>
+            </fieldset>
+
+            {!useNewAuthor ? (
+              <>
+                <label htmlFor="author-select">Selecionar Autor:</label>
+                <select
+                  id="author-select"
+                  value={newBook.author_id}
+                  onChange={(e) => setNewBook({ ...newBook, author_id: e.target.value })}
+                  required={!useNewAuthor}
+                >
+                  <option value="">Selecione um autor</option>
+                  {authors.map(author => (
+                    <option key={author.author_id} value={author.author_id}>
+                      {author.name_author}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <label htmlFor="author-name">Nome do Novo Autor:</label>
+                <input
+                  type="text"
+                  id="author-name"
+                  value={newBook.author_name}
+                  onChange={(e) => setNewBook({ ...newBook, author_name: e.target.value })}
+                  placeholder="Digite o nome do autor"
+                  required={useNewAuthor}
+                />
+                <small className="author-help-text">
+                  Se o autor já existir, o sistema usará o existente. Caso contrário, criará um novo automaticamente.
+                </small>
+              </>
+            )}
+
+            <button type="submit">Adicionar Livro</button>
           </form>
         </section>
       )}

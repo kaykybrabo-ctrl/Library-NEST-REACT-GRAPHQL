@@ -92,9 +92,9 @@ export const OVERDUE_LOANS_QUERY = gql`
   query OverdueLoans {
     overdueLoans {
       loans_id
-      title
       due_date
       fine_amount
+      title
     }
   }
 `;

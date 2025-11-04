@@ -38,6 +38,19 @@ export class AuthorsRepository {
     }
   }
 
+  async findByName(name: string): Promise<Author | null> {
+    try {
+      return await this.prisma.author.findFirst({
+        where: { 
+          name_author: name,
+          deleted_at: null
+        },
+      });
+    } catch (error) {
+      throw new DatabaseOperationException('buscar autor por nome', error.message);
+    }
+  }
+
   async update(id: number, data: Prisma.AuthorUpdateInput): Promise<Author> {
     try {
       return await this.prisma.author.update({

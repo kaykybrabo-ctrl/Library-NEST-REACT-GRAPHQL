@@ -55,7 +55,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             {isAuthenticated ? (
               <div className="user-menu">
                 <img
-                  src={getImageUrl(userProfile?.profile_image, 'profile')}
+                  src={getImageUrl(userProfile?.profile_image, 'profile', true)}
                   alt="Perfil"
                   className="user-avatar"
                   onClick={() => setShowDropdown(!showDropdown)}

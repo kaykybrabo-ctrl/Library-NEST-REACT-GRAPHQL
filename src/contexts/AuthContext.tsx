@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '../api';
+import { useMutation, useApolloClient } from '@apollo/client';
+import { LOGIN_MUTATION, REGISTER_MUTATION } from '../graphql/queries/auth';
 
 interface User {
   id: number;
@@ -44,12 +45,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return null;
   });
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  
+  const apolloClient = useApolloClient();
+  const [loginMutation] = useMutation(LOGIN_MUTATION);
+  const [registerMutation] = useMutation(REGISTER_MUTATION);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response = await api.post('/api/login', { username, password });
-      const { user: userData, token: newToken } = response.data;
+      console.log('🔍 Frontend - Tentando login com:', { username, password: password ? '[REDACTED]' : 'undefined' });
+      
+      const { data } = await loginMutation({
+        variables: {
+          username,
+          password
+        }
+      });
+      
+      console.log('✅ Frontend - Login bem-sucedido:', data);
 
+      const { user: userData, token: newToken } = data.login;
       setUser(userData);
       setToken(newToken);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -62,15 +76,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response = await api.post('/api/register', { username, password });
+      const { data } = await registerMutation({
+        variables: {
+          registerInput: { username, password }
+        }
+      });
       
-      if (response.data.token) {
-        const { token, user } = response.data;
-        setToken(token);
-        setUser(user);
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      if (data.register) {
+        const userData = data.register;
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Para register, vamos fazer login automaticamente
+        return await login(username, password);
       }
       
       return true;

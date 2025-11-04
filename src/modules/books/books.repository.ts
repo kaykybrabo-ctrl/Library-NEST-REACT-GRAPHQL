@@ -61,6 +61,23 @@ export class BooksRepository {
     }
   }
 
+  async findByTitleAndAuthor(title: string, authorId: number): Promise<Book | null> {
+    try {
+      return await this.prisma.book.findFirst({
+        where: { 
+          title: title,
+          author_id: authorId,
+          deleted_at: null
+        },
+        include: {
+          author: true,
+        },
+      });
+    } catch (error) {
+      throw new DatabaseOperationException('buscar livro por título e autor', error.message);
+    }
+  }
+
   async update(id: number, data: Prisma.BookUpdateInput): Promise<Book> {
     try {
       return await this.prisma.book.update({

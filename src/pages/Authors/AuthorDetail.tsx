@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import api from '@/api'
+import { useQuery, useMutation } from '@apollo/client'
+import { GET_AUTHOR, UPDATE_AUTHOR } from '@/graphql/queries/authors'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { Author } from '@/types'
@@ -10,8 +11,6 @@ import './AuthorDetail.css'
 const AuthorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [author, setAuthor] = useState<Author | null>(null)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -20,6 +19,16 @@ const AuthorDetail: React.FC = () => {
   const { isAdmin } = useAuth()
   const [imgVersion, setImgVersion] = useState(0)
   const [previewUrl, setPreviewUrl] = useState('')
+
+  const { data: authorData, loading, refetch } = useQuery(GET_AUTHOR, {
+    variables: { id: parseInt(id || '0') },
+    skip: !id,
+    fetchPolicy: 'cache-and-network'
+  })
+
+  const [updateAuthorMutation] = useMutation(UPDATE_AUTHOR)
+
+  const author = authorData?.author
 
   const buildImageSrc = (path?: string | null) => {
     if (!path) return ''

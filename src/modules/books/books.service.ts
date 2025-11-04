@@ -1,11 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { BooksRepository } from "./books.repository";
 import { CreateBookDto } from "./dto/create-book.dto";
+import { CreateBookWithAuthorDto } from "./dto/create-book-with-author.dto";
 import { UpdateBookDto } from "./dto/update-book.dto";
+import { AuthorsService } from "../authors/authors.service";
 
 @Injectable()
 export class BooksService {
-  constructor(private booksRepository: BooksRepository) {}
+  constructor(
+    private booksRepository: BooksRepository,
+    private authorsService: AuthorsService
+  ) {}
 
   async create(createBookDto: CreateBookDto) {
     return this.booksRepository.create({
@@ -14,6 +19,59 @@ export class BooksService {
         connect: { author_id: createBookDto.author_id }
       },
     });
+  }
+
+  async createWithAuthor(createBookWithAuthorDto: CreateBookWithAuthorDto) {
+    let authorId: number;
+
+    if (createBookWithAuthorDto.author_id) {
+      // Usar autor existente
+      authorId = createBookWithAuthorDto.author_id;
+    } else if (createBookWithAuthorDto.author_name) {
+      // Verificar se autor já existe pelo nome
+      const existingAuthor = await this.authorsService.findByName(createBookWithAuthorDto.author_name);
+      
+      if (existingAuthor) {
+        authorId = existingAuthor.author_id;
+      } else {
+        // Criar novo autor
+        const newAuthor = await this.authorsService.create({
+          name_author: this.formatAuthorName(createBookWithAuthorDto.author_name),
+          biography: `Biografia de ${this.formatAuthorName(createBookWithAuthorDto.author_name)}`
+        });
+        authorId = newAuthor.author_id;
+      }
+    } else {
+      throw new Error('É necessário fornecer author_id ou author_name');
+    }
+
+    // Verificar se já existe livro com mesmo título do mesmo autor
+    const existingBook = await this.booksRepository.findByTitleAndAuthor(
+      createBookWithAuthorDto.title, 
+      authorId
+    );
+
+    if (existingBook) {
+      throw new Error('Já existe um livro com este título deste autor');
+    }
+
+    // Criar o livro
+    return this.booksRepository.create({
+      title: createBookWithAuthorDto.title,
+      description: createBookWithAuthorDto.description,
+      photo: createBookWithAuthorDto.photo,
+      author: {
+        connect: { author_id: authorId }
+      },
+    });
+  }
+
+  private formatAuthorName(name: string): string {
+    return name
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   async findAll(page?: number, limit?: number, search?: string, includeDeleted: boolean = false, authorId?: number): Promise<any> {

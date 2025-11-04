@@ -32,3 +32,33 @@ export class UpdateProfileInput {
   @Field({ nullable: true })
   profile_image?: string;
 }
+
+@InputType()
+export class ForgotPasswordInput {
+  @Field()
+  username: string;
+}
+
+@InputType()
+export class ResetPasswordInput {
+  @Field()
+  newPassword: string;
+
+  @Field({ nullable: true })
+  token?: string;
+
+  @Field({ nullable: true })
+  username?: string;
+}
+
+@InputType()
+export class UploadImageInput {
+  @Field()
+  filename: string;
+
+  @Field()
+  fileData: string;
+
+  @Field({ nullable: true })
+  username?: string;
+}

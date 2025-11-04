@@ -56,6 +56,10 @@ export class AuthorsService {
     return this.authorsRepository.findById(id);
   }
 
+  async findByName(name: string) {
+    return this.authorsRepository.findByName(name);
+  }
+
   async update(id: number, updateAuthorDto: UpdateAuthorDto) {
     const exists = await this.authorsRepository.findById(id);
     if (!exists) {

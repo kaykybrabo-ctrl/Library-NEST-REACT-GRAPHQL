@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '@/api'
+import { useQuery, useMutation } from '@apollo/client'
+import { ALL_LOANS_QUERY, RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import './LoansCards.css'
@@ -17,42 +18,30 @@ interface Loan {
 }
 
 const Loans: React.FC = () => {
-  const { isAdmin } = useAuth()
-  const [loans, setLoans] = useState<Loan[]>([])
-  const [loading, setLoading] = useState(true)
+  const { isAdmin, user } = useAuth()
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!isAdmin) {
-      navigate('/books')
-      return
-    }
-    fetchLoans()
-  }, [isAdmin, navigate])
+  const { data: loansData, loading, refetch } = useQuery(ALL_LOANS_QUERY, {
+    skip: !isAdmin,
+    fetchPolicy: 'cache-and-network'
+  })
 
-  const fetchLoans = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get('/api/loans/all')
-      setLoans(response.data)
-      setError('')
-    } catch (err: any) {
-      setError('Erro ao carregar empréstimos')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION)
 
-  const handleCancelLoan = async (loanId: number, username: string, bookTitle: string) => {
-    if (!confirm(`Tem certeza de que deseja cancelar o empréstimo do livro "${bookTitle}" do usuário ${username}?`)) {
+  const loans = loansData?.allLoans || []
+
+  const handleReturnBook = async (loanId: number) => {
+    if (!confirm('Tem certeza de que deseja cancelar este empréstimo?')) {
       return
     }
 
     try {
-      await api.post(`/api/return/${loanId}`)
+      await returnBookMutation({
+        variables: { loanId }
+      })
       alert('Empréstimo cancelado com sucesso')
-      fetchLoans()
+      refetch()
     } catch (err: any) {
       alert('Erro ao cancelar empréstimo')
     }
@@ -158,7 +147,7 @@ const Loans: React.FC = () => {
                     
                     <button
                       type="button"
-                      onClick={() => handleCancelLoan(loan.loans_id, loan.username, loan.title)}
+                      onClick={() => handleReturnBook(loan.loans_id)}
                       aria-label="Cancelar empréstimo"
                       title="Cancelar empréstimo"
                       className="icon-button cancel-button"

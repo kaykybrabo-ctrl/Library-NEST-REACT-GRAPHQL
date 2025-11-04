@@ -1,49 +1,56 @@
 import React, { useState, useEffect } from 'react'
-import { useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
-import { RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
-import api from '@/api'
-import Layout from '@/components/Layout'
-import { useAuth } from '@/contexts/AuthContext'
-import { User, Loan } from '@/types'
-import { getImageUrl } from '@/utils/imageUtils'
+import { RETURN_BOOK_MUTATION } from '../../graphql/queries/loans'
+import { ME_QUERY, UPDATE_PROFILE_MUTATION } from '../../graphql/queries/auth'
+import { MY_LOANS_QUERY, MY_FAVORITE_BOOK_QUERY, GET_USER_PROFILE_QUERY, GET_USER_LOANS_QUERY, UPDATE_USER_DESCRIPTION_MUTATION, UPDATE_USER_DISPLAY_NAME_MUTATION } from '../../graphql/queries/users'
+import Layout from '../../components/Layout'
+import { useAuth } from '../../contexts/AuthContext'
+import { User, Loan } from '../../types'
+import { getImageUrl } from '../../utils/imageUtils'
+import api from '../../api'
 import './UserProfile.css'
 
 interface FavoriteBook {
   book_id: number
   title: string
   description?: string
-  photo?: string
   author_name?: string
 }
 
 const UserProfile: React.FC = () => {
   const { user } = useAuth()
-  const { username: paramUsername } = useParams<{ username: string }>()
+  const { username: targetUsername } = useParams<{ username: string }>()
   const [profile, setProfile] = useState<User | null>(null)
   const [viewingUser, setViewingUser] = useState<User | null>(null)
-  const [loans, setLoans] = useState<Loan[]>([])
   const [favoriteBook, setFavoriteBook] = useState<FavoriteBook | null>(null)
+  const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<'profile' | 'loans' | 'favorite'>('profile')
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [activeTab, setActiveTab] = useState('profile')
+  const [editingDisplayName, setEditingDisplayName] = useState(false)
+  const [displayName, setDisplayName] = useState('')
+  const [editingDescription, setEditingDescription] = useState(false)
+  const [description, setDescription] = useState('')
   const [uploading, setUploading] = useState(false)
   const [imgVersion, setImgVersion] = useState(0)
-  const [description, setDescription] = useState('')
-  const [editingDescription, setEditingDescription] = useState(false)
-  const [displayName, setDisplayName] = useState('')
-  const [editingDisplayName, setEditingDisplayName] = useState(false)
-  const isOwnProfile = !paramUsername || 
-    paramUsername === user?.username || 
-    (paramUsername.includes('@') && paramUsername === user?.username) ||
-    (!paramUsername.includes('@') && user?.username?.includes('@') && paramUsername === user.username.split('@')[0])
+  const [imageFile, setImageFile] = useState<File | null>(null)
   
+  // GraphQL hooks
+  const { data: meData, refetch: refetchMe } = useQuery(ME_QUERY, {
+    skip: !!targetUsername && targetUsername !== user?.username
+  })
+  const { data: loansData, refetch: refetchLoans } = useQuery(MY_LOANS_QUERY, {
+    skip: !!targetUsername && targetUsername !== user?.username
+  })
+  const { data: favoriteData, refetch: refetchFavorite } = useQuery(MY_FAVORITE_BOOK_QUERY, {
+    skip: !!targetUsername && targetUsername !== user?.username
+  })
+  const isOwnProfile = !targetUsername || targetUsername === user?.username
   const canEdit = user && (
     isOwnProfile ||
     (user.role === 'admin')
   )
-  const targetUsername = paramUsername || user?.username
 
   const buildImageSrc = (path?: string | null, type: 'book' | 'profile' = 'book', name?: string) => {
     const baseUrl = getImageUrl(path, type, false, name)
@@ -59,11 +66,7 @@ const UserProfile: React.FC = () => {
     setLoans([])
     setFavoriteBook(null)
     setLoading(true)
-    
-    fetchProfile()
-    fetchLoans()
-    fetchFavoriteBook()
-  }, [paramUsername, user?.username])
+  }, [targetUsername, user?.username])
 
   useEffect(() => {
     if (profile?.description !== undefined) {
@@ -74,32 +77,39 @@ const UserProfile: React.FC = () => {
     }
   }, [profile?.description, profile?.display_name])
 
-  const fetchProfile = async () => {
-    try {
-      const url = targetUsername && targetUsername !== user?.username 
-        ? `/api/get-profile?username=${targetUsername}`
-        : '/api/get-profile'
-      
-      const response = await api.get(url)
-      setProfile(response.data)
-      
-      if (targetUsername && targetUsername !== user?.username) {
-        setViewingUser(response.data)
-      }
-      
+  const { data: profileData, refetch: refetchProfile, loading: profileLoading, error: profileError } = useQuery(ME_QUERY, {
+    skip: !!targetUsername && targetUsername !== user?.username,
+    fetchPolicy: 'cache-and-network'
+  })
+
+  // Buscar perfil de outro usuário via GraphQL
+  const { data: otherUserData, loading: otherUserLoading, error: otherUserError } = useQuery(GET_USER_PROFILE_QUERY, {
+    variables: { username: targetUsername || '' },
+    skip: !targetUsername || targetUsername === user?.username,
+    fetchPolicy: 'cache-and-network'
+  })
+
+  useEffect(() => {
+    if (otherUserData?.userProfile) {
+      setViewingUser(otherUserData.userProfile)
       setError('')
-    } catch (e: any) {
-      if (e.response?.status === 404) {
-        setError('Usuário não encontrado.')
-      } else if (e.response?.status === 403) {
-        setError('Você não tem permissão para visualizar este perfil.')
-      } else {
-        setError('Falha ao carregar o perfil. Verifique sua conexão.')
-      }
-    } finally {
-      setLoading(false)
+    } else if (otherUserError) {
+      setError('Erro ao carregar o perfil do usuário.')
     }
-  }
+  }, [otherUserData, otherUserError])
+
+  useEffect(() => {
+    if (profileData?.me) {
+      setProfile(profileData.me)
+      setError('')
+    } else if (profileError) {
+      setError('Erro ao carregar o perfil do usuário.')
+    }
+  }, [profileData, profileError])
+
+  useEffect(() => {
+    setLoading(profileLoading || otherUserLoading)
+  }, [profileLoading, otherUserLoading])
 
   const fetchLoans = async () => {
     if (!targetUsername) return
@@ -256,7 +266,7 @@ const UserProfile: React.FC = () => {
   }
 
   const displayedUser = viewingUser || profile
-  const isViewingOtherUser = paramUsername && paramUsername !== user?.username
+  const isViewingOtherUser = targetUsername && targetUsername !== user?.username
   const pageTitle = isViewingOtherUser 
     ? `Perfil de ${displayedUser?.display_name || displayedUser?.username || 'Usuário'}` 
     : 'Meu Perfil'
@@ -335,7 +345,7 @@ const UserProfile: React.FC = () => {
                         setDisplayName(profile?.display_name || '')
                       }}
                       disabled={uploading}
-                      style={{marginLeft: '10px'}}
+                      className="cancel-button"
                     >
                       Cancelar
                     </button>
@@ -351,7 +361,7 @@ const UserProfile: React.FC = () => {
                   )}
                 </div>
               )}
-              <p style={{fontSize: '0.9em', color: '#666', marginTop: '5px'}}>
+              <p className="display-name-help">
                 Este nome aparecerá quando você alugar livros
               </p>
             </div>

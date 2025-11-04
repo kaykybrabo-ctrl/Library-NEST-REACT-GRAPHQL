@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { Book } from './entities/book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
+import { CreateBookWithAuthorDto } from './dto/create-book-with-author.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
 import { CloudinaryService } from '@/common/services/cloudinary.service';
@@ -44,6 +45,12 @@ export class BooksResolver {
   @Mutation(() => Book)
   async createBook(@Args('createBookInput') createBookDto: CreateBookDto) {
     return this.booksService.create(createBookDto);
+  }
+
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
+  @Mutation(() => Book)
+  async createBookWithAuthor(@Args('createBookWithAuthorInput') createBookWithAuthorDto: CreateBookWithAuthorDto) {
+    return this.booksService.createWithAuthor(createBookWithAuthorDto);
   }
 
   @UseGuards(GqlAuthGuard, GqlAdminGuard)
