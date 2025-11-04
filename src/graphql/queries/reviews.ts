@@ -9,6 +9,7 @@ export const CREATE_REVIEW_MUTATION = gql`
       created_at
       user {
         username
+        display_name
         photo
       }
     }
@@ -24,6 +25,7 @@ export const BOOK_REVIEWS_QUERY = gql`
       created_at
       user {
         username
+        display_name
         photo
       }
     }

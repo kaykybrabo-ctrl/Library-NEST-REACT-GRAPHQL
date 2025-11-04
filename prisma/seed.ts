@@ -78,10 +78,10 @@ async function main() {
     { id: 14, author_id: 2, title: 'Blue Night', description: 'Jornada misteriosa através da escuridão iluminada pela luz azulada da noite.' },
     { id: 15, author_id: 1, title: 'Faces of Memory', description: 'Histórias que capturam a natureza efêmera das lembranças e dos rostos que marcam nossas vidas.' },
     { id: 16, author_id: 2, title: 'Origin Tales', description: 'Explorando as raízes e os começos que moldam quem somos.' },
-    { id: 17, author_id: 1, title: 'Echoes of Tomorrow', description: 'Narrativa futurista sobre esperança, possibilidades e os ecos do que está por vir.' },
-    { id: 18, author_id: 2, title: 'The Garden of Words', description: 'Coleção de reflexões poéticas sobre linguagem, significado e expressão.' },
-    { id: 19, author_id: 1, title: 'Shadows and Light', description: 'História sobre contrastes e a beleza encontrada na dualidade da existência.' },
-    { id: 20, author_id: 2, title: 'The River of Time', description: 'Exploração profunda sobre memória, tempo e o fluxo constante da vida.' },
+    { id: 17, author_id: 1, title: 'Fragments of Hope', description: 'Narrativa sobre esperança e possibilidades em tempos difíceis.' },
+    { id: 18, author_id: 2, title: 'Trails and Scars', description: 'Coleção de reflexões sobre as marcas que a vida deixa em nós.' },
+    { id: 19, author_id: 1, title: 'From the Other Side of the Street', description: 'História sobre perspectivas diferentes e a beleza da diversidade.' },
+    { id: 20, author_id: 2, title: 'Interrupted Seasons', description: 'Exploração sobre mudanças inesperadas e adaptação na vida.' },
   ]
 
   const books = await Promise.all(
@@ -99,62 +99,25 @@ async function main() {
   )
   const hashedPassword = await bcrypt.hash('123', 10)
 
-  const users = await Promise.all([
-    prisma.user.create({
-      data: {
-        user_id: 1,
-        full_name: 'Kayky Brabo',
-        birth_date: new Date('2005-01-30'),
-        address: 'Rua das Flores, 123',
-        email: 'kayky@gmail.com',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        user_id: 2,
-        full_name: 'Kaue Brabo',
-        birth_date: new Date('2010-01-12'),
-        address: 'Av. Principal, 456',
-        email: 'kaue@gmail.com',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        user_id: 3,
-        full_name: 'Barbara Silva',
-        birth_date: new Date('1995-05-15'),
-        address: 'Rua das Acácias, 789',
-        email: 'barbara@gmail.com',
-      },
-    }),
-  ])
-  await prisma.authUser.createMany({
-    data: [
-      {
-        id: 1,
-        username: 'kayky@gmail.com',
-        password: hashedPassword,
-        role: 'admin',
-        user_id: 1,
-        display_name: 'kayky',
-      },
-      {
-        id: 2,
-        username: 'kaue@gmail.com',
-        password: hashedPassword,
-        role: 'user',
-        user_id: 2,
-        display_name: 'kaue',
-      },
-      {
-        id: 3,
-        username: 'barbara@gmail.com',
-        password: hashedPassword,
-        role: 'user',
-        user_id: 3,
-        display_name: 'barbara',
-      },
-    ],
+  const adminUser = await prisma.user.create({
+    data: {
+      user_id: 1,
+      full_name: 'Kayky Brabo',
+      birth_date: new Date('2005-01-30'),
+      address: 'Rua Hermes da fonseca, 123',
+      email: 'kayky@gmail.com',
+    },
+  })
+
+  await prisma.authUser.create({
+    data: {
+      id: 1,
+      username: 'kayky@gmail.com',
+      password: hashedPassword,
+      role: 'admin',
+      user_id: 1,
+      display_name: 'kayky',
+    },
   });
   const bookCategories = await Promise.all([
     prisma.book_categories.create({ data: { book_id: 1, category_id: 1 } }),

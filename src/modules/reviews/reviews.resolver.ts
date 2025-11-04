@@ -35,6 +35,7 @@ export class ReviewsResolver {
       created_at: review.created_at,
       user: review.user ? {
         username: review.user.username,
+        display_name: review.user.display_name,
         photo: review.user.photo,
       } : undefined,
     };
@@ -53,6 +54,7 @@ export class ReviewsResolver {
       created_at: review.created_at,
       user: review.user ? {
         username: review.user.username,
+        display_name: review.user.display_name,
         photo: review.user.photo,
       } : undefined,
     }));

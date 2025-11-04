@@ -237,7 +237,6 @@ export class CloudinaryService {
         const resource = await cloudinary.api.resource(publicId);
         backupList[publicId] = resource.secure_url;
       } catch (error) {
-        console.warn(`Imagem protegida não encontrada: ${publicId}`);
       }
     }
     

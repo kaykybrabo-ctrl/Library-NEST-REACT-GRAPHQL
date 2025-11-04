@@ -94,7 +94,6 @@ export class AuthController {
         message: 'Conta criada e login realizado com sucesso!'
       };
     } catch (error) {
-      console.error('Erro no registro:', error);
       throw error;
     }
   }
@@ -174,7 +173,6 @@ export class AuthController {
         genericResponse.messageId = res.messageId;
       }
     } catch (error) {
-      console.error('❌ Erro ao enviar email:', error);
       genericResponse.error = error?.message || 'Erro desconhecido';
     }
     

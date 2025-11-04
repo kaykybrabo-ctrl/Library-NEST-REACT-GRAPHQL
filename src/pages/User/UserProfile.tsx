@@ -34,10 +34,13 @@ const UserProfile: React.FC = () => {
   const [editingDescription, setEditingDescription] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [editingDisplayName, setEditingDisplayName] = useState(false)
-
+  const isOwnProfile = !paramUsername || 
+    paramUsername === user?.username || 
+    (paramUsername.includes('@') && paramUsername === user?.username) ||
+    (!paramUsername.includes('@') && user?.username?.includes('@') && paramUsername === user.username.split('@')[0])
+  
   const canEdit = user && (
-    (!paramUsername) ||
-    (paramUsername === user.username) ||
+    isOwnProfile ||
     (user.role === 'admin')
   )
   const targetUsername = paramUsername || user?.username

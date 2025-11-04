@@ -47,13 +47,10 @@ import * as nodemailer from 'nodemailer';
         let transport;
         
         if (user && pass) {
-          console.log('📧 Usando credenciais SMTP configuradas');
           transport = { host, port, secure, auth: { user, pass } };
         } else {
-          console.log('📧 Criando conta de teste Ethereal...');
           try {
             const testAccount = await nodemailer.createTestAccount();
-            console.log('✅ Conta de teste criada:', testAccount.user);
             transport = {
               host: "smtp.ethereal.email",
               port: 587,
@@ -64,7 +61,6 @@ import * as nodemailer from 'nodemailer';
               },
             };
           } catch (error) {
-            console.warn('⚠️ Falha ao criar conta Ethereal, usando configuração local');
             transport = {
               host: "localhost",
               port: 1025,

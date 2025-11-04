@@ -62,7 +62,8 @@ export class ReviewsService {
         ...review,
         user: {
           ...review.user,
-          username: finalName,
+          username: username,
+          display_name: displayName,
         },
       };
     }));

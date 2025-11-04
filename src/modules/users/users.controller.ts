@@ -187,7 +187,14 @@ export class UsersController {
     const currentUser = req.user;
     const targetUsername = body?.username || queryUsername || username;
     
-    if (currentUser.username !== targetUsername && currentUser.role !== 'admin') {
+    // Lógica mais robusta para verificar permissões
+    const isOwnProfile = currentUser.username === targetUsername ||
+      (currentUser.username.includes('@') && !targetUsername.includes('@') && 
+       currentUser.username.split('@')[0] === targetUsername) ||
+      (!currentUser.username.includes('@') && targetUsername.includes('@') && 
+       targetUsername.split('@')[0] === currentUser.username);
+    
+    if (!isOwnProfile && currentUser.role !== 'admin') {
       throw new HttpException(
         'Você não tem permissão para editar este perfil',
         HttpStatus.FORBIDDEN
@@ -236,7 +243,14 @@ export class UsersController {
     
     const currentUser = req.user;
     
-    if (currentUser.username !== targetUsername && currentUser.role !== 'admin') {
+    // Lógica mais robusta para verificar permissões
+    const isOwnProfile = currentUser.username === targetUsername ||
+      (currentUser.username.includes('@') && !targetUsername.includes('@') && 
+       currentUser.username.split('@')[0] === targetUsername) ||
+      (!currentUser.username.includes('@') && targetUsername.includes('@') && 
+       targetUsername.split('@')[0] === currentUser.username);
+    
+    if (!isOwnProfile && currentUser.role !== 'admin') {
       throw new HttpException(
         'Você não tem permissão para editar este perfil',
         HttpStatus.FORBIDDEN
@@ -326,7 +340,19 @@ export class UsersController {
       username = queryUsername;
     }
     
-    const dbUser = await this.usersService.findByUsername(username);
+    // Tenta encontrar o usuário com múltiplas estratégias
+    let dbUser = await this.usersService.findByUsername(username);
+    
+    // Se não encontrou e o username não tem @, tenta buscar com @gmail.com
+    if (!dbUser && !username.includes('@')) {
+      dbUser = await this.usersService.findByUsername(`${username}@gmail.com`);
+    }
+    
+    // Se não encontrou e o username tem @, tenta buscar só a parte antes do @
+    if (!dbUser && username.includes('@')) {
+      const usernameWithoutDomain = username.split('@')[0];
+      dbUser = await this.usersService.findByUsername(usernameWithoutDomain);
+    }
     
     if (dbUser) {
       return {

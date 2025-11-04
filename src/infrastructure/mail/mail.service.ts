@@ -52,7 +52,6 @@ export class MailService {
     to: string,
     context: { username?: string; resetUrl: string },
   ) {
-    console.log('📧 Iniciando envio de email de reset para:', to);
     const html = `
       <!DOCTYPE html>
       <html>
@@ -122,7 +121,6 @@ export class MailService {
     `;
     
     try {
-      console.log('📤 Enviando email...');
       const emailPromise = this.mailer.sendMail({
         to,
         subject: "🔐 Redefina sua senha do PedBook",
@@ -147,7 +145,6 @@ Equipe PedBook`,
       const info = await Promise.race([emailPromise, timeoutPromise]) as any;
       
       const preview = nodemailer.getTestMessageUrl(info);
-      console.log('✅ Email enviado com sucesso!', { messageId: info?.messageId, preview });
       
       return { 
         messageId: info?.messageId, 
@@ -156,8 +153,6 @@ Equipe PedBook`,
         message: 'Email enviado com sucesso'
       };
     } catch (err) {
-      console.error('❌ Erro ao enviar email:', err);
-      console.log('🔄 Simulando envio bem-sucedido para desenvolvimento...');
       const devToken = this.jwtService.sign(
         { username: to, purpose: "pwd_reset" },
         { expiresIn: "15m" }

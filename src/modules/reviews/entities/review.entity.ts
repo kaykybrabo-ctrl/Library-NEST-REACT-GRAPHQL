@@ -7,6 +7,9 @@ export class ReviewUser {
   username: string;
 
   @Field({ nullable: true })
+  display_name?: string;
+
+  @Field({ nullable: true })
   photo?: string;
 }
 
