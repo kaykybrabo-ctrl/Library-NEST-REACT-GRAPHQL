@@ -25,7 +25,6 @@ export class AuthResolver {
       password: password ? '[REDACTED]' : 'undefined'
     });
     
-    // Validação adicional para evitar undefined
     if (!username || !password) {
       throw new UnauthorizedException('Username e password são obrigatórios');
     }
@@ -161,7 +160,6 @@ export class AuthResolver {
     @Args('username') username: string,
     @Context() context
   ): Promise<string> {
-    // Implementação básica - retorna URL da imagem
     return `https://res.cloudinary.com/ddfgsoh5g/image/upload/pedbook/profiles/${username}-${Date.now()}.jpg`;
   }
 

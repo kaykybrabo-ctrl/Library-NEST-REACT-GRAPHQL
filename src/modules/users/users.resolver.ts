@@ -52,7 +52,6 @@ export class UsersResolver {
   ): Promise<UserProfile> {
     const user = context.req.user;
     
-    // Buscar usuário no banco
     const targetUser = await this.prisma.authUser.findUnique({
       where: { username },
       select: {
@@ -72,7 +71,7 @@ export class UsersResolver {
     return {
       id: targetUser.id,
       username: targetUser.username,
-      email: targetUser.username, // Usando username como email
+      email: targetUser.username,
       role: targetUser.role,
       description: targetUser.description || '',
       profile_image: targetUser.profile_image || '',

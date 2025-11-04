@@ -223,7 +223,6 @@ const Books: React.FC = () => {
     }
 
     try {
-      // Buscar o empréstimo do usuário usando GraphQL
       const { data: loanData } = await apolloClient.query({
         query: BOOK_LOAN_STATUS_QUERY,
         variables: { bookId },

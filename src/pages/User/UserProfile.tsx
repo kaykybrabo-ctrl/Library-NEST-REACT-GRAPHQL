@@ -36,7 +36,6 @@ const UserProfile: React.FC = () => {
   const [imgVersion, setImgVersion] = useState(0)
   const [imageFile, setImageFile] = useState<File | null>(null)
   
-  // GraphQL hooks
   const { data: meData, refetch: refetchMe } = useQuery(ME_QUERY, {
     skip: !!targetUsername && targetUsername !== user?.username
   })
@@ -82,7 +81,6 @@ const UserProfile: React.FC = () => {
     fetchPolicy: 'cache-and-network'
   })
 
-  // Buscar perfil de outro usuário via GraphQL
   const { data: otherUserData, loading: otherUserLoading, error: otherUserError } = useQuery(GET_USER_PROFILE_QUERY, {
     variables: { username: targetUsername || '' },
     skip: !targetUsername || targetUsername === user?.username,

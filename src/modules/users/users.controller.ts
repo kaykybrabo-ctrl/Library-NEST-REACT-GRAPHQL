@@ -340,15 +340,12 @@ export class UsersController {
       username = queryUsername;
     }
     
-    // Tenta encontrar o usuário com múltiplas estratégias
     let dbUser = await this.usersService.findByUsername(username);
     
-    // Se não encontrou e o username não tem @, tenta buscar com @gmail.com
     if (!dbUser && !username.includes('@')) {
       dbUser = await this.usersService.findByUsername(`${username}@gmail.com`);
     }
     
-    // Se não encontrou e o username tem @, tenta buscar só a parte antes do @
     if (!dbUser && username.includes('@')) {
       const usernameWithoutDomain = username.split('@')[0];
       dbUser = await this.usersService.findByUsername(usernameWithoutDomain);
