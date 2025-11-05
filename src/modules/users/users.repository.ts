@@ -41,10 +41,7 @@ export class UsersRepository {
 
   async findByUsername(username: string): Promise<AuthUser | null> {
     try {
-      console.log('🔍 UsersRepository.findByUsername - username recebido:', username);
-      
       if (!username) {
-        console.log('❌ Username está vazio ou undefined');
         return null;
       }
       
@@ -52,10 +49,8 @@ export class UsersRepository {
         where: { username },
       });
       
-      console.log('👤 Resultado da busca:', result ? 'ENCONTRADO' : 'NÃO ENCONTRADO');
       return result;
     } catch (error) {
-      console.error('💥 Erro na busca por username:', error);
       throw new DatabaseOperationException('buscar usuário por username', error.message);
     }
   }

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useQuery } from '@apollo/client'
 import { useAuth } from '../contexts/AuthContext'
-import { getImageUrl, getFallbackImageUrl } from '../utils/imageUtils'
-import api from '../api'
+import { ME_QUERY } from '../graphql/queries/auth'
+import { getImageUrl } from '../utils/imageUtils'
+import './Layout.css'
 
 interface LayoutProps {
   children: ReactNode
@@ -21,19 +23,16 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
 
+  const { data: profileData } = useQuery(ME_QUERY, {
+    skip: !user,
+    fetchPolicy: 'cache-and-network'
+  })
+  
   useEffect(() => {
-    if (user?.username) {
-      fetchUserProfile()
+    if (profileData?.me) {
+      setUserProfile(profileData.me)
     }
-  }, [user])
-
-  const fetchUserProfile = async () => {
-    try {
-      const response = await api.get(`/api/get-profile?username=${user?.username}&t=${Date.now()}`)
-      setUserProfile(response.data)
-    } catch (err) {
-    }
-  }
+  }, [profileData])
 
   const handleLogout = () => {
     logout()
@@ -49,18 +48,19 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             className="clickable-header"
             title="Voltar para o início"
           >
-            {title}
+            📚 PedBook
           </h1>
           <div className="header-user-menu">
             {isAuthenticated ? (
               <div className="user-menu">
                 <img
-                  src={getImageUrl(userProfile?.profile_image, 'profile', true)}
+                  src={getImageUrl(userProfile?.profile_image, 'profile')}
                   alt="Perfil"
                   className="user-avatar"
                   onClick={() => setShowDropdown(!showDropdown)}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = getFallbackImageUrl('profile')
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.src = '/default-profile.png';
                   }}
                 />
                 {showDropdown && (
@@ -73,12 +73,41 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                       <span>👤</span>
                       <span>Ir ao Perfil</span>
                     </Link>
+                    <Link 
+                      to="/books" 
+                      className="dropdown-link"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span>📚</span>
+                      <span>Livros</span>
+                    </Link>
+                    <Link 
+                      to="/authors" 
+                      className="dropdown-link"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span>👨‍💼</span>
+                      <span>Autores</span>
+                    </Link>
+                    <Link 
+                      to="/users" 
+                      className="dropdown-link"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span>👥</span>
+                      <span>Usuários</span>
+                    </Link>
+                    <Link 
+                      to="/loans" 
+                      className="dropdown-link"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      <span>📋</span>
+                      <span>Empréstimos</span>
+                    </Link>
                     <button 
-                      onClick={() => {
-                        handleLogout()
-                        setShowDropdown(false)
-                      }}
-                      className="dropdown-button"
+                      className="dropdown-link logout-button"
+                      onClick={handleLogout}
                     >
                       <span>🚪</span>
                       <span>Sair</span>
@@ -87,73 +116,17 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                 )}
               </div>
             ) : (
-              <>
-                <Link 
-                  to="/login"
-                  className="auth-link-login"
-                >
-                  Login
-                </Link>
-                <Link 
-                  to="/register"
-                  className="auth-link-register"
-                >
-                  Registrar
-                </Link>
-              </>
+              <Link to="/login" className="login-button">
+                Entrar
+              </Link>
             )}
           </div>
         </header>
-
-      <nav>
-        <Link 
-          to="/books" 
-          className={location.pathname === '/books' ? 'active' : ''}
-        >
-          Livros
-        </Link>
-        <Link 
-          to="/authors" 
-          className={location.pathname === '/authors' ? 'active' : ''}
-        >
-          Autores
-        </Link>
-        {!isAdmin && (
-          <Link 
-            to="/my-loans" 
-            className={location.pathname === '/my-loans' ? 'active' : ''}
-          >
-            Meus Empréstimos
-          </Link>
-        )}
-        <Link 
-          to="/profile" 
-          className={location.pathname === '/profile' ? 'active' : ''}
-        >
-          Perfil
-        </Link>
-        <Link 
-          to="/users" 
-          className={location.pathname === '/users' ? 'active' : ''}
-        >
-          Usuários
-        </Link>
-        {isAdmin && (
-          <Link 
-            to="/loans" 
-            className={location.pathname === '/loans' ? 'active' : ''}
-          >
-            Gerenciar Empréstimos
-          </Link>
-        )}
-      </nav>
-
-        <main>{children}</main>
+        
+        <main>
+          {children}
+        </main>
       </div>
-
-      <footer>
-        <p>&copy; 2025 PedBook</p>
-      </footer>
     </div>
   )
 }

@@ -166,4 +166,11 @@ export class LoansResolver {
       description: null,
     }));
   }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [Loan])
+  async userLoans(@Args('username') username: string): Promise<Loan[]> {
+    const userLoans = await this.loansService.findByUsername(username);
+    return userLoans;
+  }
 }

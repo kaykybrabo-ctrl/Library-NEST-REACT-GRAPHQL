@@ -52,7 +52,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      console.log('🔍 Frontend - Tentando login com:', { username, password: password ? '[REDACTED]' : 'undefined' });
       
       const { data } = await loginMutation({
         variables: {
@@ -61,7 +60,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       });
       
-      console.log('✅ Frontend - Login bem-sucedido:', data);
 
       const { user: userData, token: newToken } = data.login;
       setUser(userData);
@@ -76,23 +74,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (username: string, password: string): Promise<boolean> => {
     try {
+      
       const { data } = await registerMutation({
         variables: {
-          registerInput: { username, password }
+          username,
+          password,
+          role: 'user'
         }
       });
+      
       
       if (data.register) {
         const userData = data.register;
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         
-        // Para register, vamos fazer login automaticamente
         return await login(username, password);
       }
       
       return true;
     } catch (error: any) {
+      console.error('❌ Frontend - Erro no registro:', error);
       throw error;
     }
   };

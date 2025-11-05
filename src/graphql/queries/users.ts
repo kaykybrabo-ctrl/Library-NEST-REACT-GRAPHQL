@@ -79,18 +79,25 @@ export const GET_USER_LOANS_QUERY = gql`
 
 export const UPDATE_USER_DESCRIPTION_MUTATION = gql`
   mutation UpdateUserDescription($username: String!, $description: String!) {
-    updateUserDescription(username: $username, description: $description) {
-      success
-      message
-    }
+    updateUserDescription(username: $username, description: $description)
   }
 `;
 
 export const UPDATE_USER_DISPLAY_NAME_MUTATION = gql`
   mutation UpdateUserDisplayName($username: String!, $displayName: String!) {
-    updateUserDisplayName(username: $username, displayName: $displayName) {
-      success
-      message
+    updateUserDisplayName(username: $username, displayName: $displayName)
+  }
+`;
+
+export const GET_USERS_QUERY = gql`
+  query GetUsers {
+    users {
+      id
+      username
+      role
+      profile_image
+      display_name
+      description
     }
   }
 `;

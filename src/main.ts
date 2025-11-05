@@ -14,6 +14,7 @@ async function bootstrap() {
       forbidNonWhitelisted: false,
       transform: true,
       skipMissingProperties: false,
+      disableErrorMessages: false,
     }),
   );
 

@@ -123,6 +123,63 @@ export class LoansService {
     }
   }
 
+  async findByUsername(username: string): Promise<any[]> {
+    try {
+      const authUser = await this.prisma.authUser.findUnique({
+        where: { username: username },
+      });
+
+      if (!authUser || !authUser.user_id) {
+        return [];
+      }
+
+      const loans = await this.prisma.loan.findMany({
+        where: {
+          user_id: authUser.user_id,
+          returned_at: null,
+        },
+        include: {
+          book: {
+            include: {
+              author: true,
+            },
+          },
+        },
+        orderBy: {
+          loan_date: 'desc',
+        },
+      });
+
+      const now = new Date();
+      const loansWithTimeRemaining = loans.map(loan => {
+        const dueDate = new Date(loan.due_date);
+        const isOverdue = now > dueDate;
+        const timeDiff = dueDate.getTime() - now.getTime();
+        const daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
+
+        return {
+          loans_id: loan.loans_id,
+          loan_date: loan.loan_date,
+          due_date: loan.due_date,
+          book_id: loan.book_id,
+          title: loan.book?.title || 'Título não encontrado',
+          photo: loan.book?.photo || null,
+          description: loan.book?.description || null,
+          is_overdue: isOverdue,
+          fine_amount: loan.fine_amount,
+          days_remaining: Math.max(0, daysRemaining),
+          hours_remaining: Math.max(0, hoursRemaining),
+          time_remaining: isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
+        };
+      });
+
+      return loansWithTimeRemaining;
+    } catch (error) {
+      return [];
+    }
+  }
+
   async findAll(): Promise<any[]> {
     try {
       const loans = await this.prisma.loan.findMany({

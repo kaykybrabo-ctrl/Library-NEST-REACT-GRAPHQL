@@ -17,29 +17,21 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
-    console.log('🔍 Tentando validar usuário:', username);
-    
     try {
       const dbUser = await this.usersService.findByUsername(username);
-      console.log('👤 Usuário encontrado:', dbUser ? 'SIM' : 'NÃO');
       
       if (!dbUser) {
-        console.log('❌ Usuário não encontrado');
         return null;
       }
       
       const isPasswordValid = await bcrypt.compare(password, dbUser.password);
-      console.log('🔐 Senha válida:', isPasswordValid ? 'SIM' : 'NÃO');
       
       if (!isPasswordValid) {
-        console.log('❌ Senha inválida');
         return null;
       }
       
-      console.log('✅ Validação bem-sucedida');
       return dbUser;
     } catch (error) {
-      console.error('💥 Erro na validação:', error);
       throw error;
     }
   }

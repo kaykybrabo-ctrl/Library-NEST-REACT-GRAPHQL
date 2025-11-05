@@ -51,3 +51,26 @@ export const MY_BOOK_REVIEW_QUERY = gql`
     }
   }
 `;
+
+export const DELETE_REVIEW = gql`
+  mutation DeleteReview($reviewId: Int!) {
+    deleteReview(reviewId: $reviewId)
+  }
+`;
+
+export const GET_BOOK_REVIEWS_PUBLIC = gql`
+  query GetBookReviewsPublic($bookId: Int!) {
+    bookReviews(bookId: $bookId) {
+      id
+      book_id
+      user_id
+      rating
+      comment
+      created_at
+      user {
+        username
+        display_name
+      }
+    }
+  }
+`;

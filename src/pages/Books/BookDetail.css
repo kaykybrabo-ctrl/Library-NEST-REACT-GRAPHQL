@@ -1,15 +1,18 @@
 .back-button {
   margin-bottom: 20px;
   padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background-color: #162c74 !important;
+  color: white !important;
+  border: 2px solid #162c74 !important;
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .back-button:hover {
-  background-color: #0056b3;
+  background-color: #1a3080 !important;
+  border-color: #1a3080 !important;
+  transform: translateY(-1px);
 }
 
 .admin-view-only {
@@ -156,32 +159,38 @@
 }
 
 .book-actions button:first-child {
-  background: #3498db;
-  color: white;
+  background: #162c74 !important;
+  color: white !important;
+  border: 2px solid #162c74 !important;
 }
 
 .book-actions button:first-child:hover {
-  background: #2980b9;
+  background: #1a3080 !important;
+  border-color: #1a3080 !important;
   transform: translateY(-1px);
 }
 
 .return-button {
-  background: #e74c3c !important;
+  background: #162c74 !important;
   color: white !important;
+  border: 2px solid #162c74 !important;
 }
 
 .return-button:hover {
-  background: #c0392b !important;
+  background: #1a3080 !important;
+  border-color: #1a3080 !important;
   transform: translateY(-1px);
 }
 
 .book-actions button:not(:first-child) {
-  background: #ecf0f1;
-  color: #2c3e50;
+  background: #162c74 !important;
+  color: white !important;
+  border: 2px solid #162c74 !important;
 }
 
 .book-actions button:not(:first-child):hover {
-  background: #d5dbdb;
+  background: #1a3080 !important;
+  border-color: #1a3080 !important;
   transform: translateY(-1px);
 }
 

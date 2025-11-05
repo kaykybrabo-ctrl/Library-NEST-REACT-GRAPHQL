@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
+import { HOME_BOOKS_QUERY } from '../graphql/queries/books';
 import '../styles/home.css';
-import styles from './HomeHeader.module.css';
 import { getImageUrl } from '../utils/imageUtils';
 
 const Home: React.FC = () => {
@@ -16,43 +17,49 @@ const Home: React.FC = () => {
     return () => clearInterval(id);
   }, []);
 
+  const { data: booksData, loading: booksLoading, error: booksError } = useQuery(HOME_BOOKS_QUERY, {
+    variables: { limit: 20 },
+    errorPolicy: 'all'
+  });
+
   useEffect(() => {
-    const load = async () => {
+    if (booksData?.books) {
+      const list = [...booksData.books];
       try {
-        const res = await fetch('/api/books?limit=20');
-        if (!res.ok) throw new Error('Falha ao carregar destaques');
-        const data = await res.json();
-        const list = (data?.books || []) as any[];
-        try {
-          const norm = (s: string) => (s || '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/\s+/g, ' ')
-            .trim();
-          const hasBetween = list.some((b: any) => {
-            const t = norm(b?.title || '');
-            return (t.includes('between') && t.includes('noise') && t.includes('calm')) || t.includes('between noise and calm');
+        const norm = (s: string) => (s || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .trim();
+        const hasBetween = list.some((b: any) => {
+          const t = norm(b?.title || '');
+          return (t.includes('between') && t.includes('noise') && t.includes('calm')) || t.includes('between noise and calm');
+        });
+        if (!hasBetween) {
+          list.unshift({
+            book_id: -1001,
+            title: 'Between Noise and Calm',
+            description: '',
+            photo: null,
+            author: { name_author: '' }
           });
-          if (!hasBetween) {
-            list.unshift({
-              book_id: -1001,
-              title: 'Between Noise and Calm',
-              description: '',
-              photo: null,
-              author_name: ''
-            });
-          }
-        } catch {}
-        setFeatured(list);
-      } catch (e: any) {
-        setError(e?.message || 'Erro ao carregar');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+        }
+      } catch {}
+      setFeatured(list.map(book => ({
+        ...book,
+        author_name: book.author?.name_author || ''
+      })));
+      setLoading(false);
+    }
+    if (booksError) {
+      setError(booksError.message || 'Erro ao carregar');
+      setLoading(false);
+    }
+    if (!booksLoading && !booksData) {
+      setLoading(false);
+    }
+  }, [booksData, booksError, booksLoading]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -63,17 +70,17 @@ const Home: React.FC = () => {
 
   return (
     <div className="home-root">
-      <div className={styles.homeHeader}>
-        <div className={styles.container}>
-          <div className={styles.brand} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
-            <span className={styles.logo} aria-hidden>📚</span>
-            <h1 className={styles.title}>PedBook</h1>
+      <div className="public-header">
+        <div className="public-nav">
+          <div className="brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
+            <span className="logo">📚</span>
+            <h1 className="title">PedBook</h1>
           </div>
-          <nav className={styles.homeNav}>
-            <a href="#highlights" className={styles.navLink}>Destaques</a>
-            <a href="#contato" className={styles.navLink}>Contato</a>
-            <Link to="/login" className={styles.loginBtn}>Entrar</Link>
-          </nav>
+          <div className="nav-links">
+            <a href="#highlights">Destaques</a>
+            <a href="#contato">Contato</a>
+            <Link to="/login">Entrar</Link>
+          </div>
         </div>
       </div>
 

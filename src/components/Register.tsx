@@ -18,6 +18,16 @@ const Register: React.FC = () => {
     setError('')
     setSuccess('')
 
+    if (!username || username.trim() === '') {
+      setError('E-mail é obrigatório')
+      return
+    }
+
+    if (!password || password.trim() === '') {
+      setError('Senha é obrigatória')
+      return
+    }
+
     if (password !== confirmPassword) {
       setError('As senhas não coincidem')
       return
@@ -31,7 +41,7 @@ const Register: React.FC = () => {
     setLoading(true)
 
     try {
-      const success = await register(username, password)
+      const success = await register(username.trim(), password)
       if (success) {
         setSuccess('Conta criada e login realizado com sucesso!')
         setTimeout(() => navigate('/books'), 1500)

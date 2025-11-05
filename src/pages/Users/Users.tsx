@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@apollo/client'
+import { GET_USERS_QUERY } from '../../graphql/queries/users'
 import Layout from '../../components/Layout'
 import { getImageUrl } from '../../utils/imageUtils'
 import { useAuth } from '../../contexts/AuthContext'
@@ -16,44 +18,14 @@ interface User {
 }
 
 const Users: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
-
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        setError('Você precisa estar logado para ver os usuários')
-        setLoading(false)
-        return
-      }
-
-      const response = await fetch('/api/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Falha ao carregar usuários')
-      }
-
-      const data = await response.json()
-      setUsers(data)
-      setLoading(false)
-    } catch (err) {
-      setError('Falha ao carregar usuários')
-      setLoading(false)
-    }
-  }
+  
+  const { data, loading, error, refetch } = useQuery(GET_USERS_QUERY, {
+    errorPolicy: 'all'
+  })
+  
+  const users = data?.users || []
 
   const handleViewProfile = (username: string) => {
     navigate(`/profile/${username}`)
@@ -93,8 +65,8 @@ const Users: React.FC = () => {
         <div className="error-container">
           <div className="error-message">
             <h3>❌ Erro</h3>
-            <p>{error}</p>
-            <button onClick={fetchUsers} className="btn-retry">
+            <p>{error.message}</p>
+            <button onClick={() => refetch()} className="btn-retry">
               🔄 Tentar Novamente
             </button>
           </div>
@@ -115,7 +87,7 @@ const Users: React.FC = () => {
 
         <div className="users-grid">
           {users.map(user => (
-            <div key={user.user_id} className={`user-card ${user.role === 'admin' ? 'admin-card' : 'user-card-normal'}`}>
+            <div key={user.id} className={`user-card ${user.role === 'admin' ? 'admin-card' : 'user-card-normal'}`}>
               <div className="user-avatar-container">
                 <img 
                   src={getImageUrl(user.profile_image, 'profile')} 
@@ -151,7 +123,7 @@ const Users: React.FC = () => {
                 >
                   👁️ Ver Perfil
                 </button>
-                {currentUser?.role === 'admin' && user.user_id !== currentUser.id && (
+                {currentUser?.role === 'admin' && user.id !== currentUser.id && (
                   <span className="admin-indicator">🔧 Admin</span>
                 )}
               </div>

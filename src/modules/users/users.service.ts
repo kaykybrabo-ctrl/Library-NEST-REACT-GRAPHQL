@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
 import { CloudinaryService } from '@/common/services/cloudinary.service';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -14,24 +15,38 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    if (!createUserDto.username) {
+      throw new Error('Username é obrigatório');
+    }
+
+    if (!createUserDto.password) {
+      throw new Error('Password é obrigatório');
+    }
+
     const existingUser = await this.usersRepository.findByUsername(createUserDto.username);
 
     if (existingUser) {
       throw new Error('Este nome de usuário já está em uso');
     }
 
+    const fullName = createUserDto.username.includes('@') 
+      ? createUserDto.username.split('@')[0] 
+      : createUserDto.username;
+
     const newUser = await this.prisma.user.create({
       data: {
-        full_name: createUserDto.username.split('@')[0],
+        full_name: fullName,
         birth_date: new Date('2000-01-01'),
         address: 'Endereço não informado',
         email: createUserDto.username,
       },
     });
 
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
     return this.usersRepository.create({
       username: createUserDto.username,
-      password: createUserDto.password,
+      password: hashedPassword,
       role: createUserDto.role,
       user: {
         connect: { user_id: newUser.user_id }

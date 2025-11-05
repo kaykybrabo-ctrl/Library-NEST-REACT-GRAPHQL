@@ -104,14 +104,27 @@ export const UPLOAD_BOOK_IMAGE = gql`
       title
       description
       photo
-      deleted_at
       author_id
       author {
         author_id
         name_author
         biography
         photo
-        deleted_at
+      }
+    }
+  }
+`;
+
+export const HOME_BOOKS_QUERY = gql`
+  query HomeBooks($limit: Int) {
+    books(limit: $limit) {
+      book_id
+      title
+      description
+      photo
+      author {
+        author_id
+        name_author
       }
     }
   }

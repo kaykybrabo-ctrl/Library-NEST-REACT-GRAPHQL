@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { getImageUrl, getFallbackImageUrl } from '../../utils/imageUtils'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@apollo/client'
+import { GET_AUTHOR } from '../../graphql/queries/authors'
+import { GET_BOOKS } from '../../graphql/queries/books'
+import { getImageUrl } from '../../utils/imageUtils'
+import LoginModal from '../LoginModal'
+import { useLoginModal } from '../../hooks/useLoginModal'
 import './PublicAuthorDetail.css'
 
 interface Author {
@@ -16,7 +20,9 @@ interface Book {
   title: string;
   description?: string;
   photo?: string;
-  author_id: number;
+  author?: {
+    name_author: string;
+  };
 }
 
 const PublicAuthorDetail: React.FC = () => {
@@ -26,40 +32,42 @@ const PublicAuthorDetail: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { isOpen, showModal, hideModal, message } = useLoginModal()
 
-  const biografias = {
-    1: "Guilherme Biondo é um escritor contemporâneo brasileiro conhecido por suas obras que exploram temas profundos da condição humana. Nascido em São Paulo, desenvolveu desde cedo uma paixão pela literatura e pela filosofia. Suas obras são caracterizadas por uma prosa elegante e reflexiva, que convida o leitor a questionar aspectos fundamentais da existência. Com formação em Letras pela USP, Biondo tem se destacado no cenário literário nacional por sua capacidade de criar narrativas envolventes que combinam elementos do realismo contemporâneo com toques de introspecção psicológica.",
-    2: "Manoel Leite é um renomado autor brasileiro especializado em ficção histórica e romance. Natural do Nordeste, suas obras frequentemente retratam a rica cultura e as tradições de sua região natal. Com mais de duas décadas de carreira literária, Leite é reconhecido por sua habilidade em entrelaçar fatos históricos com narrativas ficcionais cativantes. Formado em História pela UFPE, ele utiliza seu conhecimento acadêmico para criar obras que não apenas entretêm, mas também educam os leitores sobre aspectos importantes da cultura brasileira. Seus livros já foram traduzidos para diversos idiomas e receberam vários prêmios literários nacionais."
-  }
-
+  const { data: authorData, loading: authorLoading, error: authorError } = useQuery(GET_AUTHOR, {
+    variables: { id: parseInt(id || '0') },
+    errorPolicy: 'all'
+  })
+  
+  const { data: booksData } = useQuery(GET_BOOKS, {
+    variables: { authorId: parseInt(id || '0'), limit: 1000 },
+    errorPolicy: 'all',
+    skip: !id
+  })
+  
   useEffect(() => {
-    if (id) {
-      fetchAuthor()
-      fetchAuthorBooks()
-    }
-  }, [id])
-
-  const fetchAuthor = async () => {
-    try {
-      const response = await axios.get(`/api/authors/${id}`)
-      setAuthor(response.data)
-      setLoading(false)
-    } catch (err) {
-      setError('Falha ao carregar detalhes do autor')
+    if (authorData?.author) {
+      setAuthor(authorData.author)
       setLoading(false)
     }
-  }
-
-  const fetchAuthorBooks = async () => {
-    try {
-      const response = await axios.get(`/api/books?author_id=${id}&limit=1000`)
-      setBooks(response.data.books || response.data)
-    } catch (err) {
-      setBooks([])
+    if (authorError) {
+      setError('Erro ao carregar autor')
+      setLoading(false)
     }
-  }
+  }, [authorData, authorError])
+  
+  useEffect(() => {
+    if (booksData?.books) {
+      setBooks(booksData.books)
+    }
+  }, [booksData])
 
   const getBiografia = (authorId: number) => {
+    const biografias = {
+      1: "Guilherme Biondo é um escritor contemporâneo brasileiro conhecido por suas obras que exploram temas profundos da condição humana.",
+      2: "Manoel Leite é um renomado autor brasileiro especializado em ficção histórica e romance."
+    }
+    
     return biografias[authorId as keyof typeof biografias] || 
            author?.biography || 
            'Biografia não disponível no momento.'
@@ -75,17 +83,17 @@ const PublicAuthorDetail: React.FC = () => {
               <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
-              <button onClick={() => navigate('/')} className="nav-link">Início</button>
-              <button onClick={() => navigate('/login')} className="login-btn">Entrar</button>
+              <Link to="/public/books">Livros</Link>
+              <Link to="/public/authors">Autores</Link>
             </div>
           </div>
         </div>
-        <div className="loading">Carregando detalhes do autor...</div>
+        <div className="loading">Carregando autor...</div>
       </div>
     )
   }
 
-  if (!author) {
+  if (error || !author) {
     return (
       <div className="public-layout">
         <div className="public-header">
@@ -95,13 +103,15 @@ const PublicAuthorDetail: React.FC = () => {
               <h1 className="title">PedBook</h1>
             </div>
             <div className="nav-links">
-              <button onClick={() => navigate('/')} className="nav-link">Início</button>
-              <button onClick={() => navigate('/login')} className="login-btn">Entrar</button>
+              <Link to="/public/books">Livros</Link>
+              <Link to="/public/authors">Autores</Link>
             </div>
           </div>
         </div>
-        <div className="error-message">Autor não encontrado</div>
-        <button onClick={() => navigate('/')}>Voltar ao Início</button>
+        <div className="error">
+          <h2>❌ {error || 'Autor não encontrado'}</h2>
+          <button onClick={() => navigate('/')}>🏠 Voltar ao Início</button>
+        </div>
       </div>
     )
   }
@@ -115,84 +125,62 @@ const PublicAuthorDetail: React.FC = () => {
             <h1 className="title">PedBook</h1>
           </div>
           <div className="nav-links">
-            <button onClick={() => navigate('/')} className="nav-link">Início</button>
-            <button onClick={() => navigate('/login')} className="login-btn">Entrar</button>
+            <Link to="/public/books">Livros</Link>
+            <Link to="/public/authors">Autores</Link>
           </div>
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
-      
-      <section className="profile-section">
-        <button onClick={() => navigate('/')} className="back-button">
-          ← Voltar ao Início
-        </button>
-        
+      <div className="author-detail-container">
         <div className="author-header">
-          <div className="author-image-container">
-            <img 
-              src={getImageUrl(author.photo, 'author', false, author.name_author)} 
-              alt={author.name_author}
-              className="author-image-enhanced"
-            />
-          </div>
+          <img 
+            src={getImageUrl(author.photo, 'author')} 
+            alt={author.name_author}
+            className="author-photo"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.src = '/default-author.png';
+            }}
+          />
           <div className="author-info">
-            <h2>{author.name_author}</h2>
-            <p className="author-title">Autor</p>
+            <h1>{author.name_author}</h1>
+            <p className="author-bio">{getBiografia(author.author_id)}</p>
           </div>
         </div>
-      </section>
 
-      <section className="form-section">
-        <h3>Biografia</h3>
-        <div className="biography-content">
-          <p>{getBiografia(author.author_id)}</p>
-        </div>
-      </section>
-
-      <section className="form-section">
-        <h3>Livros do Autor ({books.length})</h3>
-        {books.length === 0 ? (
-          <p>Nenhum livro encontrado para este autor.</p>
-        ) : (
-          <div className="books-grid">
-            {books.map(book => (
-              <div 
-                key={book.book_id} 
-                className="book-card clickable"
-                onClick={() => navigate(`/public/books/${book.book_id}`)}
-              >
-                <div className="author-book-image-container">
+        <div className="author-books">
+          <h2>📚 Livros do Autor ({books.length})</h2>
+          {books.length === 0 ? (
+            <p>Nenhum livro encontrado para este autor.</p>
+          ) : (
+            <div className="books-grid">
+              {books.map(book => (
+                <div key={book.book_id} className="book-card" onClick={() => navigate(`/public/books/${book.book_id}`)}>
                   <img 
                     src={getImageUrl(book.photo, 'book')} 
                     alt={book.title}
-                    className="author-book-image"
+                    className="book-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = getFallbackImageUrl('book')
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.src = '/default-book.png';
                     }}
                   />
+                  <div className="book-info">
+                    <h3>{book.title}</h3>
+                    <p>{book.description}</p>
+                  </div>
                 </div>
-                <div className="book-info">
-                  <h4 className="book-title">{book.title}</h4>
-                  <p className="book-description">
-                    {book.description ? 
-                      (book.description.length > 100 ? 
-                        book.description.substring(0, 100) + '...' : 
-                        book.description
-                      ) : 
-                      'Descrição não disponível'
-                    }
-                  </p>
-                  <button className="view-book-btn">
-                    📖 Ver Detalhes
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
+      <LoginModal 
+        isOpen={isOpen} 
+        onClose={hideModal} 
+        message={message} 
+      />
     </div>
   )
 }

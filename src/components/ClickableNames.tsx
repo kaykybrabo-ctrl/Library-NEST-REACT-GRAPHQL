@@ -60,7 +60,6 @@ export const ClickableUser: React.FC<ClickableUserProps> = ({
     if (onClick) {
       onClick(e)
     } else {
-      // Sempre usa o username completo (email) para garantir que funcione
       const profileUsername = username.includes('@') ? username : `${username}@gmail.com`
       navigate(`/profile/${profileUsername}`)
     }

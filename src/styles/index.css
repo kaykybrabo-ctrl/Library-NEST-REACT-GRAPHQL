@@ -28,25 +28,181 @@ main {
 }
 
 .form-section {
-    background-color: white;
-    padding: 20px;
-    margin-bottom: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: none;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    padding: 32px 40px !important;
+    margin-bottom: 25px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 25px rgba(22, 44, 116, 0.12) !important;
+    border: 2px solid rgba(22, 44, 116, 0.1) !important;
+    max-width: 900px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #162c74 0%, #1e40af 50%, #162c74 100%);
+}
+
+.form-section h2 {
+    color: #162c74 !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    margin-bottom: 24px !important;
+    text-align: center !important;
+    position: relative !important;
+}
+
+.form-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #162c74 0%, #1e40af 100%);
+    border-radius: 2px;
 }
 
 .form-section form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.form-section .full-width {
+    grid-column: 1 / -1;
+}
+
+.form-section label {
+    display: block;
+    color: #374151 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-section input[type="text"],
+.form-section select {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+.form-section input[type="text"]:focus,
+.form-section select:focus {
+    outline: none !important;
+    border-color: #162c74 !important;
+    box-shadow: 0 0 0 4px rgba(22, 44, 116, 0.1) !important;
+    transform: translateY(-2px) !important;
+}
+
+.form-section .fieldset-author-type {
+    grid-column: 1 / -1;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin: 10px 0 !important;
+    background: #f8fafc !important;
+}
+
+.form-section .fieldset-author-type legend {
+    color: #162c74 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    padding: 0 15px !important;
+    background: white !important;
+    border-radius: 8px !important;
+    border: 2px solid #162c74 !important;
+}
+
+.form-section .radio-option {
+    margin: 15px 0 !important;
+    padding: 15px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.form-section .radio-option:hover {
+    background: #f0f9ff !important;
+    border-color: #162c74 !important;
+}
+
+.form-section .radio-option label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    text-transform: none !important;
+    font-size: 16px !important;
+    color: #374151 !important;
+}
+
+.form-section .radio-option input[type="radio"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #162c74 !important;
+}
+
+.form-section .author-help-text {
+    grid-column: 1 / -1;
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    color: #1e40af !important;
+    font-size: 14px !important;
+    margin-top: -10px !important;
+}
+
+.form-section button[type="submit"] {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #162c74 0%, #1e40af 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 14px 32px !important;
+    border-radius: 10px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(22, 44, 116, 0.3) !important;
+    margin-top: 16px !important;
+    justify-self: center !important;
+    min-width: 160px !important;
+}
+
+.form-section button[type="submit"]:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(22, 44, 116, 0.4) !important;
+    background: linear-gradient(135deg, #1a3080 0%, #2563eb 100%) !important;
 }
 
 button {
-    background-color: #162c74;
-    color: white;
-    border: none;
+    background-color: #162c74 !important;
+    color: white !important;
+    border: none !important;
     padding: 12px 25px;
     cursor: pointer;
     border-radius: 4px;
@@ -55,7 +211,48 @@ button {
 }
 
 button:hover {
-    background-color: #1a3080;
+    background-color: #1a3080 !important;
+}
+
+button[type="submit"] {
+    background-color: #162c74 !important;
+    color: white !important;
+    border: 2px solid #162c74 !important;
+}
+
+button[type="submit"]:hover {
+    background-color: #1a3080 !important;
+    border-color: #1a3080 !important;
+}
+
+.form-section button[type="submit"] {
+    background: #162c74 !important;
+    background-color: #162c74 !important;
+    background-image: none !important;
+    color: white !important;
+    border: 2px solid #162c74 !important;
+}
+
+.form-section button[type="submit"]:hover {
+    background: #1a3080 !important;
+    background-color: #1a3080 !important;
+    background-image: none !important;
+    border-color: #1a3080 !important;
+}
+
+section.form-section button {
+    background: #162c74 !important;
+    background-color: #162c74 !important;
+    background-image: none !important;
+    color: white !important;
+    border: 2px solid #162c74 !important;
+}
+
+section.form-section button:hover {
+    background: #1a3080 !important;
+    background-color: #1a3080 !important;
+    background-image: none !important;
+    border-color: #1a3080 !important;
 }
 
 button:disabled {
@@ -69,11 +266,25 @@ input[type="password"],
 input[type="email"],
 select {
     width: 100%;
-    padding: 10px;
+    padding: 16px 20px;
     margin: 8px 0 20px;
-    border: 1px solid #ddd;
+    border: 2px solid #e2e8f0;
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+select:focus {
+    outline: none;
+    border-color: #162c74;
+    box-shadow: 0 0 0 4px rgba(22, 44, 116, 0.1);
+    transform: translateY(-1px);
 }
 
 label {
@@ -151,22 +362,59 @@ nav a.active {
 .pagination {
     display: flex;
     justify-content: center;
-    gap: 5px;
-    margin-top: 20px;
+    align-items: center;
+    gap: 6px;
+    margin-top: 24px;
     padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .pagination button {
-    color: #162c74;
-    background-color: white;
-    border: 1px solid #162c74;
-    padding: 8px 12px;
-    min-width: 40px;
+    color: #374151 !important;
+    background: #f8fafc !important;
+    border: 2px solid #e5e7eb !important;
+    padding: 10px 13px !important;
+    min-width: 36px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+}
+
+.pagination button:hover {
+    background: #162c74 !important;
+    color: white !important;
+    border-color: #162c74 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(22, 44, 116, 0.3) !important;
 }
 
 .pagination button.active {
-    background-color: #162c74;
-    color: white;
+    background: linear-gradient(135deg, #162c74 0%, #1e40af 100%) !important;
+    color: white !important;
+    border-color: #162c74 !important;
+    box-shadow: 0 4px 15px rgba(22, 44, 116, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+.pagination button:disabled {
+    background: #f1f5f9 !important;
+    color: #9ca3af !important;
+    border-color: #e5e7eb !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.pagination button:disabled:hover {
+    background: #f1f5f9 !important;
+    color: #9ca3af !important;
+    border-color: #e5e7eb !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .no-results {
@@ -305,19 +553,24 @@ nav a.active {
     font-size: 12px;
 }
 .icon-button {
-    background: transparent;
-    border: none;
-    color: #162c74;
-    padding: 6px;
-    border-radius: 6px;
+    background: #162c74;
+    border: 2px solid #162c74;
+    color: white;
     cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-weight: 500;
 }
 
 .icon-button:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: #1a3080;
+    border-color: #1a3080;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(22, 44, 116, 0.3);
 }
 
 .action-buttons .icon-button + .icon-button {
@@ -527,6 +780,33 @@ table .book-image, table .author-image,
     opacity: 0.8;
 }
 
+.public-layout .book-cover,
+.public-layout .book-cover-large,
+.public-layout .public-books-image,
+.public-layout img[alt*="book"] {
+    max-width: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+}
+
+.public-layout .book-card .book-cover,
+.public-layout .book-card img {
+    width: 100% !important;
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+    object-fit: cover !important;
+}
+
+.public-layout .book-detail-container .book-cover-large,
+.public-layout .book-header .book-cover-large {
+    max-width: 300px !important;
+    max-height: 400px !important;
+    width: 300px !important;
+    height: 400px !important;
+    object-fit: cover !important;
+}
+
 @media (max-width: 1200px) {
     main {
         padding: 30px 40px;
@@ -556,6 +836,38 @@ table .book-image, table .author-image,
     }
     
     .form-section {
-        padding: 20px;
+        padding: 25px 20px !important;
+        max-width: 100% !important;
+        margin-bottom: 25px !important;
+    }
+    
+    .form-section form {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+        max-width: 100% !important;
+    }
+    
+    .form-section h2 {
+        font-size: 24px !important;
+    }
+    
+    .form-section .fieldset-author-type {
+        padding: 15px !important;
+    }
+    
+    .form-section .radio-option {
+        padding: 12px !important;
+    }
+    
+    .pagination {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        padding: 20px 15px !important;
+    }
+    
+    .pagination button {
+        min-width: 40px !important;
+        padding: 10px 12px !important;
+        font-size: 13px !important;
     }
 }

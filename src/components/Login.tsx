@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
+import { useAuth } from '../contexts/AuthContext'
 import { FORGOT_PASSWORD_MUTATION } from '../graphql/queries/auth'
 import './Login.css'
 
@@ -11,6 +11,7 @@ const Login: React.FC = () => {
   const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -33,29 +34,28 @@ const Login: React.FC = () => {
     }
   }
 
+  const [forgotPasswordMutation] = useMutation(FORGOT_PASSWORD_MUTATION)
+
   const handleForgotPassword = async () => {
     if (!username.trim()) {
-      setError('Informe seu e-mail para receber o link de redefinição')
+      setError('Digite seu e-mail para recuperar a senha')
       return
     }
-    setError('')
+    
     setPreview(null)
     setLoading(true)
     try {
-      const res = await api.post('/api/forgot-password', { username: username.trim() })
-      const data = res?.data || {}
+      const { data } = await forgotPasswordMutation({
+        variables: { username: username.trim() }
+      })
       
-      if (data.preview) {
-        setPreview(data.preview)
+      if (data?.forgotPassword) {
+        setSuccess('E-mail de recuperação enviado com sucesso!')
       }
-      
-      if (data.error) {
-        setError('Erro ao enviar email: ' + data.error)
-      } else {
-        alert('Se a conta existir, um e-mail de redefinição foi enviado.')
-      }
-    } catch (e) {
-      alert('Se a conta existir, um e-mail de redefinição foi enviado.')
+      setError('')
+    } catch (err: any) {
+      setError(err?.message || 'Erro ao enviar e-mail de recuperação')
+      setSuccess('')
     } finally {
       setLoading(false)
     }

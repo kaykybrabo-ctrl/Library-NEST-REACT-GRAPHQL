@@ -1,15 +1,20 @@
 import { Resolver, Query, Mutation, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { AuthorsService } from './authors.service';
 import { Author } from './entities/author.entity';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
+import { CloudinaryService } from '@/common/services/cloudinary.service';
+import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
+import { GqlAdminGuard } from '@/common/guards/gql-admin.guard';
 
 @Resolver(() => Author)
 export class AuthorsResolver {
   constructor(
     private readonly authorsService: AuthorsService,
     private readonly prisma: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Query(() => [Author], { name: 'authors' })
@@ -55,6 +60,59 @@ export class AuthorsResolver {
   async restoreAuthor(@Args('id', { type: () => Int }) id: number) {
     await this.authorsService.restore(id);
     return true;
+  }
+
+  @UseGuards(GqlAuthGuard, GqlAdminGuard)
+  @Mutation(() => Author)
+  async uploadAuthorImage(
+    @Args('authorId', { type: () => Int }) authorId: number,
+    @Args('filename') filename: string,
+    @Args('fileData') fileData: string
+  ): Promise<Author> {
+    if (!filename) {
+      throw new Error('Nome do arquivo é obrigatório');
+    }
+    
+    if (!fileData) {
+      throw new Error('Dados do arquivo são obrigatórios');
+    }
+    
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    const fileExt = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+    if (!allowedExtensions.includes(fileExt)) {
+      throw new Error('Apenas arquivos de imagem são permitidos');
+    }
+
+    const base64Data = fileData.replace(/^data:image\/[a-z]+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    const mockFile = {
+      buffer,
+      mimetype: `image/${filename.split('.').pop()}`,
+      originalname: filename,
+    } as Express.Multer.File;
+
+    try {
+      const cloudinaryUrl = await this.cloudinaryService.uploadImage(
+        mockFile,
+        'pedbook/profiles'
+      );
+      
+      const updatedAuthor = await this.prisma.author.update({
+        where: { author_id: authorId },
+        data: { photo: cloudinaryUrl },
+      });
+
+      return {
+        author_id: updatedAuthor.author_id,
+        name_author: updatedAuthor.name_author,
+        biography: updatedAuthor.biography,
+        photo: updatedAuthor.photo,
+        deleted_at: updatedAuthor.deleted_at,
+      };
+    } catch (error) {
+      throw new Error(`Erro no upload da imagem: ${error.message}`);
+    }
   }
 
   @ResolveField('books', () => [require('../books/entities/book.entity').Book], { nullable: true })

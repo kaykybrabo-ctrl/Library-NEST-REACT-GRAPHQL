@@ -20,10 +20,6 @@ export class AuthResolver {
     @Args('username') username: string,
     @Args('password') password: string
   ): Promise<LoginResponse> {
-    console.log('🔍 AuthResolver - Dados recebidos:', {
-      username: username || 'undefined',
-      password: password ? '[REDACTED]' : 'undefined'
-    });
     
     if (!username || !password) {
       throw new UnauthorizedException('Username e password são obrigatórios');
@@ -59,11 +55,16 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthUser)
-  async register(@Args('registerInput') registerInput: RegisterInput): Promise<AuthUser> {
+  async register(
+    @Args('username') username: string,
+    @Args('password') password: string,
+    @Args('role', { nullable: true }) role?: string
+  ): Promise<AuthUser> {
+    
     const user = await this.usersService.create({
-      username: registerInput.username,
-      password: registerInput.password,
-      role: registerInput.role || 'user',
+      username,
+      password,
+      role: role || 'user',
     });
 
     const userResult = await this.prisma.$queryRaw`
@@ -165,7 +166,6 @@ export class AuthResolver {
 
   @Mutation(() => String)
   async forgotPassword(@Args('username') username: string): Promise<string> {
-    // Implementação básica para reset de senha
     return 'Email de recuperação enviado com sucesso';
   }
 
@@ -175,7 +175,6 @@ export class AuthResolver {
     @Args('token', { nullable: true }) token?: string,
     @Args('username', { nullable: true }) username?: string
   ): Promise<string> {
-    // Implementação básica para reset de senha
     return 'Senha alterada com sucesso';
   }
 }

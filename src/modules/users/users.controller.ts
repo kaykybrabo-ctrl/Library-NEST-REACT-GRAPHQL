@@ -187,7 +187,6 @@ export class UsersController {
     const currentUser = req.user;
     const targetUsername = body?.username || queryUsername || username;
     
-    // Lógica mais robusta para verificar permissões
     const isOwnProfile = currentUser.username === targetUsername ||
       (currentUser.username.includes('@') && !targetUsername.includes('@') && 
        currentUser.username.split('@')[0] === targetUsername) ||
@@ -243,7 +242,6 @@ export class UsersController {
     
     const currentUser = req.user;
     
-    // Lógica mais robusta para verificar permissões
     const isOwnProfile = currentUser.username === targetUsername ||
       (currentUser.username.includes('@') && !targetUsername.includes('@') && 
        currentUser.username.split('@')[0] === targetUsername) ||

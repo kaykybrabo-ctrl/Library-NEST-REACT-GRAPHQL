@@ -1,36 +1,41 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@apollo/client'
-import { GET_AUTHOR, UPDATE_AUTHOR } from '@/graphql/queries/authors'
-import Layout from '@/components/Layout'
-import { useAuth } from '@/contexts/AuthContext'
-import { Author } from '@/types'
+import { GET_AUTHOR, UPDATE_AUTHOR } from '../../graphql/queries/authors'
+import { UPLOAD_AUTHOR_IMAGE_MUTATION } from '../../graphql/queries/upload'
+import Layout from '../../components/Layout'
+import { useAuth } from '../../contexts/AuthContext'
 import { getImageUrl } from '../../utils/imageUtils'
 import './AuthorDetail.css'
 
 const AuthorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [error, setError] = useState('')
+  const { user, isAdmin } = useAuth()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [imgVersion, setImgVersion] = useState(0)
+  const [error, setError] = useState('')
   const [editingBio, setEditingBio] = useState(false)
   const [biography, setBiography] = useState('')
-  const { isAdmin } = useAuth()
-  const [imgVersion, setImgVersion] = useState(0)
-  const [previewUrl, setPreviewUrl] = useState('')
 
-  const { data: authorData, loading, refetch } = useQuery(GET_AUTHOR, {
+  const { data, loading, error: queryError, refetch } = useQuery(GET_AUTHOR, {
     variables: { id: parseInt(id || '0') },
-    skip: !id,
-    fetchPolicy: 'cache-and-network'
+    errorPolicy: 'all'
   })
 
   const [updateAuthorMutation] = useMutation(UPDATE_AUTHOR)
+  const [uploadAuthorImage] = useMutation(UPLOAD_AUTHOR_IMAGE_MUTATION)
 
-  const author = authorData?.author
+  const author = data?.author
 
-  const buildImageSrc = (path?: string | null) => {
+  useEffect(() => {
+    if (author?.biography) {
+      setBiography(author.biography)
+    }
+  }, [author])
+
+  const getImageUrlWithVersion = (path?: string) => {
     if (!path) return ''
     if (path.startsWith('http')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
     if (path.startsWith('/')) return `${path}${imgVersion ? (path.includes('?') ? `&v=${imgVersion}` : `?v=${imgVersion}`) : ''}`
@@ -47,95 +52,72 @@ const AuthorDetail: React.FC = () => {
     }
     setImageFile(file)
     setError('')
-    const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
-    handleUploadImageClick(file)
   }
 
-  const handleUploadImageClick = async (fileParam?: File) => {
-    const file = fileParam || imageFile
-    if (!file) return
+  const uploadImage = async () => {
+    if (!imageFile || !id) return
+    
     setUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
     try {
-      const response = await api.post(`/api/authors/${id}/image`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      setAuthor(prev => prev ? { ...prev, photo: response.data.photo } : null)
-      setImageFile(null)
-      setImgVersion(v => v + 1)
-      setError('')
-      alert('Imagem do autor atualizada com sucesso!')
+      const reader = new FileReader()
+      reader.onload = async () => {
+        try {
+          const fileData = reader.result as string
+          
+          await uploadAuthorImage({
+            variables: {
+              authorId: parseInt(id),
+              filename: imageFile.name,
+              fileData: fileData
+            },
+            refetchQueries: [{ query: GET_AUTHOR, variables: { id: parseInt(id) } }]
+          })
+          
+          setImageFile(null)
+          setImgVersion(v => v + 1)
+          setError('')
+          refetch()
+          alert('Imagem do autor atualizada com sucesso!')
+        } catch (err: any) {
+          const msg = err?.message || 'Falha ao enviar a imagem do autor'
+          setError(msg)
+          alert(msg)
+        } finally {
+          setUploading(false)
+        }
+      }
+      reader.readAsDataURL(imageFile)
     } catch (err: any) {
-      const msg = err?.response?.data?.error || err?.message || 'Falha ao enviar a imagem do autor'
+      const msg = err?.message || 'Falha ao processar a imagem'
       setError(msg)
-      alert(`Erro: ${msg}`)
-    } finally {
       setUploading(false)
     }
   }
 
-  useEffect(() => {
-    if (id) {
-      fetchAuthor()
-    }
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
-    }
-  }, [id, previewUrl])
-
-  const fetchAuthor = async () => {
-    try {
-      const response = await api.get(`/api/authors/${id}`)
-      setAuthor(response.data)
-      setBiography(response.data.biography || '')
-      setLoading(false)
-    } catch (err) {
-      setError('Falha ao buscar detalhes do autor')
-      setLoading(false)
-    }
-  }
-
-  
-
-  const handleImageUpload = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleUploadImageClick = async () => {
     if (!imageFile) return
-
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', imageFile)
-
-    try {
-      const response = await api.post(`/api/authors/${id}/image`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      setAuthor(prev => prev ? { ...prev, photo: response.data.photo } : null)
-      setImageFile(null)
-      setError('')
-      setImgVersion(v => v + 1)
-      alert('Imagem do autor atualizada com sucesso!')
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Falha ao enviar a imagem do autor')
-    } finally {
-      setUploading(false)
-    }
+    await uploadImage()
   }
 
-  const handleUpdateBiography = async () => {
+  const handleUpdateBio = async () => {
+    if (!id || !isAdmin) return
+    
     setUploading(true)
     try {
-      await api.patch(`/api/authors/${id}`, {
-        name_author: author?.name_author,
-        biography: biography
+      await updateAuthorMutation({
+        variables: {
+          id: parseInt(id),
+          updateAuthorInput: {
+            biography: biography
+          }
+        }
       })
-      setAuthor(prev => prev ? { ...prev, biography: biography } : null)
       setEditingBio(false)
       setError('')
+      refetch()
       alert('Biografia atualizada com sucesso!')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Falha ao atualizar a biografia')
+      setError(err?.message || 'Falha ao atualizar a biografia')
     } finally {
       setUploading(false)
     }
@@ -143,115 +125,115 @@ const AuthorDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout title="Detalhes do Autor">
-        <div className="loading">Carregando detalhes do autor...</div>
+      <Layout title="Carregando...">
+        <div className="loading">Carregando autor...</div>
       </Layout>
     )
   }
 
-  if (!author) {
+  if (queryError || !author) {
     return (
-      <Layout title="Detalhes do Autor">
-        <div className="error-message">Autor não encontrado</div>
-        <button onClick={() => navigate('/authors')}>Voltar para Autores</button>
+      <Layout title="Erro">
+        <div className="error">
+          <h2>❌ {queryError?.message || 'Autor não encontrado'}</h2>
+          <button onClick={() => navigate('/authors')}>🔙 Voltar aos Autores</button>
+        </div>
       </Layout>
     )
   }
 
   return (
-    <Layout title={`Autor: ${author.name_author}`}>
-      {error && <div className="error-message">{error}</div>}
-
-      <section className="profile-section image-tight">
-        <button onClick={() => navigate('/authors')} className="back-button">
-          ← Voltar para Autores
-        </button>
-
-        <h2>{author.name_author}</h2>
-
-        <div className="author-info">
-          {previewUrl ? (
-            <img src={previewUrl} alt="Pré-visualização selecionada" className="author-image" />
-          ) : (
-            <img
-              src={getImageUrl(author.photo, 'author', false, author.name_author)}
-              key={`${author.photo}-${imgVersion}`}
+    <Layout title={author.name_author}>
+      <div className="author-detail-container">
+        <div className="author-header">
+          <div className="author-image-section">
+            <img 
+              src={getImageUrlWithVersion(author.photo) || getImageUrl(author.photo, 'author')} 
               alt={author.name_author}
-              className="author-image"
+              className="author-photo-large"
             />
-          )}
-          
-          {isAdmin && !author.photo && (
-            <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-              Nenhuma foto definida para este autor ainda.
-            </div>
-          )}
-
-          <div className="biography-section">
-            <h3>Biografia</h3>
-            {editingBio ? (
-              <div>
-                <textarea
-                  value={biography}
-                  onChange={(e) => setBiography(e.target.value)}
-                  placeholder="Digite a biografia do autor..."
-                  rows={6}
-                  className="biography-textarea"
-                />
-                <div>
-                  <button onClick={handleUpdateBiography} disabled={uploading}>
-                    {uploading ? 'Salvando...' : 'Salvar Biografia'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingBio(false)
-                      setBiography(author?.biography || '')
-                    }}
-                    className="cancel-button"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p className="biography-text">
-                  {author.biography || 'Nenhuma biografia disponível ainda.'}
-                </p>
-                {isAdmin && (
-                  <button onClick={() => setEditingBio(true)}>
-                    Editar Biografia
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {isAdmin && (
-            <div className="image-upload image-upload-section">
-              <h3>Atualizar Foto do Autor</h3>
-              <div>
+            
+            {isAdmin && (
+              <div className="image-upload-section">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={onSelectImage}
-                  className="file-input"
-                  disabled={uploading}
+                  style={{ marginBottom: '10px' }}
                 />
                 {imageFile && (
-                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selecionado: {imageFile.name}</div>
+                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                    Selecionado: {imageFile.name}
+                  </div>
                 )}
-                <button onClick={() => handleUploadImageClick()} disabled={!imageFile || uploading}>
-                  {uploading ? 'Enviando...' : 'Enviar Foto'}
+                <button 
+                  onClick={handleUploadImageClick} 
+                  disabled={!imageFile || uploading}
+                  style={{ marginTop: '10px' }}
+                >
+                  {uploading ? 'Enviando...' : 'Atualizar Imagem'}
                 </button>
               </div>
+            )}
+          </div>
+
+          <div className="author-info">
+            <h1>{author.name_author}</h1>
+            
+            <div className="biography-section">
+              <h3>📖 Biografia</h3>
+              {editingBio && isAdmin ? (
+                <div>
+                  <textarea
+                    value={biography}
+                    onChange={(e) => setBiography(e.target.value)}
+                    rows={6}
+                    style={{ width: '100%', marginBottom: '10px' }}
+                  />
+                  <div>
+                    <button onClick={handleUpdateBio} disabled={uploading}>
+                      {uploading ? 'Salvando...' : 'Salvar'}
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setEditingBio(false)
+                        setBiography(author.biography || '')
+                      }}
+                      style={{ marginLeft: '10px' }}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p>{author.biography || 'Biografia não disponível.'}</p>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => setEditingBio(true)}
+                      style={{ marginTop: '10px' }}
+                    >
+                      ✏️ Editar Biografia
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
-      </section>
+        {error && (
+          <div className="error-message" style={{ marginTop: '20px' }}>
+            {error}
+          </div>
+        )}
 
-      
+        <div className="author-actions">
+          <button onClick={() => navigate('/authors')}>
+            🔙 Voltar aos Autores
+          </button>
+        </div>
+      </div>
     </Layout>
   )
 }

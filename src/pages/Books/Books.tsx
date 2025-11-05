@@ -533,18 +533,18 @@ const Books: React.FC = () => {
                   aria-label="Anterior"
                   title="Anterior"
                   onClick={() => setCurrentSlide((s) => (s - 1 + slidesLength) % slidesLength)}
-                  style={{ position: 'absolute', top: '50%', left: 12, transform: 'translateY(-50%)', background: '#fff', border: '2px solid #1976d2', borderRadius: '50%', width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}
+                  style={{ position: 'absolute', top: '50%', left: 12, transform: 'translateY(-50%)', background: '#162c74', border: '2px solid #162c74', borderRadius: '50%', width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}
                 >
-                  <span style={{ color: '#1976d2', fontSize: 24, lineHeight: 1 }}>&lt;</span>
+                  <span style={{ color: 'white', fontSize: 24, lineHeight: 1 }}>&lt;</span>
                 </button>
                 <button
                   type="button"
                   aria-label="Próximo"
                   title="Próximo"
                   onClick={() => setCurrentSlide((s) => (s + 1) % slidesLength)}
-                  style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', background: '#fff', border: '2px solid #1976d2', borderRadius: '50%', width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}
+                  style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', background: '#162c74', border: '2px solid #162c74', borderRadius: '50%', width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 3, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}
                 >
-                  <span style={{ color: '#1976d2', fontSize: 24, lineHeight: 1 }}>&gt;</span>
+                  <span style={{ color: 'white', fontSize: 24, lineHeight: 1 }}>&gt;</span>
                 </button>
 
                 <div style={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
@@ -798,8 +798,7 @@ const Books: React.FC = () => {
                                 onClick={(e) => { e.stopPropagation(); handleReturnBook(book.book_id); }}
                                 aria-label="Devolver livro"
                                 title="Devolver livro"
-                                className="icon-button"
-                                style={{borderColor: '#ff9800', color: '#ff9800'}}
+                                className="icon-button return-btn"
                               >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor" />
@@ -824,7 +823,6 @@ const Books: React.FC = () => {
                                 aria-label="Modo administrador"
                                 title="👑 Administradores não podem alugar livros"
                                 className="icon-button admin-view"
-                                style={{borderColor: '#f59e0b', color: '#f59e0b'}}
                               >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
@@ -880,8 +878,7 @@ const Books: React.FC = () => {
                                 onClick={(e) => { e.stopPropagation(); handleDeleteBook(book.book_id); }}
                                 aria-label="Excluir"
                                 title="Excluir"
-                                className="icon-button"
-                                style={{borderColor: '#f44336', color: '#f44336'}}
+                                className="icon-button delete-btn"
                               >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M6 7h12v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7Zm11-3h-3.5l-1-1h-3L8 4H5v2h14V4Z" fill="currentColor" />

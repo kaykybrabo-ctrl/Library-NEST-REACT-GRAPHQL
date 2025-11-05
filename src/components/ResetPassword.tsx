@@ -1,19 +1,22 @@
-import React, { useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import api from '../api'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
+import { RESET_PASSWORD_MUTATION } from '../graphql/queries/auth'
 import Layout from './Layout'
+import './ResetPassword.css'
 
 const ResetPassword: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const email = useMemo(() => {
-    const params = new URLSearchParams(location.search)
+    const params = new URLSearchParams(searchParams.toString())
     return (params.get('u') || '').trim().toLowerCase()
-  }, [location.search])
+  }, [searchParams])
   const token = useMemo(() => {
-    const params = new URLSearchParams(location.search)
+    const params = new URLSearchParams(searchParams.toString())
     return (params.get('t') || '').trim()
-  }, [location.search])
+  }, [searchParams])
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -21,39 +24,38 @@ const ResetPassword: React.FC = () => {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const [resetPasswordMutation] = useMutation(RESET_PASSWORD_MUTATION)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (!email) {
-      setError('Link de e-mail inválido ou ausente. Solicite um novo e-mail de redefinição.')
+    if (!newPassword.trim()) {
+      setError('Digite a nova senha')
       return
     }
-    if (!newPassword || newPassword.length < 3) {
-      setError('Por favor, informe uma nova senha com pelo menos 3 caracteres')
+    if (newPassword.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres')
       return
     }
-    if (newPassword !== confirmPassword) {
-      setError('As senhas não coincidem')
-      return
-    }
-
+    
     setLoading(true)
     try {
-      const payload: any = { newPassword }
-      if (token) payload.token = token
-      else payload.username = email
-      const res = await api.post('/api/reset-password', payload)
-      if (res?.data?.ok) {
+      const { data } = await resetPasswordMutation({
+        variables: {
+          newPassword,
+          token: token || undefined,
+          username: !token ? email : undefined
+        }
+      })
+      
+      if (data?.resetPassword) {
         setSuccess('Senha atualizada com sucesso. Você já pode entrar.')
         alert('Senha atualizada com sucesso!')
-        setTimeout(() => navigate('/'), 1200)
-      } else {
-        setError(res?.data?.message || 'Falha ao redefinir a senha')
+        setTimeout(() => {
+          navigate('/login')
+        }, 2000)
       }
-    } catch (e: any) {
-      setError('Falha ao redefinir a senha')
+    } catch (err: any) {
+      setError(err?.message || 'Erro ao redefinir senha')
     } finally {
       setLoading(false)
     }

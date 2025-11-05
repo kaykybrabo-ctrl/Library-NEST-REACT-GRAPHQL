@@ -29,11 +29,18 @@
 .cancel-button {
   margin-left: 10px;
   padding: 10px 20px;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background-color: #162c74 !important;
+  color: white !important;
+  border: 2px solid #162c74 !important;
+  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+  background-color: #1a3080 !important;
+  border-color: #1a3080 !important;
+  transform: translateY(-1px);
 }
 
 .display-name-help {
@@ -107,17 +114,6 @@
 
 .loan-book-image {
   margin: 0;
-  border-radius: 4px;
-  display: block;
-}
-
-.return-button {
-  padding: 8px 16px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .loan-actions {
@@ -137,8 +133,21 @@
   }
 }
 
+.return-button {
+  padding: 8px 16px;
+  background-color: #162c74 !important;
+  color: white !important;
+  border: 2px solid #162c74 !important;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
 .return-button:hover {
-  background-color: #c82333;
+  background-color: #1a3080 !important;
+  border-color: #1a3080 !important;
+  transform: translateY(-1px);
 }
 
 .favorite-book-card {

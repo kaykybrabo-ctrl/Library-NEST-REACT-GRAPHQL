@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { GET_BOOK, UPLOAD_BOOK_IMAGE } from '@/graphql/queries/books'
+import { GET_BOOK } from '@/graphql/queries/books'
+import { UPLOAD_BOOK_IMAGE_MUTATION } from '@/graphql/queries/upload'
 import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, MY_BOOK_LOAN_QUERY, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
 import { CREATE_REVIEW_MUTATION, BOOK_REVIEWS_QUERY } from '@/graphql/queries/reviews'
-import { ADD_TO_FAVORITES_MUTATION } from '@/graphql/queries/favorites'
+import { ADD_TO_FAVORITES_MUTATION, MY_FAVORITE_BOOK_QUERY } from '@/graphql/queries/favorites'
 import { ME_QUERY } from '@/graphql/queries/auth'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
@@ -15,7 +16,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Book, Review } from '@/types'
 import { getImageUrl } from '@/utils/imageUtils'
 import { ClickableUser } from '../../components/ClickableNames'
-import api from '@/api'
 import './BookDetail.css'
 
 const BookDetail: React.FC = () => {
@@ -63,8 +63,9 @@ const BookDetail: React.FC = () => {
   const [rentBook] = useMutation(RENT_BOOK_MUTATION)
   const [returnBook] = useMutation(RETURN_BOOK_MUTATION)
   const [createReview] = useMutation(CREATE_REVIEW_MUTATION)
-  const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION)
-  const [uploadBookImage] = useMutation(UPLOAD_BOOK_IMAGE)
+  const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION, {
+    refetchQueries: [{ query: MY_FAVORITE_BOOK_QUERY }]
+  })
 
   const book = bookData?.book
   const reviews = reviewsData?.bookReviews || []
@@ -93,37 +94,39 @@ const BookDetail: React.FC = () => {
     await uploadImage(file)
   }
 
+  const [uploadBookImageMutation] = useMutation(UPLOAD_BOOK_IMAGE_MUTATION)
+
   const uploadImage = async (file: File) => {
     setUploading(true)
     setUploadStatus('Enviando imagem...')
     
     try {
-      const fileData = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-      
-      await uploadBookImage({
-        variables: {
-          bookId: Number(id),
-          filename: file.name,
-          fileData: fileData
+      const reader = new FileReader()
+      reader.onload = async () => {
+        try {
+          const fileData = reader.result as string
+          
+          await uploadBookImageMutation({
+            variables: {
+              bookId: parseInt(id || '0'),
+              filename: file.name,
+              fileData: fileData
+            },
+            refetchQueries: [{ query: GET_BOOK, variables: { id: parseInt(id || '0') } }]
+          })
+          
+          setUploadStatus('Imagem atualizada com sucesso!')
+          setImageFile(null)
+          setPreviewUrl('')
+        } catch (error: any) {
+          setUploadStatus(`Erro: ${error.message}`)
+        } finally {
+          setUploading(false)
         }
-      })
-      
-      refetchBook()
-      setImageFile(null)
-      setPreviewUrl('')
-      setImgVersion(v => v + 1)
-      setUploadStatus('Imagem atualizada com sucesso!')
-      setError('')
-    } catch (err: any) {
-      const msg = err?.message || 'Falha ao enviar a imagem'
-      setError(msg)
-      setUploadStatus('')
-    } finally {
+      }
+      reader.readAsDataURL(file)
+    } catch (error: any) {
+      setUploadStatus(`Erro: ${error.message}`)
       setUploading(false)
     }
   }

@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom'
 import { RETURN_BOOK_MUTATION } from '../../graphql/queries/loans'
 import { ME_QUERY, UPDATE_PROFILE_MUTATION } from '../../graphql/queries/auth'
 import { MY_LOANS_QUERY, MY_FAVORITE_BOOK_QUERY, GET_USER_PROFILE_QUERY, GET_USER_LOANS_QUERY, UPDATE_USER_DESCRIPTION_MUTATION, UPDATE_USER_DISPLAY_NAME_MUTATION } from '../../graphql/queries/users'
+import { UPLOAD_USER_IMAGE_MUTATION } from '../../graphql/queries/upload'
 import Layout from '../../components/Layout'
 import { useAuth } from '../../contexts/AuthContext'
 import { User, Loan } from '../../types'
 import { getImageUrl } from '../../utils/imageUtils'
-import api from '../../api'
 import './UserProfile.css'
 
 interface FavoriteBook {
@@ -109,32 +109,42 @@ const UserProfile: React.FC = () => {
     setLoading(profileLoading || otherUserLoading)
   }, [profileLoading, otherUserLoading])
 
-  const fetchLoans = async () => {
-    if (!targetUsername) return
+  useEffect(() => {
+    if (favoriteData?.myFavoriteBook?.favoriteBook && !targetUsername) {
+      const book = favoriteData.myFavoriteBook.favoriteBook
+      setFavoriteBook({
+        ...book,
+        author_name: book.author?.name_author || 'Desconhecido'
+      })
+    } else if (favoriteData?.myFavoriteBook?.favoriteBook === null && !targetUsername) {
+      setFavoriteBook(null)
+    }
+  }, [favoriteData, targetUsername])
 
-    const response = await api.get(`/api/loans?username=${targetUsername}`)
-    setLoans(response.data)
+  const { data: userLoansData, refetch: refetchUserLoans } = useQuery(GET_USER_LOANS_QUERY, {
+    variables: { username: targetUsername || '' },
+    skip: !targetUsername || targetUsername === user?.username,
+    fetchPolicy: 'cache-and-network'
+  })
+
+  useEffect(() => {
+    if (loansData?.myLoans && !targetUsername) {
+      setLoans(loansData.myLoans)
+    } else if (userLoansData?.userLoans && targetUsername) {
+      setLoans(userLoansData.userLoans)
+    }
+  }, [loansData, userLoansData, targetUsername])
+
+  const fetchLoans = async () => {
+    if (targetUsername && targetUsername !== user?.username) {
+      await refetchUserLoans()
+    } else {
+      await refetchLoans()
+    }
   }
 
   const fetchFavoriteBook = async () => {
-    if (!targetUsername) {
-      return
-    }
-
-    try {
-      const response = await api.get(`/api/users/favorite?username=${targetUsername}`)
-      if (response.data) {
-        const favoriteData = {
-          ...response.data,
-          author_name: response.data.author?.name_author || 'Desconhecido'
-        }
-        setFavoriteBook(favoriteData)
-      } else {
-        setFavoriteBook(null)
-      }
-    } catch (error) {
-      setFavoriteBook(null)
-    }
+    await refetchFavorite()
   }
 
   const onSelectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,6 +152,8 @@ const UserProfile: React.FC = () => {
     if (!file) return
     setImageFile(file)
   }
+
+  const [uploadUserImage] = useMutation(UPLOAD_USER_IMAGE_MUTATION)
 
   const handleUploadImage = async () => {
     if (!imageFile || !canEdit) {
@@ -153,26 +165,42 @@ const UserProfile: React.FC = () => {
     
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('image', imageFile)
-      formData.append('username', targetUsername || 'guest')
-      
-      const resp = await api.post('/api/upload-image', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      if (resp?.data) {
-        setProfile(resp.data)
+      const reader = new FileReader()
+      reader.onload = async () => {
+        try {
+          const fileData = reader.result as string
+          
+          const { data } = await uploadUserImage({
+            variables: {
+              username: targetUsername || user?.username || '',
+              filename: imageFile.name,
+              fileData: fileData
+            }
+          })
+          
+          setProfile(prev => prev ? {
+            ...prev,
+            profile_image: data.uploadUserImage.profile_image
+          } : null)
+          
+          setImgVersion((v) => v + 1)
+          setImageFile(null)
+          setError('')
+          alert('Imagem de perfil atualizada com sucesso!')
+        } catch (error: any) {
+          setError(`Falha ao enviar a imagem: ${error.message}`)
+        } finally {
+          setUploading(false)
+        }
       }
-      setImgVersion((v) => v + 1)
-      setImageFile(null)
-      setError('')
-      alert('Imagem de perfil atualizada com sucesso!')
+      reader.readAsDataURL(imageFile)
     } catch (e) {
-      setError('Falha ao enviar a imagem')
-    } finally {
+      setError('Falha ao processar a imagem')
       setUploading(false)
     }
   }
+
+  const [updateUserDescription] = useMutation(UPDATE_USER_DESCRIPTION_MUTATION)
 
   const handleUpdateDescription = async () => {
     if (!canEdit) {
@@ -182,21 +210,30 @@ const UserProfile: React.FC = () => {
 
     setUploading(true)
 
-    const response = await api.post('/api/save-description', {
-      username: targetUsername,
-      description: description
-    })
+    try {
+      await updateUserDescription({
+        variables: {
+          username: targetUsername || user?.username || '',
+          description: description
+        }
+      })
 
-    setProfile(prev => prev ? {
-      ...prev,
-      description: description
-    } : null)
-    
-    setEditingDescription(false)
-    setError('')
-    alert('Descrição atualizada com sucesso!')
-    setUploading(false)
+      setProfile(prev => prev ? {
+        ...prev,
+        description: description
+      } : null)
+      
+      setEditingDescription(false)
+      setError('')
+      alert('Descrição atualizada com sucesso!')
+    } catch (e: any) {
+      setError('Falha ao atualizar a descrição')
+    } finally {
+      setUploading(false)
+    }
   }
+
+  const [updateUserDisplayName] = useMutation(UPDATE_USER_DISPLAY_NAME_MUTATION)
 
   const handleUpdateDisplayName = async () => {
     if (!canEdit) {
@@ -207,9 +244,11 @@ const UserProfile: React.FC = () => {
     setUploading(true)
 
     try {
-      await api.post('/api/save-display-name', {
-        display_name: displayName,
-        username: targetUsername
+      await updateUserDisplayName({
+        variables: {
+          username: targetUsername || user?.username || '',
+          displayName: displayName
+        }
       })
 
       setProfile(prev => prev ? {
@@ -221,7 +260,7 @@ const UserProfile: React.FC = () => {
       setError('')
       alert('Nome atualizado com sucesso!')
     } catch (e: any) {
-      const errorMessage = e.response?.data?.message || 'Falha ao atualizar o nome'
+      const errorMessage = e.message || 'Falha ao atualizar o nome'
       setError(errorMessage)
       alert(errorMessage)
     } finally {
@@ -367,40 +406,20 @@ const UserProfile: React.FC = () => {
             <div className="profile-image-container">
               <h3>Imagem de Perfil</h3>
               <div className="profile-image-display">
-                {profile?.profile_image ? (
-                  <img
-                    src={buildImageSrc(profile.profile_image, 'profile')}
-                    key={`${profile?.profile_image}-${imgVersion}`}
-                    alt="Perfil"
-                    className="profile-image"
-                    style={{
-                      maxWidth: '200px', 
-                      maxHeight: '200px', 
-                      objectFit: 'cover',
-                      border: '2px solid #ddd',
-                      borderRadius: '8px',
-                      display: 'block'
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://res.cloudinary.com/ddfgsoh5g/image/upload/v1761062930/pedbook/profiles/default-user.svg';
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '200px',
-                    height: '200px',
-                    border: '2px dashed #ccc',
+                <img
+                  src={buildImageSrc(profile?.profile_image, 'profile')}
+                  key={`${profile?.profile_image || 'default'}-${imgVersion}`}
+                  alt="Perfil"
+                  className="profile-image"
+                  style={{
+                    maxWidth: '200px', 
+                    maxHeight: '200px', 
+                    objectFit: 'cover',
+                    border: '2px solid #ddd',
                     borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#f9f9f9',
-                    color: '#666'
-                  }}>
-                    Nenhuma imagem de perfil enviada ainda
-                  </div>
-                )}
+                    display: 'block'
+                  }}
+                />
               </div>
             </div>
 
