@@ -129,10 +129,17 @@
 }
 
 .author-header {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 40px;
+  margin: 30px 0 40px 0;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .author-header .author-image-container *,
@@ -153,41 +160,110 @@
   box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
-  width: 120px !important;
-  height: 120px !important;
-  border-radius: 50% !important;
+  width: 160px !important;
+  height: 160px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
   position: relative !important;
 }
 
+.author-header .author-image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .author-header .author-image-enhanced {
-  width: 120px !important;
-  height: 120px !important;
-  border-radius: 50% !important;
+  width: 160px !important;
+  height: 160px !important;
+  min-width: 160px !important;
+  min-height: 160px !important;
+  max-width: 160px !important;
+  max-height: 160px !important;
+  border-radius: 12px !important;
   object-fit: cover !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  background: none !important;
-  background-color: transparent !important;
-  outline: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  transition: transform 0.3s ease;
+  object-position: center !important;
+  border: 3px solid #f0f0f0 !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+  transition: transform 0.3s ease !important;
   display: block !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #f0f0f0 !important;
+  flex-shrink: 0 !important;
 }
 
 .author-header .author-image-enhanced:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
 }
 
-.author-info h2 {
+.public-layout .author-header .author-image-enhanced,
+.author-header img,
+.author-image-enhanced {
+  width: 160px !important;
+  height: 160px !important;
+  min-width: 160px !important;
+  min-height: 160px !important;
+  max-width: 160px !important;
+  max-height: 160px !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.breadcrumb-container {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding: 12px 0;
+  position: sticky;
+  top: 70px;
+  z-index: 90;
+}
+
+.breadcrumb {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.breadcrumb a {
   color: #162c74;
-  font-size: 32px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.breadcrumb .separator {
+  color: #6b7280;
+  font-weight: 400;
+  margin: 0 4px;
+}
+
+.breadcrumb .current {
+  color: #374151;
+  font-weight: 600;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.author-info h1 {
+  color: #162c74;
+  font-size: 2.2em;
   margin: 0 0 10px 0;
   font-weight: 700;
 }
@@ -224,8 +300,25 @@
   border-left: 4px solid #162c74;
 }
 
+.author-biography {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 10px;
+  border-left: 4px solid #162c74;
+  margin-top: 20px;
+}
+
+.author-biography h3 {
+  color: #162c74;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+}
+
+.author-biography p,
 .biography-content p {
-  color: #333;
+  line-height: 1.7;
+  color: #555;
+  font-size: 16px;
   margin: 0;
   text-align: justify;
 }
@@ -419,9 +512,10 @@
   }
   
   .author-header {
-    flex-direction: column;
-    text-align: center;
+    grid-template-columns: 1fr;
     gap: 20px;
+    text-align: center;
+    padding: 20px;
   }
   
   .author-info h2 {

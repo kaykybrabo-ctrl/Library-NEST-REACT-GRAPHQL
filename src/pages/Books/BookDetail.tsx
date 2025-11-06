@@ -283,26 +283,14 @@ const BookDetail: React.FC = () => {
 
   return (
     <Layout title={`Livro: ${book.title}`}>
-      {error && <div className="error-message">{error}</div>}
-      
-      <section className="profile-section image-tight">
+      <div className="book-detail-container">
+        {error && <div className="error-message">{error}</div>}
+        
         <button onClick={() => navigate('/books')} className="back-button">
           ← Voltar para Livros
         </button>
-        
-        <h2>{book.title}</h2>
-        <p><strong>Autor:</strong> {book.author?.name_author || 'Desconhecido'}</p>
-        <p><strong>Descrição:</strong> {book.description || 'Sem descrição disponível'}</p>
-        
-        {book.categories && book.categories.length > 0 && (
-          <p><strong>Gêneros:</strong> {book.categories.join(', ')}</p>
-        )}
-        
-        {book.publishers && book.publishers.length > 0 && (
-          <p><strong>Editoras:</strong> {book.publishers.join(', ')}</p>
-        )}
 
-        <div className="book-detail-layout">
+        <div className="book-header">
           <div className="book-image-section">
             {previewUrl ? (
               <img src={previewUrl} alt="Pré-visualização selecionada" className="book-image" />
@@ -321,8 +309,78 @@ const BookDetail: React.FC = () => {
               </div>
             )}
           </div>
-          
-          <div className="book-actions-section">
+
+          <div className="book-info">
+            <h1>{book.title}</h1>
+            <p><strong>Autor:</strong> {book.author?.name_author || 'Desconhecido'}</p>
+            
+            {book.categories && book.categories.length > 0 && (
+              <p><strong>Gêneros:</strong> {book.categories.join(', ')}</p>
+            )}
+            
+            {book.publishers && book.publishers.length > 0 && (
+              <p><strong>Editoras:</strong> {book.publishers.join(', ')}</p>
+            )}
+
+            {book.description && (
+              <div className="book-description">
+                <h3>📖 Descrição</h3>
+                <p>{book.description}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {userLoan && (
+          <div className="loan-info">
+            <h4>📚 Status do Empréstimo</h4>
+            <p><strong>Alugado em:</strong> {new Date(userLoan.loan_date).toLocaleDateString('pt-BR')}</p>
+            <p><strong>Vencimento:</strong> {new Date(userLoan.due_date).toLocaleDateString('pt-BR')}</p>
+            <div className={`days-remaining ${(() => {
+              if (userLoan.is_overdue) return 'overdue';
+              
+              const totalHours = Math.floor(userLoan.hours_remaining);
+              let remainingHours = totalHours - (userLoan.days_remaining * 24);
+              let adjustedDays = userLoan.days_remaining;
+              
+              if (remainingHours >= 24) {
+                adjustedDays += Math.floor(remainingHours / 24);
+              }
+              
+              return adjustedDays <= 1 ? 'urgent' : adjustedDays <= 3 ? 'warning' : 'normal';
+            })()}`}>
+              {(() => {
+                if (userLoan.is_overdue) {
+                  return '⚠️ Atrasado!';
+                }
+                
+                const totalHours = Math.floor(userLoan.hours_remaining);
+                let remainingHours = totalHours - (userLoan.days_remaining * 24);
+                let adjustedDays = userLoan.days_remaining;
+                
+                if (remainingHours >= 24) {
+                  adjustedDays += Math.floor(remainingHours / 24);
+                  remainingHours = remainingHours % 24;
+                }
+                
+                if (adjustedDays === 0) {
+                  return '⏰ Vence hoje!';
+                } else if (adjustedDays === 1) {
+                  return `⏰ Vence amanhã (${remainingHours}h restantes)`;
+                } else {
+                  return `📅 ${adjustedDays} dias e ${remainingHours}h restantes`;
+                }
+              })()}
+            </div>
+            {userLoan.is_overdue && (
+              <div className="fine-amount">
+                <strong>💰 Multa: R$ {userLoan.fine_amount.toFixed(2)}</strong>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="book-actions-section">
             <h4>Ações do Livro</h4>
             {userLoan ? (
               <>
@@ -372,26 +430,31 @@ const BookDetail: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <button onClick={handleReturnBook} className="action-btn primary">Devolver Livro</button>
-                <button onClick={handleFavoriteBook} className="action-btn primary">⭐ Adicionar aos Favoritos</button>
+                <div className="book-actions">
+                  <button onClick={handleReturnBook}>Devolver Livro</button>
+                  <button onClick={handleFavoriteBook}>⭐ Adicionar aos Favoritos</button>
+                </div>
               </>
             ) : isBookRentedByOther ? (
               <>
                 <p>❌ Este livro está alugado por outro usuário.</p>
-                <button disabled className="action-btn disabled">Livro Indisponível</button>
-                <button onClick={handleFavoriteBook} className="action-btn primary">⭐ Adicionar aos Favoritos</button>
+                <div className="book-actions">
+                  <button disabled>Livro Indisponível</button>
+                  <button onClick={handleFavoriteBook}>⭐ Adicionar aos Favoritos</button>
+                </div>
               </>
             ) : (
               <>
-                {user?.role === 'admin' ? (
-                  <button disabled className="action-btn disabled">👑 Modo Administrador - Apenas Visualização</button>
-                ) : (
-                  <button onClick={handleRentBook} className="action-btn primary">📚 Alugar Livro</button>
-                )}
-                <button onClick={handleFavoriteBook} className="action-btn primary">⭐ Adicionar aos Favoritos</button>
+                <div className="book-actions">
+                  {user?.role === 'admin' ? (
+                    <button disabled>👑 Modo Administrador - Apenas Visualização</button>
+                  ) : (
+                    <button onClick={handleRentBook}>📚 Alugar Livro</button>
+                  )}
+                  <button onClick={handleFavoriteBook}>⭐ Adicionar aos Favoritos</button>
+                </div>
               </>
             )}
-          </div>
         </div>
 
         {isAdmin && (
@@ -418,37 +481,43 @@ const BookDetail: React.FC = () => {
             {uploadStatus}
           </div>
         )}
-      </section>
+      </div>
 
-      <section className="form-section">
+      <section className="form-section review-form">
         <h3>Escreva uma Avaliação</h3>
         {!currentUser ? (
           <p>Faça login para escrever uma avaliação.</p>
         ) : (
           <form onSubmit={handleSubmitReview}>
-            <Box sx={{ mb: 2 }}>
-              <Typography component="legend" sx={{ mb: 1 }}>Nota:</Typography>
-              <Rating
-                name="book-rating"
-                value={newReview.rating}
-                onChange={(_, newValue) => {
-                  setNewReview({ ...newReview, rating: newValue || 1 })
-                }}
-                max={5}
-                size="large"
-              />
-            </Box>
+            <div className="review-form-content">
+              <div className="review-rating-section">
+                <Box sx={{ mb: 2 }}>
+                  <Typography component="legend" sx={{ mb: 1 }}>Nota:</Typography>
+                  <Rating
+                    name="book-rating"
+                    value={newReview.rating}
+                    onChange={(_, newValue) => {
+                      setNewReview({ ...newReview, rating: newValue || 1 })
+                    }}
+                    max={5}
+                    size="large"
+                  />
+                </Box>
+              </div>
 
-            <label htmlFor="comment">Comentário:</label>
-            <textarea
-              id="comment"
-              value={newReview.comment}
-              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-              rows={4}
-              className="review-textarea"
-            />
-
-            <button type="submit">Enviar Avaliação</button>
+              <div className="review-comment-section">
+                <label htmlFor="comment">Comentário:</label>
+                <textarea
+                  id="comment"
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  rows={4}
+                  className="review-textarea"
+                  placeholder="Compartilhe sua opinião sobre este livro..."
+                />
+                <button type="submit">Enviar Avaliação</button>
+              </div>
+            </div>
           </form>
         )}
       </section>

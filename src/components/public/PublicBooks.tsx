@@ -98,6 +98,14 @@ const PublicBooks: React.FC = () => {
         </div>
       </div>
 
+      <div className="breadcrumb-container">
+        <div className="breadcrumb">
+          <Link to="/">Início</Link>
+          <span className="separator">›</span>
+          <span className="current">Livros</span>
+        </div>
+      </div>
+
       <div className="books-container">
         <div className="books-header">
           <h1>📚 Nossa Biblioteca</h1>

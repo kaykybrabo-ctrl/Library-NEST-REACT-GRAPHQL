@@ -120,7 +120,6 @@ const PublicAuthors: React.FC = () => {
         </div>
       </div>
 
-      {/* Breadcrumb */}
       <div className="breadcrumb-container">
         <div className="breadcrumb">
           <Link to="/">Início</Link>
@@ -131,12 +130,10 @@ const PublicAuthors: React.FC = () => {
 
       <div className="authors-wrapper">
         <div className="authors-container">
-          {/* Page Title */}
           <div className="page-title-section">
             <h1 className="page-title">👨‍💼 Nossos Autores</h1>
           </div>
 
-          {/* Search and Filters */}
           <div className="authors-controls">
             <div className="search-section">
               <div className="search-input-container">
@@ -174,7 +171,6 @@ const PublicAuthors: React.FC = () => {
             </div>
           </div>
 
-          {/* Results Info */}
           {searchTerm && (
             <div className="search-results-info">
               <p>
@@ -186,7 +182,6 @@ const PublicAuthors: React.FC = () => {
             </div>
           )}
 
-          {/* Authors Grid/List */}
           {filteredAuthors.length === 0 ? (
             <div className="no-authors">
               <div className="no-authors-icon">👨‍💼</div>

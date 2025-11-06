@@ -191,7 +191,6 @@ const PublicBookDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Breadcrumb */}
       <div className="breadcrumb-container">
         <div className="breadcrumb">
           <Link to="/">Início</Link>
@@ -204,7 +203,6 @@ const PublicBookDetail: React.FC = () => {
 
       <div className="book-detail-wrapper">
         <div className="book-detail-container">
-          {/* Hero Section */}
           <div className="book-hero">
             <div className="book-image-container">
               <img 
@@ -271,7 +269,6 @@ const PublicBookDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Description Section */}
           <div className="book-description-section">
             <h2 className="section-title">📝 Sobre este livro</h2>
             <div className="description-content">
@@ -281,7 +278,6 @@ const PublicBookDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Reviews Section */}
           <div className="reviews-section">
             <div className="reviews-header">
               <h2 className="section-title">💬 Avaliações dos Leitores</h2>

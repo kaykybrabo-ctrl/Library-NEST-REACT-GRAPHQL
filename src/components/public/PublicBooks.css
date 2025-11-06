@@ -109,6 +109,53 @@
   background: #0d1a3d;
 }
 
+.breadcrumb-container {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding: 12px 0;
+  position: sticky;
+  top: 70px;
+  z-index: 90;
+}
+
+.breadcrumb {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.breadcrumb a {
+  color: #162c74;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.breadcrumb .separator {
+  color: #6b7280;
+  font-weight: 400;
+  margin: 0 4px;
+}
+
+.breadcrumb .current {
+  color: #374151;
+  font-weight: 600;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .content-section {
   max-width: 1100px;
   margin: 0 auto;
@@ -216,7 +263,6 @@
   display: block;
 }
 
-/* Força o tamanho correto para TODAS as imagens nos cards */
 .public-layout .book-card img,
 .book-card .book-cover,
 .books-grid .book-card img {
@@ -269,17 +315,7 @@
 }
 
 .book-description {
-  color: #6c757d;
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
+  display: none !important;
 }
 
 .view-btn {

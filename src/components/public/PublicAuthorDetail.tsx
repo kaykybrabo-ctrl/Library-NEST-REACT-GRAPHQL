@@ -131,6 +131,16 @@ const PublicAuthorDetail: React.FC = () => {
         </div>
       </div>
 
+      <div className="breadcrumb-container">
+        <div className="breadcrumb">
+          <Link to="/">Início</Link>
+          <span className="separator">›</span>
+          <Link to="/public/authors">Autores</Link>
+          <span className="separator">›</span>
+          <span className="current">{author.name_author}</span>
+        </div>
+      </div>
+
       <div className="author-detail-container">
         <div className="author-header">
           <img 

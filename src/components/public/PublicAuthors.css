@@ -1,6 +1,4 @@
-/* PublicAuthors.css - Layout Moderno */
 
-/* Header Melhorado */
 .public-header {
   background: #162c74 !important;
   color: white;
@@ -90,7 +88,6 @@
   transform: translateY(0);
 }
 
-/* Loading */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -114,7 +111,6 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Error State */
 .error-container {
   display: flex;
   align-items: center;
@@ -152,7 +148,6 @@
   flex-wrap: wrap;
 }
 
-/* Breadcrumb */
 .breadcrumb-container {
   background: rgba(255,255,255,0.9);
   backdrop-filter: blur(10px);
@@ -190,7 +185,6 @@
   font-weight: 500;
 }
 
-/* Main Container */
 .authors-wrapper {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: calc(100vh - 200px);
@@ -203,7 +197,6 @@
   padding: 0 2rem;
 }
 
-/* Page Title Section */
 .page-title-section {
   text-align: center;
   margin-bottom: 2rem;
@@ -217,7 +210,6 @@
   margin: 0;
 }
 
-/* Controls Section */
 .authors-controls {
   display: flex;
   justify-content: space-between;
@@ -323,7 +315,6 @@
   color: #162c74;
 }
 
-/* Search Results Info */
 .search-results-info {
   margin-bottom: 1.5rem;
   padding: 1rem;
@@ -338,7 +329,6 @@
   font-weight: 500;
 }
 
-/* No Authors State */
 .no-authors {
   text-align: center;
   padding: 4rem 2rem;
@@ -383,7 +373,6 @@
   box-shadow: 0 12px 35px rgba(22, 44, 116, 0.4);
 }
 
-/* Authors Content */
 .authors-content {
   display: grid;
   gap: 2rem;
@@ -397,7 +386,6 @@
   grid-template-columns: 1fr;
 }
 
-/* Author Card Modern */
 .author-card-modern {
   background: white;
   border-radius: 20px;
@@ -431,7 +419,6 @@
   transform: scaleX(1);
 }
 
-/* List View Specific */
 .authors-content.list .author-card-modern {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -445,7 +432,6 @@
   text-align: center;
 }
 
-/* Author Image Section */
 .author-image-section {
   position: relative;
   display: flex;
@@ -488,7 +474,6 @@
   box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
 }
 
-/* Author Info Section */
 .author-info-section {
   flex: 1;
 }
@@ -531,7 +516,6 @@
   -webkit-line-clamp: 4;
 }
 
-/* Author Stats Mini */
 .author-stats-mini {
   display: flex;
   gap: 1.5rem;
@@ -559,7 +543,6 @@
   font-weight: 500;
 }
 
-/* Author Actions */
 .author-actions {
   display: flex;
   gap: 0.75rem;
@@ -606,7 +589,6 @@
   box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
   .authors-content.grid {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -693,7 +675,6 @@
   }
 }
 
-/* Utility Classes */
 .btn-primary {
   background: linear-gradient(135deg, #162c74 0%, #1e40af 100%);
   color: white;
