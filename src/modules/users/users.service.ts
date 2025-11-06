@@ -80,6 +80,11 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findById(id);
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+
     if (updateUserDto.username) {
       const existingUser = await this.usersRepository.findByUsername(updateUserDto.username);
 

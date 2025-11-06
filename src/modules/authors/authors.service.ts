@@ -68,14 +68,14 @@ export class AuthorsService {
     return this.authorsRepository.update(id, updateAuthorDto);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const author = await this.authorsRepository.findById(id);
 
     if (!author) {
       throw new Error('Autor não encontrado');
     }
 
-    await this.authorsRepository.softDelete(id);
+    return this.authorsRepository.softDelete(id);
   }
 
   async count(): Promise<number> {

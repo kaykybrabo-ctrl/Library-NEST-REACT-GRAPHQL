@@ -176,14 +176,14 @@ export class BooksService {
     await this.booksRepository.updatePhoto(id, photo);
   }
 
-  async restore(id: number): Promise<void> {
+  async restore(id: number) {
     const book = await this.booksRepository.findById(id);
 
     if (!book) {
-      throw new Error('Livro não encontrado');
+      throw new Error(`Livro com ID ${id} não encontrado`);
     }
 
-    await this.booksRepository.restore(id);
+    return this.booksRepository.restore(id);
   }
 
   private getBookDescription(title: string): string {
