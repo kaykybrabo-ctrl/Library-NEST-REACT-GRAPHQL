@@ -3,6 +3,7 @@ import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
+import { MailService } from '@/infrastructure/mail/mail.service';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { LoginInput, RegisterInput, UpdateProfileInput } from './dto/auth-graphql.dto';
 import { LoginResponse, AuthUser, UserProfile } from './entities/auth.entity';
@@ -13,6 +14,7 @@ export class AuthResolver {
     private authService: AuthService,
     private usersService: UsersService,
     private prisma: PrismaService,
+    private mailService: MailService,
   ) {}
 
   @Mutation(() => LoginResponse)
@@ -166,7 +168,36 @@ export class AuthResolver {
 
   @Mutation(() => String)
   async forgotPassword(@Args('username') username: string): Promise<string> {
-    return 'Email de recuperação enviado com sucesso';
+    try {
+      // Verificar se o usuário existe
+      const user = await this.prisma.authUser.findUnique({
+        where: { username }
+      });
+
+      if (!user) {
+        // Por segurança, não revelamos se o usuário existe ou não
+        return 'Se o e-mail existir em nossa base, você receberá instruções de recuperação.';
+      }
+
+      // Gerar token de reset
+      const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const resetUrl = `http://localhost:8080/reset?u=${encodeURIComponent(username)}&t=${resetToken}`;
+
+      // Enviar e-mail usando o MailService
+      const result = await this.mailService.sendPasswordResetEmail(username, {
+        username: user.display_name || user.username,
+        resetUrl
+      });
+
+      // Retornar o preview do Ethereal para desenvolvimento
+      if (result.preview) {
+        return `E-mail enviado! Preview: ${result.preview}`;
+      }
+
+      return result.message || 'E-mail de recuperação enviado com sucesso!';
+    } catch (error) {
+      return 'Erro interno. Tente novamente mais tarde.';
+    }
   }
 
   @Mutation(() => String)
@@ -175,6 +206,37 @@ export class AuthResolver {
     @Args('token', { nullable: true }) token?: string,
     @Args('username', { nullable: true }) username?: string
   ): Promise<string> {
-    return 'Senha alterada com sucesso';
+    try {
+      if (!newPassword || newPassword.length < 3) {
+        throw new Error('A senha deve ter pelo menos 3 caracteres');
+      }
+
+      if (!username) {
+        throw new Error('Username é obrigatório');
+      }
+
+      // Verificar se o usuário existe
+      const user = await this.prisma.authUser.findUnique({
+        where: { username }
+      });
+
+      if (!user) {
+        throw new Error('Usuário não encontrado');
+      }
+
+      // Hash da nova senha usando bcryptjs (mesmo que o AuthService usa)
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Atualizar a senha no banco
+      await this.prisma.authUser.update({
+        where: { username },
+        data: { password: hashedPassword }
+      });
+
+      return 'Senha alterada com sucesso';
+    } catch (error) {
+      throw new Error(error?.message || 'Erro interno ao resetar senha');
+    }
   }
 }

@@ -33,18 +33,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser && savedUser !== 'undefined') {
-      try {
-        return JSON.parse(savedUser);
-      } catch (error) {
-        return null;
-      }
-    }
-    return null;
-  });
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [user, setUser] = useState<User | null>(null); // Auto-login desabilitado
+  const [token, setToken] = useState<string | null>(null); // Auto-login desabilitado
   
   const apolloClient = useApolloClient();
   const [loginMutation] = useMutation(LOGIN_MUTATION);
@@ -94,7 +84,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       return true;
     } catch (error: any) {
-      console.error('❌ Frontend - Erro no registro:', error);
       throw error;
     }
   };

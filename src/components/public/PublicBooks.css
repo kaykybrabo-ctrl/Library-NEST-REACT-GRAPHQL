@@ -314,7 +314,9 @@
   color: #0d1a3d;
 }
 
-.book-description {
+/* Esconder descrições apenas na listagem de livros, não na página de detalhes */
+.books-grid .book-description,
+.books-list .book-description {
   display: none !important;
 }
 

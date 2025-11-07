@@ -26,8 +26,9 @@ export class BooksResolver {
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('search', { nullable: true }) search?: string,
     @Args('includeDeleted', { nullable: true }) includeDeleted?: boolean,
+    @Args('authorId', { type: () => Int, nullable: true }) authorId?: number,
   ) {
-    const result = await this.booksService.findAll(page, limit, search, includeDeleted);
+    const result = await this.booksService.findAll(page, limit, search, includeDeleted, authorId);
     return result.books;
   }
 

@@ -55,7 +55,7 @@ export class ReviewsService {
       }
       
       if (!finalName) {
-        finalName = email || 'Usuário';
+        finalName = email || 'User';
       }
       
       return {

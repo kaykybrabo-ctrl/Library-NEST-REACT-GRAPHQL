@@ -98,12 +98,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                       <span>Usuários</span>
                     </Link>
                     <Link 
-                      to="/loans" 
+                      to={isAdmin ? "/loans" : "/my-loans"} 
                       className="dropdown-link"
                       onClick={() => setShowDropdown(false)}
                     >
                       <span>📋</span>
-                      <span>Empréstimos</span>
+                      <span>{isAdmin ? "Gerenciar Empréstimos" : "Meus Empréstimos"}</span>
                     </Link>
                     <button 
                       className="dropdown-link logout-button"

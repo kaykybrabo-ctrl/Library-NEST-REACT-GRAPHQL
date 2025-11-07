@@ -80,7 +80,7 @@ export class LoansResolver {
         days_remaining: 0,
         hours_remaining: 0,
         time_remaining: '',
-        username: (loan as any).username || 'Usuário',
+        username: (loan as any).username || 'User',
         user_id: loan.user_id,
         book_id: loan.book_id,
         title: (loan as any).book?.title || '',

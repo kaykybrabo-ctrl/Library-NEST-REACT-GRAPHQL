@@ -44,15 +44,28 @@ const Login: React.FC = () => {
     
     setPreview(null)
     setLoading(true)
+    setError('')
+    setSuccess('')
+    
     try {
       const { data } = await forgotPasswordMutation({
         variables: { username: username.trim() }
       })
       
       if (data?.forgotPassword) {
-        setSuccess('E-mail de recuperação enviado com sucesso!')
+        const message = data.forgotPassword;
+        
+        // Extrair o link do Ethereal se existir
+        const previewMatch = message.match(/Preview: (https?:\/\/[^\s]+)/);
+        if (previewMatch) {
+          setSuccess('E-mail de recuperação enviado com sucesso!');
+          setPreview(previewMatch[1]);
+        } else {
+          setSuccess(message);
+        }
+      } else {
+        setError('Erro ao processar solicitação de recuperação')
       }
-      setError('')
     } catch (err: any) {
       setError(err?.message || 'Erro ao enviar e-mail de recuperação')
       setSuccess('')
@@ -65,6 +78,7 @@ const Login: React.FC = () => {
     <div className="login-container">
       <h1>PedBook</h1>
       {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
       <form onSubmit={handleSubmit}>
         <label htmlFor="email">E-mail:</label>
         <input

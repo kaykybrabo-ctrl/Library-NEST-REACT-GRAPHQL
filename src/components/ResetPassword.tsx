@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { RESET_PASSWORD_MUTATION } from '../graphql/queries/auth'
+import { useAuth } from '../contexts/AuthContext'
 import Layout from './Layout'
 import './ResetPassword.css'
 
@@ -23,6 +24,7 @@ const ResetPassword: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
 
   const [resetPasswordMutation] = useMutation(RESET_PASSWORD_MUTATION)
 
@@ -32,27 +34,55 @@ const ResetPassword: React.FC = () => {
       setError('Digite a nova senha')
       return
     }
-    if (newPassword.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres')
+    if (newPassword.length < 3) {
+      setError('A senha deve ter pelo menos 3 caracteres')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError('As senhas não coincidem')
       return
     }
     
     setLoading(true)
+    setError('')
+    setSuccess('')
+    
     try {
       const { data } = await resetPasswordMutation({
         variables: {
           newPassword,
           token: token || undefined,
-          username: !token ? email : undefined
+          username: email
         }
       })
       
+      
       if (data?.resetPassword) {
-        setSuccess('Senha atualizada com sucesso. Você já pode entrar.')
-        alert('Senha atualizada com sucesso!')
-        setTimeout(() => {
-          navigate('/login')
-        }, 2000)
+        setSuccess('Senha atualizada com sucesso! Fazendo login...')
+        
+        // Fazer login automático
+        try {
+          const loginSuccess = await login(email, newPassword)
+          
+          if (loginSuccess) {
+            setSuccess('Senha atualizada e login realizado com sucesso!')
+            setTimeout(() => {
+              navigate('/books')
+            }, 1500)
+          } else {
+            setSuccess('Senha atualizada com sucesso. Você já pode entrar.')
+            setTimeout(() => {
+              navigate('/login')
+            }, 2000)
+          }
+        } catch (loginError) {
+          setSuccess('Senha atualizada com sucesso. Você já pode entrar.')
+          setTimeout(() => {
+            navigate('/login')
+          }, 2000)
+        }
+      } else {
+        setError('Erro ao processar reset de senha')
       }
     } catch (err: any) {
       setError(err?.message || 'Erro ao redefinir senha')

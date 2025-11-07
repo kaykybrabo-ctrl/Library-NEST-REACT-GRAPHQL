@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { GET_AUTHORS } from '../../graphql/queries/authors'
+import { GET_BOOKS } from '../../graphql/queries/books'
 import { getImageUrl } from '../../utils/imageUtils'
 import LoginModal from '../LoginModal'
 import { useLoginModal } from '../../hooks/useLoginModal'
@@ -24,25 +25,33 @@ const PublicAuthors: React.FC = () => {
     errorPolicy: 'all'
   })
   
+  const { data: booksData } = useQuery(GET_BOOKS, {
+    variables: { limit: 100 },
+    errorPolicy: 'all'
+  })
+  
   const authors = data?.authors || []
 
-  const getBiografia = (author: Author) => {
-    const biografias = {
+  const getBiography = (author: Author) => {
+    const biographies = {
       1: "Guilherme Biondo é um escritor contemporâneo brasileiro conhecido por suas obras que exploram temas profundos da condição humana. Suas obras abordam questões existenciais e filosóficas com uma linguagem poética e envolvente.",
       2: "Manoel Leite é um renomado autor brasileiro especializado em ficção histórica e romance. Com mais de 20 anos de carreira, já publicou diversos bestsellers que retratam a cultura brasileira."
     }
     
-    return biografias[author.author_id as keyof typeof biografias] || 
+    return biographies[author.author_id as keyof typeof biographies] || 
            author.biography || 
            'Biografia em construção. Este talentoso autor está preparando sua apresentação para você conhecer melhor seu trabalho e trajetória literária.'
   }
 
   const getAuthorStats = (author: Author) => {
+    // Contar livros reais do autor
+    const authorBooks = booksData?.books?.filter(book => book.author_id === author.author_id) || []
+    
     const stats = {
-      1: { books: 12, rating: 4.8, readers: 2847 },
-      2: { books: 8, rating: 4.6, readers: 1923 }
+      1: { books: authorBooks.length, rating: 4.8, readers: 2847 },
+      2: { books: authorBooks.length, rating: 4.6, readers: 1923 }
     }
-    return stats[author.author_id as keyof typeof stats] || { books: 5, rating: 4.5, readers: 1200 }
+    return stats[author.author_id as keyof typeof stats] || { books: authorBooks.length, rating: 4.5, readers: 1200 }
   }
 
   const filteredAuthors = authors.filter(author =>
@@ -224,7 +233,7 @@ const PublicAuthors: React.FC = () => {
                       <div className="author-category">✍️ Escritor</div>
                       <h3 className="author-name">{author.name_author}</h3>
                       <p className="author-bio-preview">
-                        {getBiografia(author)}
+                        {getBiography(author)}
                       </p>
                       
                       <div className="author-stats-mini">

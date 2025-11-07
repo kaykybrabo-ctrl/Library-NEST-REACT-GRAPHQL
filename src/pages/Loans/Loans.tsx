@@ -22,7 +22,7 @@ const Loans: React.FC = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const { data: loansData, loading, refetch } = useQuery(ALL_LOANS_QUERY, {
+  const { data: loansData, loading, refetch, error: queryError } = useQuery(ALL_LOANS_QUERY, {
     skip: !isAdmin,
     fetchPolicy: 'cache-and-network'
   })
@@ -38,12 +38,12 @@ const Loans: React.FC = () => {
 
     try {
       await returnBookMutation({
-        variables: { loanId }
+        variables: { loanId: Number(loanId) }
       })
       alert('Empréstimo cancelado com sucesso')
       refetch()
     } catch (err: any) {
-      alert('Erro ao cancelar empréstimo')
+      alert('Erro ao cancelar empréstimo: ' + (err.message || 'Erro desconhecido'))
     }
   }
 
@@ -58,7 +58,67 @@ const Loans: React.FC = () => {
   }
 
   if (!isAdmin) {
-    return null
+    return (
+      <Layout title="Empréstimos">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '400px',
+          textAlign: 'center',
+          padding: '40px 20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+            borderRadius: '50%',
+            width: '80px',
+            height: '80px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '24px'
+          }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          </div>
+          <h2 style={{ color: '#333', marginBottom: '16px' }}>Acesso Restrito</h2>
+          <p style={{ color: '#666', fontSize: '1.1rem', maxWidth: '400px', lineHeight: '1.5' }}>
+            Esta página é exclusiva para administradores. Apenas administradores podem visualizar e gerenciar todos os empréstimos da biblioteca.
+          </p>
+          <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '16px' }}>
+            Para ver seus próprios empréstimos, acesse a aba "Meus Empréstimos".
+          </p>
+          <button
+            onClick={() => navigate('/my-loans')}
+            style={{
+              background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '12px 24px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              marginTop: '24px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(76, 175, 80, 0.3)';
+            }}
+          >
+            Ver Meus Empréstimos
+          </button>
+        </div>
+      </Layout>
+    )
   }
 
   if (loading) {

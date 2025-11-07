@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, CREATE_BOOK_WITH_AUTHOR, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
 import { GET_AUTHORS } from '@/graphql/queries/authors'
-import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
+import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY, MY_BOOK_LOAN_QUERY } from '@/graphql/queries/loans'
 import { useAuth } from '@/contexts/AuthContext'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
@@ -154,9 +154,11 @@ const Books: React.FC = () => {
     
     try {
       const loanStatuses: {[key: number]: any} = {};
+      const userLoanStatuses: {[key: number]: any} = {};
       
       for (const book of books) {
         try {
+          // Buscar status geral do livro
           const { data } = await apolloClient.query({
             query: BOOK_LOAN_STATUS_QUERY,
             variables: { bookId: book.book_id },
@@ -166,11 +168,23 @@ const Books: React.FC = () => {
           if (data?.bookLoanStatus) {
             loanStatuses[book.book_id] = data.bookLoanStatus;
           }
+
+          // Buscar empréstimo do usuário atual
+          const { data: userLoanData } = await apolloClient.query({
+            query: MY_BOOK_LOAN_QUERY,
+            variables: { bookId: book.book_id },
+            fetchPolicy: 'network-only'
+          });
+          
+          if (userLoanData?.myBookLoan) {
+            userLoanStatuses[book.book_id] = userLoanData.myBookLoan;
+          }
         } catch (err) {
         }
       }
       
       setBookLoans(loanStatuses);
+      setUserLoans(userLoanStatuses);
     } catch (error) {
     }
   };
@@ -218,16 +232,18 @@ const Books: React.FC = () => {
   };
 
   const handleReturnBook = async (bookId: number) => {
+    
     if (!confirm('Tem certeza de que deseja devolver este livro?')) {
       return;
     }
 
     try {
       const { data: loanData } = await apolloClient.query({
-        query: BOOK_LOAN_STATUS_QUERY,
+        query: MY_BOOK_LOAN_QUERY,
         variables: { bookId },
         fetchPolicy: 'network-only'
       });
+      
       
       if (!loanData?.myBookLoan?.hasLoan || !loanData.myBookLoan.loan?.loans_id) {
         setError('Empréstimo não encontrado');
@@ -239,15 +255,13 @@ const Books: React.FC = () => {
       });
       
       setError('');
-      await apolloClient.resetStore();
       
-      setTimeout(async () => {
-        await fetchBooks();
-        await fetchLoanStatuses();
-        setTimeout(() => {
-          window.location.reload()
-        }, 1000);
-      }, 200);
+      // Atualizar dados sem recarregar a página
+      await fetchBooks();
+      await fetchLoanStatuses();
+      
+      // Mostrar mensagem de sucesso
+      alert('Livro devolvido com sucesso!');
       
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Erro ao devolver livro';
@@ -795,14 +809,42 @@ const Books: React.FC = () => {
                             {userLoans[book.book_id]?.hasLoan ? (
                               <button
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); handleReturnBook(book.book_id); }}
-                                aria-label="Devolver livro"
-                                title="Devolver livro"
-                                className="icon-button return-btn"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleReturnBook(book.book_id);
+                                }}
+                                title="📤 Clique para devolver este livro"
+                                style={{
+                                  background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  padding: '8px 16px',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '600',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
+                                  minWidth: '90px',
+                                  justifyContent: 'center'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 152, 0, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.3)';
+                                }}
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor" />
                                 </svg>
+                                Devolver
                               </button>
                             ) : bookLoans[book.book_id]?.isRented ? (
                               <button
@@ -831,15 +873,46 @@ const Books: React.FC = () => {
                             ) : (
                               <button
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); handleRentBook(book.book_id); }}
+                                onClick={(e) => { 
+                                  e.preventDefault();
+                                  e.stopPropagation(); 
+                                  handleRentBook(book.book_id); 
+                                }}
                                 aria-label="Alugar livro"
-                                title="✅ Clique para alugar este livro"
-                                className="icon-button"
-                                style={{borderColor: '#4caf50', color: '#4caf50'}}
+                                title="📚 Clique para alugar este livro"
+                                className="rent-button"
+                                style={{
+                                  background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  padding: '8px 16px',
+                                  fontSize: '0.85rem',
+                                  fontWeight: '600',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                                  minWidth: '90px',
+                                  justifyContent: 'center',
+                                  position: 'relative',
+                                  zIndex: '10'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(76, 175, 80, 0.3)';
+                                }}
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 8h-3V7h-4v3H7l5 5 5-5z" fill="currentColor" />
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
                                 </svg>
+                                Alugar
                               </button>
                             )}
                           </>

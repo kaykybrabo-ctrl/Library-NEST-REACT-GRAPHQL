@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const GET_BOOKS = gql`
-  query GetBooks($page: Int, $limit: Int, $search: String, $includeDeleted: Boolean) {
-    books(page: $page, limit: $limit, search: $search, includeDeleted: $includeDeleted) {
+  query GetBooks($page: Int, $limit: Int, $search: String, $includeDeleted: Boolean, $authorId: Int) {
+    books(page: $page, limit: $limit, search: $search, includeDeleted: $includeDeleted, authorId: $authorId) {
       book_id
       title
       description

@@ -40,8 +40,9 @@ const PublicAuthorDetail: React.FC = () => {
   })
   
   const { data: booksData } = useQuery(GET_BOOKS, {
-    variables: { authorId: parseInt(id || '0'), limit: 1000 },
+    variables: { authorId: parseInt(id || '0'), limit: 100 },
     errorPolicy: 'all',
+    fetchPolicy: 'no-cache',
     skip: !id
   })
   
@@ -62,13 +63,13 @@ const PublicAuthorDetail: React.FC = () => {
     }
   }, [booksData])
 
-  const getBiografia = (authorId: number) => {
-    const biografias = {
+  const getBiography = (authorId: number) => {
+    const biographies = {
       1: "Guilherme Biondo é um escritor contemporâneo brasileiro conhecido por suas obras que exploram temas profundos da condição humana.",
       2: "Manoel Leite é um renomado autor brasileiro especializado em ficção histórica e romance."
     }
     
-    return biografias[authorId as keyof typeof biografias] || 
+    return biographies[authorId as keyof typeof biographies] || 
            author?.biography || 
            'Biografia não disponível no momento.'
   }
@@ -154,7 +155,7 @@ const PublicAuthorDetail: React.FC = () => {
           />
           <div className="author-info">
             <h1>{author.name_author}</h1>
-            <p className="author-bio">{getBiografia(author.author_id)}</p>
+            <p className="author-bio">{getBiography(author.author_id)}</p>
           </div>
         </div>
 
