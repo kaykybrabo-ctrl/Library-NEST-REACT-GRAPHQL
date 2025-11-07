@@ -1,11 +1,11 @@
 import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { CloudinaryService } from '../../common/services/cloudinary.service';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
 import { FavoriteResponse, UserFavorite } from './entities/favorite.entity';
 import { UserProfile } from '../auth/entities/auth.entity';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { CloudinaryService } from '../../common/services/cloudinary.service';
+import { UsersService } from './users.service';
 
 @Resolver()
 export class UsersResolver {
@@ -161,6 +161,41 @@ export class UsersResolver {
       };
     } catch (error) {
       throw new Error(`Erro no upload da imagem: ${error.message}`);
+    }
+  }
+
+  @Mutation(() => String)
+  async uploadUserImagePureGraphQL(
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('filename') filename: string,
+    @Args('fileData') fileData: string,
+  ): Promise<string> {
+    try {
+      if (!fileData.startsWith('data:image/')) {
+        throw new Error('Apenas arquivos de imagem são permitidos');
+      }
+
+      const base64Data = fileData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      const ext = filename.split('.').pop() || 'jpg';
+      const mockFile = {
+        buffer: buffer,
+        originalname: `user-${userId}-${Date.now()}.${ext}`,
+        mimetype: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+        size: buffer.length,
+      } as Express.Multer.File;
+
+      const cloudinaryUrl = await this.cloudinaryService.uploadProfileImage(mockFile);
+
+      await this.prisma.authUser.update({
+        where: { id: userId },
+        data: { profile_image: cloudinaryUrl }
+      });
+
+      return `✅ Imagem enviada com sucesso!`;
+    } catch (error) {
+      throw new Error(`❌ Erro no upload: ${error.message}`);
     }
   }
 

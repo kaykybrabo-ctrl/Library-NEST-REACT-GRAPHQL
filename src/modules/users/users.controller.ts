@@ -105,24 +105,20 @@ export class UsersController {
     }
   }
 
-  @UseInterceptors(FileInterceptor("image", {
-    storage: require('multer').diskStorage({
-      destination: (req, file, cb) => {
-        cb(null, require('path').join(process.cwd(), "FRONTEND", "uploads"));
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        const extension = require('path').extname(file.originalname) || '.jpg';
-        cb(null, uniqueSuffix + extension);
-      }
-    })
-  }))
-  @Post("api/upload-image")
-  async uploadImage(
-    @UploadedFile() file?: Express.Multer.File,
-    @Body() body?: any,
-    @Request() req?: any,
-    @Query('username') queryUsername?: string
+  
+  @Post("api/upload-image-disabled")
+  async uploadImageDisabled() {
+    return {
+      success: false,
+      message: "❌ Este endpoint foi desabilitado. Use GraphQL mutation: uploadUserImagePureGraphQL"
+    };
+  }
+
+  private async uploadImageLegacy(
+    file?: Express.Multer.File,
+    body?: any,
+    req?: any,
+    queryUsername?: string
   ) {
     let username = "guest";
     

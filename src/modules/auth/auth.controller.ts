@@ -2,223 +2,123 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
-  Request,
-  Get,
-  UnauthorizedException,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { LocalAuthGuard } from "@/common/guards/local-auth.guard";
-import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
-import { LoginDto } from "./dto/login.dto";
-import { RegisterDto } from "./dto/register.dto";
-import { UsersService } from "@/modules/users/users.service";
 import { MailService } from "@/infrastructure/mail/mail.service";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtService } from "@nestjs/jwt";
+import { UsersService } from "@/modules/users/users.service";
 
 @Controller('api')
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private usersService: UsersService,
     private mailService: MailService,
     private jwtService: JwtService,
+    private usersService: UsersService,
   ) {}
-
-  @Post("login")
-  async login(@Body() loginDto: LoginDto) {
-    const dbUser = await this.authService.validateUser(loginDto.username, loginDto.password);
-    
-    if (!dbUser) {
-      throw new UnauthorizedException('Credenciais inválidas');
-    }
-    
-    const loginData = await this.authService.login(dbUser);
-    return {
-      token: loginData.access_token,
-      user: {
-        id: dbUser.id,
-        username: dbUser.username,
-        role: dbUser.role
-      }
-    };
-  }
-
-  @Post("old-login")
-  async oldLogin(@Request() req, @Body() loginDto: LoginDto) {
-    const loginData = await this.authService.login(req.user);
-    return {
-      token: loginData.access_token,
-      user: {
-        id: loginData.id,
-        username: loginData.username,
-        role: loginData.role,
-      },
-    };
-  }
-
-  @Get("get-profile")
-  async getProfileMock() {
-    return {
-      id: 1,
-      username: "admin",
-      email: "admin@example.com",
-      role: "admin",
-      description: "Administrador do sistema",
-      profile_image: null
-    };
-  }
-
-  @Post("save-description")
-  async saveDescription(@Body() body: any) {
-    return { 
-      success: true,
-      message: "Descrição salva com sucesso" 
-    };
-  }
-
-  @Post("register")
-  async register(@Body() registerDto: RegisterDto) {
-    try {
-      const newUser = await this.authService.register(registerDto);
-      
-      const loginData = await this.authService.login(newUser);
-      return {
-        token: loginData.access_token,
-        user: {
-          id: newUser.id,
-          username: newUser.username,
-          role: newUser.role
-        },
-        message: 'Conta criada e login realizado com sucesso!'
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Post("register-duplicate")
-  async registerApi(@Body() registerDto: RegisterDto) {
-    const newUser = await this.authService.register(registerDto);
-    
-    const loginData = await this.authService.login(newUser);
-    return {
-      token: loginData.access_token,
-      user: {
-        id: newUser.id,
-        username: newUser.username,
-        role: newUser.role
-      },
-      message: 'Conta criada e login realizado com sucesso!'
-    };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get("user/me")
-  getProfile(@Request() req) {
-    return req.user;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get("user/me-duplicate")
-  getProfileApi(@Request() req) {
-    return req.user;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get("user/role")
-  getUserRole(@Request() req) {
-    return {
-      role: req.user.role,
-      isAdmin: req.user.role === "admin",
-    };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get("user/role-duplicate")
-  getUserRoleApi(@Request() req) {
-    return {
-      role: req.user.role,
-      isAdmin: req.user.role === "admin",
-    };
-  }
 
   @Post("forgot-password")
   async forgotPassword(@Body() body: { username: string }) {
     const username = (body?.username || "").trim();
     
     if (!username) {
-      return { message: "Nome de usuário (e-mail) é obrigatório" };
-    }
-
-    const genericResponse: any = {
-      message: "Se a conta existir, um e-mail de redefinição foi enviado",
-    };
-
-    const token = this.jwtService.sign(
-      { username, purpose: "pwd_reset" },
-      { expiresIn: "15m" },
-    );
-    const resetUrl = `${process.env.PUBLIC_WEB_URL || "http://localhost:8080"}/reset?u=${encodeURIComponent(username)}&t=${encodeURIComponent(token)}`;
-    
-    try {
-      const res = await this.mailService.sendPasswordResetEmail(username, {
-        username,
-        resetUrl,
-      });
-      
-      if (res?.preview) {
-        genericResponse.preview = res.preview;
-        genericResponse.messageId = res.messageId;
-      }
-    } catch (error) {
-      genericResponse.error = error?.message || 'Erro desconhecido';
-    }
-    
-    return genericResponse;
-  }
-
-  @Post("reset-password")
-  async resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
-    const newPassword = (dto?.newPassword || "").trim();
-    if (!newPassword) {
-      return { ok: false, message: "Nova senha é obrigatória" };
-    }
-
-    let username = (dto?.username || "").trim().toLowerCase();
-    const token = (dto?.token || "").trim();
-
-    if (token) {
-      try {
-        const payload: any = this.jwtService.verify(token);
-        if (payload?.purpose !== "pwd_reset") {
-          return { ok: false, message: "Token inválido" };
-        }
-        username = (payload?.username || "").toLowerCase();
-      } catch {
-        return { ok: false, message: "Token inválido ou expirado" };
-      }
-    }
-
-    if (!username) {
-      return { ok: false, message: "Usuário ou token é obrigatório" };
+      return {
+        success: false,
+        message: "E-mail é obrigatório"
+      };
     }
 
     try {
       const user = await this.usersService.findByUsername(username);
+      
       if (!user) {
         return {
-          ok: true,
-          message: "A senha foi atualizada caso a conta exista",
+          success: true,
+          message: "Se o e-mail existir em nossa base, você receberá as instruções de recuperação."
         };
       }
-      
-      await this.usersService.updatePassword(username, newPassword);
-      
-      return { ok: true, message: "Senha atualizada com sucesso" };
-    } catch (e) {
-      return { ok: false, message: "Falha ao redefinir a senha" };
+
+      const resetToken = this.jwtService.sign(
+        { username: user.username, type: 'password-reset' },
+        { expiresIn: '1h' }
+      );
+
+      const resetUrl = `${process.env.PUBLIC_WEB_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&email=${encodeURIComponent(username)}`;
+
+      await this.mailService.sendPasswordResetEmail(username, { username, resetUrl });
+
+      return {
+        success: true,
+        message: "Se o e-mail existir em nossa base, você receberá as instruções de recuperação."
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Erro interno. Tente novamente mais tarde."
+      };
+    }
+  }
+
+  @Post("reset-password")
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    const { newPassword, token, username } = dto;
+    
+    if (!newPassword || newPassword.length < 3) {
+      return {
+        success: false,
+        message: "Senha deve ter pelo menos 3 caracteres"
+      };
+    }
+
+    try {
+      if (token) {
+        const decoded = this.jwtService.verify(token);
+        if (decoded.type !== 'password-reset') {
+          return {
+            success: false,
+            message: "Token inválido"
+          };
+        }
+        
+        const user = await this.usersService.findByUsername(decoded.username);
+        if (!user) {
+          return {
+            success: false,
+            message: "Usuário não encontrado"
+          };
+        }
+
+        await this.usersService.updatePassword(user.id.toString(), newPassword);
+        
+        return {
+          success: true,
+          message: "Senha alterada com sucesso"
+        };
+      } else if (username) {
+        const user = await this.usersService.findByUsername(username);
+        if (!user) {
+          return {
+            success: false,
+            message: "Usuário não encontrado"
+          };
+        }
+
+        await this.usersService.updatePassword(user.id.toString(), newPassword);
+        
+        return {
+          success: true,
+          message: "Senha alterada com sucesso"
+        };
+      } else {
+        return {
+          success: false,
+          message: "Token ou username é obrigatório"
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: "Erro ao redefinir senha"
+      };
     }
   }
 }

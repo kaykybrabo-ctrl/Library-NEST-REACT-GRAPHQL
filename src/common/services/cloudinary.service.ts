@@ -71,8 +71,8 @@ export class CloudinaryService {
       );
 
       return result.secure_url;
-    } catch (error) {
-      throw new Error(`Failed to upload image to Cloudinary: ${error.message}`);
+    } catch (error: any) {
+      throw new Error(`Failed to upload image to Cloudinary: ${error?.message || error || 'Unknown error'}`);
     }
   }
 
@@ -130,8 +130,8 @@ export class CloudinaryService {
       );
 
       return result.secure_url;
-    } catch (error) {
-      throw new Error(`Failed to upload profile image to Cloudinary: ${error.message}`);
+    } catch (error: any) {
+      throw new Error(`Failed to upload profile image to Cloudinary: ${error?.message || error || 'Unknown error'}`);
     }
   }
 

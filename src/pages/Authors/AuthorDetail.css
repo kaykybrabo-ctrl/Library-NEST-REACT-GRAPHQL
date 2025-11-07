@@ -20,6 +20,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  position: relative;
+  overflow: visible;
 }
 
 .author-photo-large {
@@ -119,6 +121,202 @@
   background: #ccc;
   cursor: not-allowed;
   transform: none;
+}
+
+.graphql-upload-container,
+*[class*="graphql-upload"],
+*[class*="GraphQLUpload"] {
+  border: 2px dashed #ccc !important;
+  padding: 15px !important;
+  margin: 10px 0 !important;
+  border-radius: 8px !important;
+  background: #f9f9f9 !important;
+  position: static !important;
+  z-index: auto !important;
+  display: block !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  box-shadow: none !important;
+}
+
+.graphql-upload-container h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.graphql-upload-container input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background: white;
+}
+
+.graphql-upload-container button {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.graphql-upload-container button:hover {
+  background: #0056b3;
+}
+
+.graphql-upload-container button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.graphql-upload-container .file-info {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  padding: 5px;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.graphql-upload-container .upload-message {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.graphql-upload-container .upload-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.graphql-upload-container .upload-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.graphql-upload-container .upload-message.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.author-image-section .graphql-upload-container {
+  width: 100% !important;
+  max-width: 280px !important;
+  margin: 15px auto 0 auto !important;
+  padding: 12px !important;
+  background: rgba(22, 44, 116, 0.05) !important;
+  border: 2px dashed #162c74 !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  position: static !important;
+  display: block !important;
+  z-index: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  float: none !important;
+  clear: both !important;
+}
+
+.author-detail-container .author-image-section .graphql-upload-container,
+.author-detail-container .graphql-upload-container,
+div[class*="author"] .graphql-upload-container {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: auto !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 280px !important;
+  margin: 15px auto 0 auto !important;
+}
+
+.author-image-section .graphql-upload-container h3 {
+  color: #162c74;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.author-image-section .graphql-upload-container input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background: white;
+  font-size: 12px;
+}
+
+.author-image-section .graphql-upload-container button {
+  width: 100%;
+  background: #162c74;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.author-image-section .graphql-upload-container button:hover {
+  background: #1a3080;
+}
+
+.author-image-section .graphql-upload-container button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.author-image-section .graphql-upload-container .upload-message {
+  font-size: 12px;
+  margin-top: 8px;
+  text-align: center;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.author-image-section .graphql-upload-container .upload-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.author-image-section .graphql-upload-container .upload-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.author-image-section .graphql-upload-container .upload-message.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
 }
 
 .biography-textarea {

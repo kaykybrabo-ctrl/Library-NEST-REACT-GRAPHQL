@@ -5,6 +5,7 @@ import { GET_AUTHOR, UPDATE_AUTHOR } from '../../graphql/queries/authors'
 import { UPLOAD_AUTHOR_IMAGE_MUTATION } from '../../graphql/queries/upload'
 import Layout from '../../components/Layout'
 import { useAuth } from '../../contexts/AuthContext'
+import GraphQLUpload from '../../components/GraphQLUpload'
 import { getImageUrl } from '../../utils/imageUtils'
 import './AuthorDetail.css'
 
@@ -154,26 +155,17 @@ const AuthorDetail: React.FC = () => {
             />
             
             {isAdmin && (
-              <div className="image-upload-section">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={onSelectImage}
-                  style={{ marginBottom: '10px' }}
-                />
-                {imageFile && (
-                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-                    Selecionado: {imageFile.name}
-                  </div>
-                )}
-                <button 
-                  onClick={handleUploadImageClick} 
-                  disabled={!imageFile || uploading}
-                  style={{ marginTop: '10px' }}
-                >
-                  {uploading ? 'Enviando...' : 'Atualizar Imagem'}
-                </button>
-              </div>
+              <GraphQLUpload 
+                type="author"
+                entityId={parseInt(id || '0')} 
+                title="Upload de Imagem do Autor"
+                onSuccess={() => {
+                  setImgVersion(v => v + 1);
+                }}
+                onImageUpdate={() => {
+                  setImgVersion(v => v + 1);
+                }}
+              />
             )}
           </div>
 

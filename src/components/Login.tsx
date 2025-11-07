@@ -55,7 +55,6 @@ const Login: React.FC = () => {
       if (data?.forgotPassword) {
         const message = data.forgotPassword;
         
-        // Extrair o link do Ethereal se existir
         const previewMatch = message.match(/Preview: (https?:\/\/[^\s]+)/);
         if (previewMatch) {
           setSuccess('E-mail de recuperação enviado com sucesso!');

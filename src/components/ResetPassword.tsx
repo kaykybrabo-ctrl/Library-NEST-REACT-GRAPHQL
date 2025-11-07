@@ -60,7 +60,6 @@ const ResetPassword: React.FC = () => {
       if (data?.resetPassword) {
         setSuccess('Senha atualizada com sucesso! Fazendo login...')
         
-        // Fazer login automático
         try {
           const loginSuccess = await login(email, newPassword)
           

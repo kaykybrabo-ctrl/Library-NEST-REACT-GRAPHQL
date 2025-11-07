@@ -158,7 +158,6 @@ const Books: React.FC = () => {
       
       for (const book of books) {
         try {
-          // Buscar status geral do livro
           const { data } = await apolloClient.query({
             query: BOOK_LOAN_STATUS_QUERY,
             variables: { bookId: book.book_id },
@@ -169,7 +168,6 @@ const Books: React.FC = () => {
             loanStatuses[book.book_id] = data.bookLoanStatus;
           }
 
-          // Buscar empréstimo do usuário atual
           const { data: userLoanData } = await apolloClient.query({
             query: MY_BOOK_LOAN_QUERY,
             variables: { bookId: book.book_id },
@@ -256,11 +254,9 @@ const Books: React.FC = () => {
       
       setError('');
       
-      // Atualizar dados sem recarregar a página
       await fetchBooks();
       await fetchLoanStatuses();
       
-      // Mostrar mensagem de sucesso
       alert('Livro devolvido com sucesso!');
       
     } catch (err: any) {

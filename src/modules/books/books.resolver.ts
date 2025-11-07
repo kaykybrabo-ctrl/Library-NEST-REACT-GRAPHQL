@@ -3,14 +3,15 @@ import { UseGuards } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { Book } from './entities/book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
-import { CreateBookWithAuthorDto } from './dto/create-book-with-author.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { CreateBookWithAuthorDto } from './dto/create-book-with-author.dto';
+import { join } from 'path';
+import { v4 as uuid } from 'uuid';
 import { PrismaService } from '@/infrastructure/prisma/prisma.service';
 import { CloudinaryService } from '@/common/services/cloudinary.service';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { GqlAdminGuard } from '@/common/guards/gql-admin.guard';
 import { Upload } from '@/common/scalars/upload.scalar';
-import { Author } from '../authors/entities/author.entity';
 
 @Resolver(() => Book)
 export class BooksResolver {
@@ -140,7 +141,45 @@ export class BooksResolver {
     }
   }
 
-  @ResolveField('author', () => Author, { nullable: true })
+  @Mutation(() => String)
+  async uploadBookImagePureGraphQL(
+    @Args('bookId', { type: () => Int }) bookId: number,
+    @Args('filename') filename: string,
+    @Args('fileData') fileData: string,
+  ): Promise<string> {
+    try {
+      if (!fileData.startsWith('data:image/')) {
+        throw new Error('Apenas arquivos de imagem são permitidos');
+      }
+
+      const base64Data = fileData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      const ext = filename.split('.').pop() || 'jpg';
+      const mockFile = {
+        buffer: buffer,
+        originalname: `book-${bookId}-${Date.now()}.${ext}`,
+        mimetype: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+        size: buffer.length,
+      } as Express.Multer.File;
+
+      const cloudinaryUrl = await this.cloudinaryService.uploadImage(
+        mockFile,
+        'pedbook/books'
+      );
+
+      await this.prisma.book.update({
+        where: { book_id: bookId },
+        data: { photo: cloudinaryUrl }
+      });
+
+      return `✅ Imagem enviada com sucesso!`;
+    } catch (error) {
+      throw new Error(`❌ Erro no upload: ${error.message}`);
+    }
+  }
+
+  @ResolveField('author', () => require('../authors/entities/author.entity').Author, { nullable: true })
   async author(@Parent() book: Book) {
     if (!book.author_id) return null;
     return this.prisma.author.findUnique({

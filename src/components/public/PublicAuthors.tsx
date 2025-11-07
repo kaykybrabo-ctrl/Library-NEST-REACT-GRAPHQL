@@ -44,7 +44,6 @@ const PublicAuthors: React.FC = () => {
   }
 
   const getAuthorStats = (author: Author) => {
-    // Contar livros reais do autor
     const authorBooks = booksData?.books?.filter(book => book.author_id === author.author_id) || []
     
     const stats = {

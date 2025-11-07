@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Book, Review } from '@/types'
 import { getImageUrl } from '@/utils/imageUtils'
 import { ClickableUser } from '../../components/ClickableNames'
+import GraphQLUpload from '@/components/GraphQLUpload'
 import './BookDetail.css'
 
 const BookDetail: React.FC = () => {
@@ -457,29 +458,19 @@ const BookDetail: React.FC = () => {
             )}
         </div>
 
+
         {isAdmin && (
-          <div className="image-upload">
-            <h3>Atualizar Imagem do Livro</h3>
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={onSelectImage}
-                disabled={uploading}
-              />
-              {imageFile && (
-                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Selecionado: {imageFile.name}</div>
-              )}
-              <button onClick={handleUploadImageClick} disabled={!imageFile || uploading}>
-                {uploading ? 'Enviando...' : 'Atualizar Imagem'}
-              </button>
-            </div>
-          </div>
-        )}
-        {uploadStatus && (
-          <div style={{ marginTop: 8, fontSize: 12, color: uploadStatus.startsWith('Erro') ? '#c00' : '#0a0' }}>
-            {uploadStatus}
-          </div>
+          <GraphQLUpload 
+            type="book"
+            entityId={parseInt(id || '0')} 
+            title="Upload de Imagem do Livro"
+            onSuccess={() => {
+              setImgVersion(v => v + 1);
+            }}
+            onImageUpdate={() => {
+              setImgVersion(v => v + 1);
+            }}
+          />
         )}
       </div>
 

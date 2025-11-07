@@ -115,6 +115,44 @@ export class AuthorsResolver {
     }
   }
 
+  @Mutation(() => String)
+  async uploadAuthorImagePureGraphQL(
+    @Args('authorId', { type: () => Int }) authorId: number,
+    @Args('filename') filename: string,
+    @Args('fileData') fileData: string,
+  ): Promise<string> {
+    try {
+      if (!fileData.startsWith('data:image/')) {
+        throw new Error('Apenas arquivos de imagem são permitidos');
+      }
+
+      const base64Data = fileData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      const ext = filename.split('.').pop() || 'jpg';
+      const mockFile = {
+        buffer: buffer,
+        originalname: `author-${authorId}-${Date.now()}.${ext}`,
+        mimetype: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+        size: buffer.length,
+      } as Express.Multer.File;
+
+      const cloudinaryUrl = await this.cloudinaryService.uploadImage(
+        mockFile,
+        'pedbook/profiles'
+      );
+
+      await this.prisma.author.update({
+        where: { author_id: authorId },
+        data: { photo: cloudinaryUrl }
+      });
+
+      return `✅ Imagem enviada com sucesso!`;
+    } catch (error) {
+      throw new Error(`❌ Erro no upload: ${error.message}`);
+    }
+  }
+
   @ResolveField('books', () => [require('../books/entities/book.entity').Book], { nullable: true })
   async books(@Parent() author: Author) {
     return this.prisma.book.findMany({
