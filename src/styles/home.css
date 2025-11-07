@@ -5,6 +5,15 @@
   --muted: #6b7280;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .home-root {
   display: flex;
   flex-direction: column;
@@ -12,28 +21,57 @@
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
   overflow-x: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.home-header{
-  position:sticky; top:0; z-index:10;
-  display:flex; align-items:center; justify-content:center;
-  padding:12px 16px !important;
-  background:#162c74 !important;
-  box-shadow:0 2px 10px rgba(0,0,0,.08) !important;
+.home-header,
+.public-header{
+  position: fixed !important; 
+  top: 0 !important; 
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 1000 !important;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  padding: 12px 16px !important;
+  background: #162c74 !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,.1) !important;
+  border: none !important;
+  margin: 0 !important;
 }
-.home-header .container{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 20px}
-.home-header .brand{display:flex;align-items:center;gap:12px}
-.home-header .logo{color:#fff !important;font-size:24px}
-.home-header h1{color:#fff !important;font-weight:800;font-size:20px;letter-spacing:.2px;margin:0}
+.home-header .container,
+.public-header .public-nav{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 20px}
+.home-header .brand,
+.public-header .brand{display:flex;align-items:center;gap:12px}
+.home-header .logo,
+.public-header .logo{color:#fff !important;font-size:24px}
+.home-header h1,
+.public-header h1,
+.public-header .title{color:#fff !important;font-weight:800;font-size:20px;letter-spacing:.2px;margin:0}
 
 
-.home-header nav{background:transparent !important; padding:0 !important; box-shadow:none; display:flex; align-items:center; gap:12px; justify-content:flex-end}
-.home-header nav a{background:transparent !important}
+.home-header nav,
+.public-header .nav-links{background:transparent !important; padding:0 !important; box-shadow:none; display:flex; align-items:center; gap:12px; justify-content:flex-end}
+.home-header nav a,
+.public-header .nav-links a{background:transparent !important; color:#fff !important;text-decoration:none;padding:10px 14px;border-radius:999px;font-weight:600}
+.home-header nav a:hover,
+.public-header .nav-links a:hover{background:rgba(255,255,255,.12) !important}
 
 .home-header a:focus-visible,.home-header button:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
 
 
-.hero{position:relative}
+.hero{
+  position: absolute; 
+  top: 64px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 .hero-gradient{display:block; position:absolute; inset:0; background:linear-gradient(180deg, rgba(25,118,210,.12), transparent 30%, rgba(25,118,210,.08)); z-index:0}
 
 .carousel{position:relative;height:54vh;min-height:360px;overflow:hidden}
@@ -112,7 +150,7 @@
 .carousel .carousel-controls .prev { left: 16px; }
 .carousel .carousel-controls .next { right: 16px; }
 
-.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;padding:24px 20px;max-width:1100px;margin:0 auto}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:24px 20px;max-width:1200px;margin:0 auto;margin-top:calc(54vh + 64px + 40px);border-top:1px solid #e5e7eb;padding-top:40px;}
 
 .feature-card {
   border: 1px solid #e5e7eb;
@@ -170,9 +208,26 @@
 .home-header .login-btn:hover{background:rgba(255,255,255,.14);border-color:#fff !important}
 
 
+@media (max-width: 1024px){
+  .features{
+    grid-template-columns: repeat(2,1fr);
+    max-width: 800px;
+  }
+}
+
 @media (max-width: 640px){
-  .home-header h1{font-size:18px}
-  .home-header .nav-link{padding:8px 10px}
+  .hero{
+    top: 70px;
+  }
+  .features{
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin-top: calc(54vh + 70px + 40px);
+  }
+  .home-header h1,
+  .public-header .title{font-size:18px}
+  .home-header .nav-link,
+  .public-header .nav-links a{padding:8px 10px}
   .home-header .home-nav{gap:8px}
 }
 
