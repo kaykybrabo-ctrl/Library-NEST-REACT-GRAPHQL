@@ -37,7 +37,7 @@ export class UsersService {
       data: {
         full_name: fullName,
         birth_date: new Date('2000-01-01'),
-        address: 'Address not provided',
+        address: 'Endereço não informado',
         email: createUserDto.username,
       },
     });

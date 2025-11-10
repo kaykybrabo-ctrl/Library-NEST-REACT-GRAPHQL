@@ -358,7 +358,7 @@ const UserProfile: React.FC = () => {
           <section className="profile-section">
             <h2>Informações do Perfil</h2>
             <p><strong>E-mail:</strong> {displayedUser?.username || 'Desconhecido'}</p>
-            <p><strong>Função:</strong> {displayedUser?.role || 'Usuário'}</p>
+            <p><strong>Função:</strong> {displayedUser?.role === 'admin' ? 'Administrador' : 'Usuário'}</p>
 
             <div className="display-name-section">
               <h3>Nome de Exibição</h3>

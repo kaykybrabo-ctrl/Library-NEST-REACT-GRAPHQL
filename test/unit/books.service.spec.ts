@@ -26,6 +26,7 @@ describe('BooksService - Testes Unitários', () => {
       softDelete: jest.fn(),
       restore: jest.fn(),
       count: jest.fn(),
+      findByTitleAndAuthor: jest.fn(),
     };
 
     const mockAuthorsService = {
@@ -153,6 +154,120 @@ describe('BooksService - Testes Unitários', () => {
 
       await expect(service.restore(999))
         .rejects.toThrow('Livro com ID 999 não encontrado');
+    });
+  });
+
+  describe('createWithAuthor', () => {
+    it('deve criar livro com autor existente', async () => {
+      const createDto = { title: 'New Book', author_name: 'Existing Author' };
+      const existingAuthor = { 
+        author_id: 1, 
+        name_author: 'Existing Author',
+        photo: null,
+        deleted_at: null,
+        biography: 'Test biography'
+      };
+      const newBook = { ...mockBook, title: 'New Book', author_id: 1 };
+
+      authorsService.findByName.mockResolvedValue(existingAuthor);
+      booksRepository.findByTitleAndAuthor.mockResolvedValue(null);
+      booksRepository.create.mockResolvedValue(newBook);
+
+      const result = await service.createWithAuthor(createDto);
+
+      expect(authorsService.findByName).toHaveBeenCalledWith('Existing Author');
+      expect(authorsService.create).not.toHaveBeenCalled();
+      expect(booksRepository.findByTitleAndAuthor).toHaveBeenCalledWith('New Book', 1);
+      expect(booksRepository.create).toHaveBeenCalledWith({
+        title: createDto.title,
+        author: { connect: { author_id: 1 } },
+      });
+      expect(result).toHaveProperty('book_id');
+      expect(result).toHaveProperty('title', 'New Book');
+    });
+
+    it('deve criar livro com novo autor automaticamente', async () => {
+      const createDto = { title: 'New Book', author_name: 'New Author' };
+      const newAuthor = { 
+        author_id: 2, 
+        name_author: 'New Author',
+        photo: null,
+        deleted_at: null,
+        biography: 'Biografia de New Author'
+      };
+      const newBook = { ...mockBook, title: 'New Book', author_id: 2 };
+
+      authorsService.findByName.mockResolvedValue(null);
+      authorsService.create.mockResolvedValue(newAuthor);
+      booksRepository.findByTitleAndAuthor.mockResolvedValue(null);
+      booksRepository.create.mockResolvedValue(newBook);
+
+      const result = await service.createWithAuthor(createDto);
+
+      expect(authorsService.findByName).toHaveBeenCalledWith('New Author');
+      expect(authorsService.create).toHaveBeenCalledWith({
+        name_author: 'New Author',
+        biography: 'Biografia de New Author',
+      });
+      expect(booksRepository.findByTitleAndAuthor).toHaveBeenCalledWith('New Book', 2);
+      expect(booksRepository.create).toHaveBeenCalledWith({
+        title: createDto.title,
+        author: { connect: { author_id: 2 } },
+      });
+      expect(result).toHaveProperty('book_id');
+      expect(result).toHaveProperty('title', 'New Book');
+    });
+
+    it('deve lançar erro quando livro com mesmo título e autor já existe', async () => {
+      const createDto = { title: 'Existing Book', author_name: 'Existing Author' };
+      const existingAuthor = { 
+        author_id: 1, 
+        name_author: 'Existing Author',
+        photo: null,
+        deleted_at: null,
+        biography: 'Test biography'
+      };
+      const existingBook = { ...mockBook, title: 'Existing Book', author_id: 1 };
+
+      authorsService.findByName.mockResolvedValue(existingAuthor);
+      booksRepository.findByTitleAndAuthor.mockResolvedValue(existingBook);
+
+      await expect(service.createWithAuthor(createDto))
+        .rejects.toThrow('Já existe um livro com este título deste autor');
+    });
+  });
+
+  describe('findAll com filtros', () => {
+    it('deve retornar livros com informações do autor', async () => {
+      const booksWithAuthor = [{ ...mockBook, author: { name_author: 'Test Author' } }];
+      booksRepository.findAll.mockResolvedValue(booksWithAuthor);
+      booksRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAll();
+
+      expect(booksRepository.findAll).toHaveBeenCalled();
+      expect(result).toHaveProperty('books');
+      expect(result.books).toHaveLength(1);
+      expect(result.books[0]).toHaveProperty('author');
+    });
+
+    it('deve retornar livros com informações completas do autor', async () => {
+      const bookWithCompleteAuthor = {
+        ...mockBook,
+        author: {
+          author_id: 1,
+          name_author: 'Complete Author',
+          biography: 'Author biography'
+        }
+      };
+      booksRepository.findAll.mockResolvedValue([bookWithCompleteAuthor]);
+      booksRepository.count.mockResolvedValue(1);
+
+      const result = await service.findAll();
+
+      expect(result.books[0]).toHaveProperty('author');
+      expect(result.books[0].author).toHaveProperty('name_author', 'Complete Author');
+      expect(result.books[0].author).toHaveProperty('biography', 'Author biography');
     });
   });
 });

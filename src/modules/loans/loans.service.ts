@@ -106,14 +106,14 @@ export class LoansService {
           loan_date: loan.loan_date,
           due_date: loan.due_date,
           book_id: loan.book_id,
-          title: loan.book?.title || 'Title not found',
+          title: loan.book?.title || 'Título não encontrado',
           photo: loan.book?.photo || null,
           description: loan.book?.description || null,
           is_overdue: isOverdue,
           fine_amount: loan.fine_amount,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),
-          time_remaining: isOverdue ? 'Overdue' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
+          time_remaining: isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
         };
       });
 
@@ -163,14 +163,14 @@ export class LoansService {
           loan_date: loan.loan_date,
           due_date: loan.due_date,
           book_id: loan.book_id,
-          title: loan.book?.title || 'Title not found',
+          title: loan.book?.title || 'Título não encontrado',
           photo: loan.book?.photo || null,
           description: loan.book?.description || null,
           is_overdue: isOverdue,
           fine_amount: loan.fine_amount,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),
-          time_remaining: isOverdue ? 'Overdue' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
+          time_remaining: isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
         };
       });
 
@@ -221,14 +221,14 @@ export class LoansService {
         const authUser = authUserResult[0];
         const displayName = authUser?.display_name;
         const username = authUser?.username || loan.user?.email;
-        const userDisplayName = displayName || username || 'User';
+        const userDisplayName = displayName || username || 'Usuário';
 
         return {
           loans_id: loan.loans_id,
           loan_date: loan.loan_date,
           due_date: loan.due_date,
           book_id: loan.book_id,
-          title: loan.book?.title || 'Title not found',
+          title: loan.book?.title || 'Título não encontrado',
           photo: loan.book?.photo || null,
           description: loan.book?.description || null,
           user_id: loan.user_id,
@@ -236,7 +236,7 @@ export class LoansService {
           is_overdue: isOverdue,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),
-          time_remaining: isOverdue ? 'Overdue' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
+          time_remaining: isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
         };
       }));
 
@@ -301,7 +301,7 @@ export class LoansService {
         where: { user_id: loan.user_id },
       });
 
-      let displayName = 'User';
+      let displayName = 'Usuário';
       if (authUser) {
         const userResult = await this.prisma.$queryRaw`
           SELECT display_name, username 
@@ -314,7 +314,7 @@ export class LoansService {
           const userData = userResult[0];
           displayName = userData.display_name || 
                       (userData.username?.includes('@') ? userData.username.split('@')[0] : userData.username) || 
-                      'User';
+                      'Usuário';
         }
       }
 
@@ -393,7 +393,7 @@ export class LoansService {
 
       const formattedOverdueLoans = overdueLoans.map(loan => ({
         loans_id: loan.loans_id,
-        book_title: loan.book?.title || 'Title not found',
+        book_title: loan.book?.title || 'Título não encontrado',
         fine_amount: loan.fine_amount,
         due_date: loan.due_date,
       }));
@@ -437,13 +437,13 @@ export class LoansService {
     }
     
     if (adjustedDays > 1) {
-      return `${adjustedDays} days and ${remainingHours}h`;
+      return `${adjustedDays} dias e ${remainingHours}h`;
     } else if (adjustedDays === 1) {
-      return `1 day and ${remainingHours}h`;
+      return `1 dia e ${remainingHours}h`;
     } else if (totalHours > 0) {
-      return `${totalHours} hour${totalHours > 1 ? 's' : ''}`;
+      return `${totalHours} hora${totalHours > 1 ? 's' : ''}`;
     } else {
-      return 'Less than 1 hour';
+      return 'Menos de 1 hora';
     }
   }
 }

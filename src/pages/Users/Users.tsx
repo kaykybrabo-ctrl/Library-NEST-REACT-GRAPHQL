@@ -124,7 +124,7 @@ const Users: React.FC = () => {
                   👁️ Ver Perfil
                 </button>
                 {currentUser?.role === 'admin' && user.id !== currentUser.id && (
-                  <span className="admin-indicator">🔧 Admin</span>
+                  <span className="admin-indicator">🔧 Administrador</span>
                 )}
               </div>
             </div>
