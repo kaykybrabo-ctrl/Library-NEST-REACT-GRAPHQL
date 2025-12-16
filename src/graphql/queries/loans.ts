@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const RENT_BOOK_MUTATION = gql`
-  mutation RentBook($bookId: Int!) {
-    rentBook(bookId: $bookId) {
+  mutation RentBook($bookId: Int!, $dueDate: String) {
+    rentBook(bookId: $bookId, dueDate: $dueDate) {
       loans_id
       loan_date
       due_date
@@ -20,12 +20,26 @@ export const RETURN_BOOK_MUTATION = gql`
   }
 `;
 
+export const RENEW_LOAN_MUTATION = gql`
+  mutation RenewLoan($loanId: Int!) {
+    renewLoan(loanId: $loanId) {
+      loans_id
+      loan_date
+      due_date
+      returned_at
+      is_overdue
+      fine_amount
+    }
+  }
+`;
+
 export const MY_LOANS_QUERY = gql`
   query MyLoans {
     myLoans {
       loans_id
       loan_date
       due_date
+      returned_at
       book_id
       title
       photo

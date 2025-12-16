@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { GET_BOOK } from '@/graphql/queries/books'
+import { toast } from 'react-toastify'
+import { GET_BOOK, UPDATE_BOOK } from '@/graphql/queries/books'
+import { GET_AUTHORS } from '@/graphql/queries/authors'
 import { UPLOAD_BOOK_IMAGE_MUTATION } from '@/graphql/queries/upload'
 import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, MY_BOOK_LOAN_QUERY, BOOK_LOAN_STATUS_QUERY } from '@/graphql/queries/loans'
 import { CREATE_REVIEW_MUTATION, BOOK_REVIEWS_QUERY } from '@/graphql/queries/reviews'
@@ -9,14 +11,14 @@ import { ADD_TO_FAVORITES_MUTATION, MY_FAVORITE_BOOK_QUERY } from '@/graphql/que
 import { ME_QUERY } from '@/graphql/queries/auth'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
-import SuccessModal from '@/components/SuccessModal'
-import ConfirmModal from '@/components/ConfirmModal'
+import RentModal from '@/components/RentModal'
 import { Rating, Typography, Box } from '@mui/material'
 import { useAuth } from '@/contexts/AuthContext'
-import { Book, Review } from '@/types'
+import { Book, Review, Author } from '@/types'
 import { getImageUrl } from '@/utils/imageUtils'
 import { ClickableUser } from '../../components/ClickableNames'
 import GraphQLUpload from '@/components/GraphQLUpload'
+import EditModal from '@/components/EditModal'
 import './BookDetail.css'
 
 const BookDetail: React.FC = () => {
@@ -28,18 +30,23 @@ const BookDetail: React.FC = () => {
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [uploadStatus, setUploadStatus] = useState<string>('')
-  const [newReview, setNewReview] = useState({ rating: 5, comment: '' })
+  const [newReview, setNewReview] = useState({ rating: 0, comment: '' })
   const { isAdmin, user } = useAuth()
   const [imgVersion, setImgVersion] = useState(0)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorModalMessage, setErrorModalMessage] = useState('')
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [successModalMessage, setSuccessModalMessage] = useState('')
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showRentModal, setShowRentModal] = useState(false)
+  const [rentLoading, setRentLoading] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
 
   const { data: bookData, loading, refetch: refetchBook } = useQuery(GET_BOOK, {
     variables: { id: Number(id) },
     skip: !id,
+  })
+
+  const { data: authorsData } = useQuery(GET_AUTHORS, {
+    fetchPolicy: 'cache-first',
   })
 
   const { data: reviewsData, refetch: refetchReviews } = useQuery(BOOK_REVIEWS_QUERY, {
@@ -63,6 +70,7 @@ const BookDetail: React.FC = () => {
 
   const [rentBook] = useMutation(RENT_BOOK_MUTATION)
   const [returnBook] = useMutation(RETURN_BOOK_MUTATION)
+  const [updateBookMutation] = useMutation(UPDATE_BOOK)
   const [createReview] = useMutation(CREATE_REVIEW_MUTATION)
   const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION, {
     refetchQueries: [{ query: MY_FAVORITE_BOOK_QUERY }]
@@ -74,6 +82,7 @@ const BookDetail: React.FC = () => {
   const userLoan = userLoanData?.myBookLoan?.loan
   const bookLoanStatus = bookLoanStatusData?.bookLoanStatus
   const isBookRentedByOther = bookLoanStatus?.isRented && !userLoan
+  const authors: Author[] = authorsData?.authors || []
 
   const buildImageSrc = (path?: string | null) => {
     const baseUrl = getImageUrl(path, 'book', false, book?.title)
@@ -154,20 +163,23 @@ const BookDetail: React.FC = () => {
       setShowErrorModal(true)
       return
     }
-    setShowConfirmModal(true)
+    setShowRentModal(true)
   }
 
-  const confirmRentBook = async () => {
-    setShowConfirmModal(false)
+  const handleConfirmRent = async (returnDate: string) => {
+    setRentLoading(true)
     try {
       await rentBook({
-        variables: { bookId: Number(id) }
+        variables: { bookId: Number(id), dueDate: returnDate }
       })
       setError('')
-      refetchUserLoan()
+      setShowRentModal(false)
+      toast.success(`✅ "${book?.title}" foi alugado com sucesso!`)
+      await refetchUserLoan()
+      await refetchBookLoanStatus()
     } catch (err: any) {
       let errorMessage = 'Erro ao alugar livro. Tente novamente.'
-      
+
       if (err.message?.includes('já está emprestado')) {
         errorMessage = 'Este livro já está emprestado para outro usuário.'
       } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
@@ -175,10 +187,12 @@ const BookDetail: React.FC = () => {
       } else if (err.message) {
         errorMessage = err.message
       }
-      
+
       setErrorModalMessage(errorMessage)
       setShowErrorModal(true)
       setError('')
+    } finally {
+      setRentLoading(false)
     }
   }
 
@@ -200,8 +214,7 @@ const BookDetail: React.FC = () => {
       })
       
       setError('')
-      setSuccessModalMessage(`"${book?.title}" foi devolvido com sucesso!`)
-      setShowSuccessModal(true)
+      toast.success(`✅ "${book?.title}" foi devolvido com sucesso!`)
       
       await apolloClient.resetStore()
       
@@ -221,6 +234,11 @@ const BookDetail: React.FC = () => {
   }
 
   const handleFavoriteBook = async () => {
+    if (isAdmin) {
+      setError('👨‍💼 Administradores não podem favoritar livros')
+      return
+    }
+
     if (!currentUser) {
       setError('Faça login para adicionar aos favoritos')
       return
@@ -231,19 +249,94 @@ const BookDetail: React.FC = () => {
         variables: { bookId: Number(id) }
       })
       setError('')
-      setSuccessModalMessage(`"${book?.title}" foi adicionado aos seus favoritos!`)
-      setShowSuccessModal(true)
+      toast.success(`✅ "${book?.title}" foi adicionado aos seus favoritos!`)
     } catch (err: any) {
       const errorMsg = err.message || 'Erro ao adicionar aos favoritos'
       setError(errorMsg)
     }
   }
 
+  const handleEditBook = async (data: any) => {
+    if (!id || !book) return
+    setEditLoading(true)
+
+    try {
+      await updateBookMutation({
+        variables: {
+          id: Number(id),
+          updateBookInput: {
+            title: data.title?.trim() || book.title,
+            description: data.description ?? '',
+            author_id: Number(data.author_id || book.author_id),
+          },
+        },
+        refetchQueries: [
+          { query: GET_BOOK, variables: { id: Number(id) } },
+        ],
+        awaitRefetchQueries: true,
+      })
+
+      if (data.imageFile) {
+        await new Promise<void>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = async () => {
+            try {
+              const fileData = reader.result as string
+
+              await uploadBookImageMutation({
+                variables: {
+                  bookId: Number(id),
+                  filename: data.imageFile.name,
+                  fileData,
+                },
+                refetchQueries: [
+                  { query: GET_BOOK, variables: { id: Number(id) } },
+                ],
+                awaitRefetchQueries: true,
+              })
+
+              setImgVersion((v) => v + 1)
+              resolve()
+            } catch (error) {
+              reject(error)
+            }
+          }
+          reader.onerror = () => {
+            reject(new Error('Falha ao ler o arquivo de imagem'))
+          }
+          reader.readAsDataURL(data.imageFile)
+        })
+      }
+
+      toast.success('✅ Livro atualizado com sucesso!')
+      setError('')
+      await refetchBook()
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Falha ao atualizar livro'
+      setError(errorMsg)
+      setErrorModalMessage(errorMsg)
+      toast.error(errorMsg)
+      setShowErrorModal(true)
+    } finally {
+      setEditLoading(false)
+    }
+  }
+
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (isAdmin) {
+      setError('👨‍💼 Administradores não podem deixar avaliações')
+      return
+    }
+
     if (!currentUser) {
-      setError('Faça login para enviar uma avaliação')
+      setError('Faça login para escrever uma avaliação')
+      return
+    }
+
+    if (newReview.rating < 1) {
+      setError('Selecione pelo menos 1 estrela para avaliar')
       return
     }
 
@@ -256,7 +349,7 @@ const BookDetail: React.FC = () => {
         }
       })
       
-      setNewReview({ rating: 5, comment: '' })
+      setNewReview({ rating: 0, comment: '' })
       refetchReviews()
       setError('')
     } catch (err: any) {
@@ -313,7 +406,7 @@ const BookDetail: React.FC = () => {
 
           <div className="book-info">
             <h1>{book.title}</h1>
-            <p><strong>Autor:</strong> {book.author?.name_author || 'Desconhecido'}</p>
+            <p><strong>Autor:</strong> <span onClick={() => book.author?.author_id && navigate(`/authors/${book.author.author_id}`)} style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'underline' }}>{book.author?.name_author || 'Desconhecido'}</span></p>
             
             {book.categories && book.categories.length > 0 && (
               <p><strong>Gêneros:</strong> {book.categories.join(', ')}</p>
@@ -460,17 +553,15 @@ const BookDetail: React.FC = () => {
 
 
         {isAdmin && (
-          <GraphQLUpload 
-            type="book"
-            entityId={parseInt(id || '0')} 
-            title="Upload de Imagem do Livro"
-            onSuccess={() => {
-              setImgVersion(v => v + 1);
-            }}
-            onImageUpdate={() => {
-              setImgVersion(v => v + 1);
-            }}
-          />
+          <div className="book-actions">
+            <button
+              type="button"
+              onClick={() => setShowEditModal(true)}
+              className="edit-button"
+            >
+              ✏️ EDITAR LIVRO
+            </button>
+          </div>
         )}
       </div>
 
@@ -488,7 +579,7 @@ const BookDetail: React.FC = () => {
                     name="book-rating"
                     value={newReview.rating}
                     onChange={(_, newValue) => {
-                      setNewReview({ ...newReview, rating: newValue || 1 })
+                      setNewReview({ ...newReview, rating: newValue ?? 0 })
                     }}
                     max={5}
                     size="large"
@@ -502,7 +593,7 @@ const BookDetail: React.FC = () => {
                   id="comment"
                   value={newReview.comment}
                   onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                  rows={4}
+                  rows={2}
                   className="review-textarea"
                   placeholder="Compartilhe sua opinião sobre este livro..."
                 />
@@ -548,22 +639,31 @@ const BookDetail: React.FC = () => {
         onClose={() => setShowErrorModal(false)}
       />
 
-      <SuccessModal
-        isOpen={showSuccessModal}
-        title="Livro Favoritado!"
-        message={successModalMessage}
-        onClose={() => setShowSuccessModal(false)}
+      <RentModal
+        isOpen={showRentModal}
+        onClose={() => setShowRentModal(false)}
+        book={book}
+        onConfirm={handleConfirmRent}
+        loading={rentLoading}
       />
 
-      <ConfirmModal
-        isOpen={showConfirmModal}
-        title="Confirmar Aluguel"
-        message={`Tem certeza que deseja alugar o livro "${book?.title}"?`}
-        onConfirm={confirmRentBook}
-        onCancel={() => setShowConfirmModal(false)}
-        confirmText="Sim, alugar"
-        cancelText="Cancelar"
-      />
+      {isAdmin && (
+        <EditModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleEditBook}
+          title="Editar Livro"
+          type="book"
+          initialData={{
+            title: book.title,
+            description: book.description,
+            author_id: book.author_id,
+            photo: book.photo,
+          }}
+          authors={authors}
+          loading={editLoading}
+        />
+      )}
     </Layout>
   )
 }

@@ -124,7 +124,7 @@ export class UsersService {
 
   async setFavoriteBook(userId: number, bookId: number): Promise<any> {
     return this.usersRepository.update(userId, {
-      favorite_book_id: bookId
+      favorite_book_id: bookId,
     });
   }
 

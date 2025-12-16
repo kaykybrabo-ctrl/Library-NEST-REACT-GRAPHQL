@@ -118,6 +118,43 @@
   margin-top: 20px;
 }
 
+.author-card-actions .icon-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e0e0;
+  background: white;
+  color: #162c74;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+}
+
+.author-card-actions .icon-button:hover {
+  background: #162c74;
+  color: white;
+  border-color: #162c74;
+}
+
+.author-card-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.author-card-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .edit-form {
   padding: 16px;
 }

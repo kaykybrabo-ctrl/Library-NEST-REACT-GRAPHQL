@@ -12,8 +12,9 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.3s ease;
   position: relative;
+  border: 2px solid transparent;
 }
 
 .book-card:hover {
@@ -21,9 +22,14 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+.book-card.favorited {
+  border: 2px solid #e91e63;
+  box-shadow: 0 4px 16px rgba(233, 30, 99, 0.2);
+}
+
 .book-card-image {
   width: 100%;
-  height: 200px;
+  height: 380px;
   background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
   display: flex;
   align-items: center;
@@ -144,6 +150,71 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.book-card-actions .action-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.book-card-actions .rent-button {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.book-card-actions .rent-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.book-card-actions .return-button {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.book-card-actions .return-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.3);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.book-card-actions .icon-button.favorite-active {
+  animation: heartBeat 0.6s ease-in-out;
+  color: #e91e63 !important;
+}
+
+.book-card-actions .icon-button.favorited {
+  color: #e91e63 !important;
 }
 
 .book-card-actions .icon-button {
@@ -532,6 +603,12 @@
 
 .featured-carousel h2 {
   margin-bottom: 12px;
+  padding: 20px 0;
+}
+
+h2 {
+  padding: 20px 0 !important;
+  margin: 20px 0 !important;
 }
 
 .carousel-fallback-container {

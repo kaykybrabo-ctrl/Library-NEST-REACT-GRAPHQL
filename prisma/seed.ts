@@ -99,6 +99,7 @@ async function main() {
   )
   const hashedPassword = await bcrypt.hash('123', 10)
 
+  // Admin padrão
   const adminUser = await prisma.user.create({
     data: {
       user_id: 1,
@@ -115,8 +116,28 @@ async function main() {
       username: 'kayky@gmail.com',
       password: hashedPassword,
       role: 'admin',
-      user_id: 1,
+      user_id: adminUser.user_id,
       display_name: 'kayky',
+    },
+  });
+
+  // Usuário comum padrão para testes (pode alugar e favoritar)
+  const normalUser = await prisma.user.create({
+    data: {
+      full_name: 'Usuário Teste',
+      birth_date: new Date('2000-01-01'),
+      address: 'Endereço teste',
+      email: 'user@gmail.com',
+    },
+  })
+
+  await prisma.authUser.create({
+    data: {
+      username: 'user@gmail.com',
+      password: hashedPassword,
+      role: 'user',
+      user_id: normalUser.user_id,
+      display_name: 'user',
     },
   });
   const bookCategories = await Promise.all([

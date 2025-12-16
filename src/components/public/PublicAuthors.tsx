@@ -6,6 +6,7 @@ import { GET_BOOKS } from '../../graphql/queries/books'
 import { getImageUrl } from '../../utils/imageUtils'
 import LoginModal from '../LoginModal'
 import { useLoginModal } from '../../hooks/useLoginModal'
+import { useAuth } from '../../contexts/AuthContext'
 import './PublicAuthors.css'
 
 interface Author {
@@ -20,6 +21,8 @@ const PublicAuthors: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const { isOpen, showModal, hideModal, message } = useLoginModal()
+  const { isAuthenticated } = useAuth()
+  const homePath = isAuthenticated ? '/books' : '/public/authors'
   
   const { data, loading, error } = useQuery(GET_AUTHORS, {
     errorPolicy: 'all'
@@ -62,7 +65,7 @@ const PublicAuthors: React.FC = () => {
       <div className="public-layout">
         <div className="public-header">
           <div className="public-nav">
-            <div className="brand" onClick={() => navigate('/')}>
+            <div className="brand" onClick={() => navigate(homePath)}>
               <span className="logo">📚</span>
               <h1 className="title">PedBook</h1>
             </div>
@@ -103,7 +106,7 @@ const PublicAuthors: React.FC = () => {
               <button onClick={() => window.location.reload()} className="btn-primary">
                 🔄 Tentar Novamente
               </button>
-              <button onClick={() => navigate('/')} className="btn-secondary">
+              <button onClick={() => navigate(homePath)} className="btn-secondary">
                 🏠 Voltar ao Início
               </button>
             </div>
@@ -117,7 +120,7 @@ const PublicAuthors: React.FC = () => {
     <div className="public-layout">
       <div className="public-header">
         <div className="public-nav">
-          <div className="brand" onClick={() => navigate('/')}>
+          <div className="brand" onClick={() => navigate(homePath)}>
             <span className="logo">📚</span>
             <h1 className="title">PedBook</h1>
           </div>
@@ -130,7 +133,7 @@ const PublicAuthors: React.FC = () => {
 
       <div className="breadcrumb-container">
         <div className="breadcrumb">
-          <Link to="/">Início</Link>
+          <Link to={homePath}>Início</Link>
           <span className="separator">›</span>
           <span className="current">Nossos Autores</span>
         </div>

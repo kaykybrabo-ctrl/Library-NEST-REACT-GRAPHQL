@@ -22,6 +22,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
+  const effectiveHomePath = (isAuthenticated || localStorage.getItem('token')) ? '/books' : '/'
 
   const { data: profileData } = useQuery(ME_QUERY, {
     skip: !user,
@@ -44,9 +45,11 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       <div className="content-wrapper">
         <header>
           <h1 
-            onClick={() => navigate('/')}
+            onClick={() => {
+              window.location.reload()
+            }}
             className="clickable-header"
-            title="Voltar para o início"
+            title="Recarregar esta página"
           >
             📚 PedBook
           </h1>

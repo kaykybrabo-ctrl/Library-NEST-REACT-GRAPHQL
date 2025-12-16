@@ -6,6 +6,7 @@ import { GET_BOOK_REVIEWS_PUBLIC } from '../../graphql/queries/reviews'
 import { getImageUrl } from '../../utils/imageUtils'
 import LoginModal from '../LoginModal'
 import { useLoginModal } from '../../hooks/useLoginModal'
+import { useAuth } from '../../contexts/AuthContext'
 import './PublicBookDetail.css'
 
 interface Book {
@@ -42,6 +43,8 @@ const PublicBookDetail: React.FC = () => {
   const [error, setError] = useState('')
   const [currentUser, setCurrentUser] = useState<any>(null)
   const { isOpen, showModal, hideModal, message } = useLoginModal()
+  const { isAuthenticated } = useAuth()
+  const homePath = isAuthenticated ? '/books' : '/'
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -125,7 +128,7 @@ const PublicBookDetail: React.FC = () => {
       <div className="public-layout">
         <div className="public-header">
           <div className="public-nav">
-            <div className="brand" onClick={() => navigate('/')}>
+            <div className="brand" onClick={() => navigate(homePath)}>
               <span className="logo">📚</span>
               <h1 className="title">PedBook</h1>
             </div>
@@ -148,7 +151,7 @@ const PublicBookDetail: React.FC = () => {
       <div className="public-layout">
         <div className="public-header">
           <div className="public-nav">
-            <div className="brand" onClick={() => navigate('/')}>
+            <div className="brand" onClick={() => navigate(homePath)}>
               <span className="logo">📚</span>
               <h1 className="title">PedBook</h1>
             </div>
@@ -166,7 +169,7 @@ const PublicBookDetail: React.FC = () => {
               <button onClick={() => navigate('/public/books')} className="btn-primary">
                 📚 Ver Todos os Livros
               </button>
-              <button onClick={() => navigate('/')} className="btn-secondary">
+              <button onClick={() => navigate(homePath)} className="btn-secondary">
                 🏠 Voltar ao Início
               </button>
             </div>
@@ -180,7 +183,7 @@ const PublicBookDetail: React.FC = () => {
     <div className="public-layout">
       <div className="public-header">
         <div className="public-nav">
-          <div className="brand" onClick={() => navigate('/')}>
+          <div className="brand" onClick={() => navigate(homePath)}>
             <span className="logo">📚</span>
             <h1 className="title">PedBook</h1>
           </div>
@@ -193,7 +196,7 @@ const PublicBookDetail: React.FC = () => {
 
       <div className="breadcrumb-container">
         <div className="breadcrumb">
-          <Link to="/">Início</Link>
+          <Link to={homePath}>Início</Link>
           <span className="separator">›</span>
           <Link to="/public/books">Livros</Link>
           <span className="separator">›</span>

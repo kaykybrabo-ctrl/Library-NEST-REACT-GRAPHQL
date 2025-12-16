@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { useAuth } from '../contexts/AuthContext'
 import { FORGOT_PASSWORD_MUTATION } from '../graphql/queries/auth'
@@ -18,6 +18,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
     setLoading(true)
 
     try {
@@ -75,10 +76,15 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-container">
+      <div className="back-to-home">
+        <Link to="/" className="back-to-home-btn">
+          ← Voltar para a página inicial
+        </Link>
+      </div>
       <h1>PedBook</h1>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <label htmlFor="email">E-mail:</label>
         <input
           type="email"

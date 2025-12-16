@@ -299,6 +299,15 @@ label {
     overflow: hidden;
     margin-bottom: 25px;
     width: 100%;
+    padding: 20px;
+}
+
+.book-list h2,
+.author-list h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #162c74;
+    font-size: 1.8em;
 }
 
 table {

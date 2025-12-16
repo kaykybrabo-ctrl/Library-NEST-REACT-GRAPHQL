@@ -36,6 +36,22 @@ export const MY_FAVORITE_BOOK_QUERY = gql`
   }
 `;
 
+export const USER_FAVORITE_BOOK_QUERY = gql`
+  query UserFavoriteBook($username: String!) {
+    userFavoriteBook(username: $username) {
+      favoriteBook {
+        book_id
+        title
+        description
+        photo
+        author {
+          name_author
+        }
+      }
+    }
+  }
+`;
+
 export const OVERDUE_LOANS_QUERY = gql`
   query OverdueLoans {
     overdueLoans {

@@ -5,6 +5,15 @@ export const ADD_TO_FAVORITES_MUTATION = gql`
     addToFavorites(bookId: $bookId) {
       success
       message
+      favoriteBook {
+        book_id
+        title
+        description
+        photo
+        author {
+          name_author
+        }
+      }
     }
   }
 `;

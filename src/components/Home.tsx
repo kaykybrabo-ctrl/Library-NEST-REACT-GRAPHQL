@@ -4,6 +4,7 @@ import { useQuery } from '@apollo/client';
 import { HOME_BOOKS_QUERY } from '../graphql/queries/books';
 import '../styles/home.css';
 import { getImageUrl } from '../utils/imageUtils';
+import { useAuth } from '../contexts/AuthContext';
 
 const Home: React.FC = () => {
   const [featured, setFeatured] = useState<Array<{ book_id: number; title: string; description: string; photo: string | null; author_name: string }>>([]);
@@ -11,6 +12,16 @@ const Home: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleBrandClick = () => {
+    const hasToken = typeof localStorage !== 'undefined' && localStorage.getItem('token');
+    if (isAuthenticated || hasToken) {
+      navigate('/books');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const id = setInterval(() => rotateNext(), 5000);
@@ -72,7 +83,7 @@ const Home: React.FC = () => {
     <div className="home-root">
       <div className="public-header">
         <div className="public-nav">
-          <div className="brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
+          <div className="brand" onClick={handleBrandClick} style={{ cursor: 'pointer' }}>
             <span className="logo">📚</span>
             <h1 className="title">PedBook</h1>
           </div>

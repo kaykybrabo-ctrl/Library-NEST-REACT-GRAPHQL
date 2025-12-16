@@ -16,22 +16,12 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }) =>
-      console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
-    );
-  }
-  if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
-    if ('statusCode' in networkError && (networkError.statusCode === 401 || networkError.statusCode === 403)) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
+const errorLink = onError(({ networkError }) => {
+  if (networkError && 'statusCode' in networkError && (networkError.statusCode === 401 || networkError.statusCode === 403)) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
     }
   }
 });

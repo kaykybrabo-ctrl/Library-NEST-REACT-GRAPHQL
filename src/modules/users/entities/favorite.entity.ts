@@ -8,6 +8,9 @@ export class FavoriteResponse {
 
   @Field()
   message: string;
+
+  @Field(() => Book, { nullable: true })
+  favoriteBook?: Book;
 }
 
 @ObjectType()

@@ -2,3 +2,29 @@
   text-align: center;
   margin-top: 20px;
 }
+
+.back-to-home {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.back-to-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  border: 1px solid #e0e0e0;
+}
+
+.back-to-home-btn:hover {
+  color: #162c74;
+  background-color: #f8f9fa;
+  border-color: #162c74;
+  text-decoration: none;
+}

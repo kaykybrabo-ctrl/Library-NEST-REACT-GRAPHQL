@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@apollo/client'
+import { toast } from 'react-toastify'
 import { ALL_LOANS_QUERY, RETURN_BOOK_MUTATION } from '@/graphql/queries/loans'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
@@ -9,6 +10,7 @@ import './LoansCards.css'
 interface Loan {
   loans_id: number
   loan_date: string
+  due_date: string
   book_id: number
   title: string
   photo: string | null
@@ -40,10 +42,10 @@ const Loans: React.FC = () => {
       await returnBookMutation({
         variables: { loanId: Number(loanId) }
       })
-      alert('Empréstimo cancelado com sucesso')
+      toast.success('Empréstimo cancelado com sucesso')
       refetch()
     } catch (err: any) {
-      alert('Erro ao cancelar empréstimo: ' + (err.message || 'Erro desconhecido'))
+      toast.error('Erro ao cancelar empréstimo: ' + (err.message || 'Erro desconhecido'))
     }
   }
 
@@ -181,6 +183,9 @@ const Loans: React.FC = () => {
                   </p>
                   <p className="loan-card-date">
                     <strong>Alugado em:</strong> {formatDate(loan.loan_date)}
+                  </p>
+                  <p className="loan-card-date">
+                    <strong>Devolução prevista:</strong> {formatDate(loan.due_date)}
                   </p>
                   <p className="loan-card-description">
                     {loan.description || 'Sem descrição disponível para este livro.'}

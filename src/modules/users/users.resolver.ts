@@ -48,10 +48,12 @@ export class UsersResolver {
   ): Promise<FavoriteResponse> {
     try {
       const user = context.req.user;
-      await this.usersService.setFavoriteBook(user.id, bookId);
+      const result = await this.usersService.setFavoriteBook(user.id, bookId);
+      const favoriteBook = await this.usersService.getFavoriteBook(user.username);
       return {
         success: true,
         message: 'Livro adicionado aos favoritos com sucesso',
+        favoriteBook,
       };
     } catch (error) {
       return {
@@ -66,6 +68,17 @@ export class UsersResolver {
   async myFavoriteBook(@Context() context): Promise<UserFavorite> {
     const user = context.req.user;
     const favoriteBook = await this.usersService.getFavoriteBook(user.username);
+    return {
+      favoriteBook,
+    };
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => UserFavorite)
+  async userFavoriteBook(
+    @Args('username') username: string,
+  ): Promise<UserFavorite> {
+    const favoriteBook = await this.usersService.getFavoriteBook(username);
     return {
       favoriteBook,
     };

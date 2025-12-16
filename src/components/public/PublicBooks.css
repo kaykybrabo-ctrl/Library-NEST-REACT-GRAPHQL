@@ -204,7 +204,7 @@
 .books-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 2rem 2rem;
 }
 
 .books-header {
@@ -215,6 +215,8 @@
 .books-header h1 {
   color: #162c74;
   margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
 }
 
 .search-bar {
@@ -313,8 +315,6 @@
 .book-author:hover {
   color: #0d1a3d;
 }
-
-/* Esconder descrições apenas na listagem de livros, não na página de detalhes */
 .books-grid .book-description,
 .books-list .book-description {
   display: none !important;

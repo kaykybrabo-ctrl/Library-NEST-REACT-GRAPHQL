@@ -6,6 +6,7 @@ import { GET_BOOKS } from '../../graphql/queries/books'
 import { getImageUrl } from '../../utils/imageUtils'
 import LoginModal from '../LoginModal'
 import { useLoginModal } from '../../hooks/useLoginModal'
+import { useAuth } from '../../contexts/AuthContext'
 import './PublicAuthorDetail.css'
 
 interface Author {
@@ -33,6 +34,8 @@ const PublicAuthorDetail: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const { isOpen, showModal, hideModal, message } = useLoginModal()
+  const { isAuthenticated } = useAuth()
+  const homePath = isAuthenticated ? '/books' : '/public/authors'
 
   const { data: authorData, loading: authorLoading, error: authorError } = useQuery(GET_AUTHOR, {
     variables: { id: parseInt(id || '0') },
@@ -79,7 +82,7 @@ const PublicAuthorDetail: React.FC = () => {
       <div className="public-layout">
         <div className="public-header">
           <div className="public-nav">
-            <div className="brand" onClick={() => navigate('/')}>
+            <div className="brand" onClick={() => navigate(homePath)}>
               <span className="logo">📚</span>
               <h1 className="title">PedBook</h1>
             </div>
@@ -111,7 +114,7 @@ const PublicAuthorDetail: React.FC = () => {
         </div>
         <div className="error">
           <h2>❌ {error || 'Autor não encontrado'}</h2>
-          <button onClick={() => navigate('/')}>🏠 Voltar ao Início</button>
+          <button onClick={() => navigate(homePath)}>🏠 Voltar ao Início</button>
         </div>
       </div>
     )
@@ -121,7 +124,7 @@ const PublicAuthorDetail: React.FC = () => {
     <div className="public-layout">
       <div className="public-header">
         <div className="public-nav">
-          <div className="brand" onClick={() => navigate('/')}>
+          <div className="brand" onClick={() => navigate(homePath)}>
             <span className="logo">📚</span>
             <h1 className="title">PedBook</h1>
           </div>
@@ -134,7 +137,7 @@ const PublicAuthorDetail: React.FC = () => {
 
       <div className="breadcrumb-container">
         <div className="breadcrumb">
-          <Link to="/">Início</Link>
+          <Link to={homePath}>Início</Link>
           <span className="separator">›</span>
           <Link to="/public/authors">Autores</Link>
           <span className="separator">›</span>

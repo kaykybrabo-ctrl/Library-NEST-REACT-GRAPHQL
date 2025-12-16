@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@apollo/client'
+import { toast } from 'react-toastify'
 import { GET_AUTHOR, UPDATE_AUTHOR } from '../../graphql/queries/authors'
 import { UPLOAD_AUTHOR_IMAGE_MUTATION } from '../../graphql/queries/upload'
 import Layout from '../../components/Layout'
 import { useAuth } from '../../contexts/AuthContext'
 import GraphQLUpload from '../../components/GraphQLUpload'
 import { getImageUrl } from '../../utils/imageUtils'
+import EditModal from '../../components/EditModal'
 import './AuthorDetail.css'
 
 const AuthorDetail: React.FC = () => {
@@ -19,6 +21,8 @@ const AuthorDetail: React.FC = () => {
   const [error, setError] = useState('')
   const [editingBio, setEditingBio] = useState(false)
   const [biography, setBiography] = useState('')
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
 
   const { data, loading, error: queryError, refetch } = useQuery(GET_AUTHOR, {
     variables: { id: parseInt(id || '0') },
@@ -34,7 +38,8 @@ const AuthorDetail: React.FC = () => {
     if (author?.biography) {
       setBiography(author.biography)
     }
-  }, [author])
+    setShowEditModal(false)
+  }, [author, id])
 
   const getImageUrlWithVersion = (path?: string) => {
     if (!path) return ''
@@ -78,11 +83,11 @@ const AuthorDetail: React.FC = () => {
           setImgVersion(v => v + 1)
           setError('')
           refetch()
-          alert('Imagem do autor atualizada com sucesso!')
+          toast.success('Imagem do autor atualizada com sucesso!')
         } catch (err: any) {
           const msg = err?.message || 'Falha ao enviar a imagem do autor'
           setError(msg)
-          alert(msg)
+          toast.error(msg)
         } finally {
           setUploading(false)
         }
@@ -116,7 +121,7 @@ const AuthorDetail: React.FC = () => {
       setEditingBio(false)
       setError('')
       refetch()
-      alert('Biografia atualizada com sucesso!')
+      toast.success('Biografia atualizada com sucesso!')
     } catch (err: any) {
       setError(err?.message || 'Falha ao atualizar a biografia')
     } finally {
@@ -146,6 +151,9 @@ const AuthorDetail: React.FC = () => {
   return (
     <Layout title={author.name_author}>
       <div className="author-detail-container">
+        <button onClick={() => navigate('/authors')} className="back-button">
+          ← Voltar para Autores
+        </button>
         <div className="author-header">
           <div className="author-image-section">
             <img 
@@ -153,20 +161,6 @@ const AuthorDetail: React.FC = () => {
               alt={author.name_author}
               className="author-photo-large"
             />
-            
-            {isAdmin && (
-              <GraphQLUpload 
-                type="author"
-                entityId={parseInt(id || '0')} 
-                title="Upload de Imagem do Autor"
-                onSuccess={() => {
-                  setImgVersion(v => v + 1);
-                }}
-                onImageUpdate={() => {
-                  setImgVersion(v => v + 1);
-                }}
-              />
-            )}
           </div>
 
           <div className="author-info">
@@ -174,42 +168,7 @@ const AuthorDetail: React.FC = () => {
             
             <div className="biography-section">
               <h3>📖 Biografia</h3>
-              {editingBio && isAdmin ? (
-                <div>
-                  <textarea
-                    value={biography}
-                    onChange={(e) => setBiography(e.target.value)}
-                    rows={6}
-                    style={{ width: '100%', marginBottom: '10px' }}
-                  />
-                  <div>
-                    <button onClick={handleUpdateBio} disabled={uploading}>
-                      {uploading ? 'Salvando...' : 'Salvar'}
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setEditingBio(false)
-                        setBiography(author.biography || '')
-                      }}
-                      style={{ marginLeft: '10px' }}
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <p>{author.biography || 'Biografia não disponível.'}</p>
-                  {isAdmin && (
-                    <button 
-                      onClick={() => setEditingBio(true)}
-                      style={{ marginTop: '10px' }}
-                    >
-                      ✏️ Editar Biografia
-                    </button>
-                  )}
-                </div>
-              )}
+              <p>{author.biography || 'Biografia não disponível.'}</p>
             </div>
           </div>
         </div>
@@ -221,10 +180,92 @@ const AuthorDetail: React.FC = () => {
         )}
 
         <div className="author-actions">
-          <button onClick={() => navigate('/authors')}>
-            🔙 Voltar aos Autores
-          </button>
+          {isAdmin && (
+            <button 
+              onClick={() => setShowEditModal(true)}
+              className="edit-button"
+            >
+              ✏️ Editar Autor
+            </button>
+          )}
         </div>
+
+        {isAdmin && (
+          <EditModal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            onSave={async (data: any) => {
+              if (!id) return
+
+              setEditLoading(true)
+              try {
+                await updateAuthorMutation({
+                  variables: {
+                    id: parseInt(id),
+                    updateAuthorInput: {
+                      name_author: data.name_author?.trim() || author.name_author,
+                      biography: data.description ?? author.biography ?? '',
+                    },
+                  },
+                  refetchQueries: [
+                    { query: GET_AUTHOR, variables: { id: parseInt(id) } },
+                  ],
+                  awaitRefetchQueries: true,
+                })
+
+                if (data.imageFile) {
+                  await new Promise<void>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = async () => {
+                      try {
+                        const fileData = reader.result as string
+
+                        await uploadAuthorImage({
+                          variables: {
+                            authorId: parseInt(id),
+                            filename: data.imageFile.name,
+                            fileData,
+                          },
+                          refetchQueries: [
+                            { query: GET_AUTHOR, variables: { id: parseInt(id) } },
+                          ],
+                          awaitRefetchQueries: true,
+                        })
+
+                        setImgVersion((v) => v + 1)
+                        resolve()
+                      } catch (error) {
+                        reject(error)
+                      }
+                    }
+                    reader.onerror = () => {
+                      reject(new Error('Falha ao ler o arquivo de imagem'))
+                    }
+                    reader.readAsDataURL(data.imageFile)
+                  })
+                }
+
+                setError('')
+                await refetch()
+                toast.success('Autor atualizado com sucesso!')
+              } catch (err: any) {
+                const msg = err?.message || 'Falha ao atualizar autor'
+                setError(msg)
+                toast.error(msg)
+              } finally {
+                setEditLoading(false)
+              }
+            }}
+            title="Editar Autor"
+            type="author"
+            initialData={{
+              name_author: author.name_author,
+              description: author.biography || '',
+              photo: author.photo,
+            }}
+            loading={editLoading}
+          />
+        )}
       </div>
     </Layout>
   )

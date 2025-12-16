@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty } from "class-validator";
+import { IsNumber, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateLoanDto {
   @IsNumber()
@@ -8,4 +8,8 @@ export class CreateLoanDto {
   @IsNumber()
   @IsNotEmpty()
   book_id: number;
+
+  @IsOptional()
+  @IsString()
+  due_date?: string;
 }

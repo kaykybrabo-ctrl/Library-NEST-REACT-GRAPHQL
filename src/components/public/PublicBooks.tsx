@@ -5,6 +5,7 @@ import { GET_BOOKS } from '../../graphql/queries/books'
 import { getImageUrl } from '../../utils/imageUtils'
 import LoginModal from '../LoginModal'
 import { useLoginModal } from '../../hooks/useLoginModal'
+import { useAuth } from '../../contexts/AuthContext'
 import './PublicBooks.css'
 
 interface Book {
@@ -22,6 +23,8 @@ const PublicBooks: React.FC = () => {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const { isOpen, showModal, hideModal, message } = useLoginModal()
+  const { isAuthenticated } = useAuth()
+  const homePath = isAuthenticated ? '/books' : '/public/books'
   
   const { data, loading, error } = useQuery(GET_BOOKS, {
     variables: { limit: 1000 },
@@ -45,7 +48,7 @@ const PublicBooks: React.FC = () => {
       <div className="public-layout">
         <div className="public-header">
           <div className="public-nav">
-            <div className="brand" onClick={() => navigate('/')}>
+            <div className="brand" onClick={() => navigate(homePath)}>
               <span className="logo">📚</span>
               <h1 className="title">PedBook</h1>
             </div>
@@ -77,7 +80,7 @@ const PublicBooks: React.FC = () => {
         </div>
         <div className="error">
           <h2>❌ {error?.message || 'Erro ao carregar livros'}</h2>
-          <button onClick={() => navigate('/')}>🏠 Voltar ao Início</button>
+          <button onClick={() => navigate(homePath)}>🏠 Voltar ao Início</button>
         </div>
       </div>
     )
@@ -87,7 +90,7 @@ const PublicBooks: React.FC = () => {
     <div className="public-layout">
       <div className="public-header">
         <div className="public-nav">
-          <div className="brand" onClick={() => navigate('/')}>
+          <div className="brand" onClick={() => navigate(homePath)}>
             <span className="logo">📚</span>
             <h1 className="title">PedBook</h1>
           </div>
@@ -100,7 +103,7 @@ const PublicBooks: React.FC = () => {
 
       <div className="breadcrumb-container">
         <div className="breadcrumb">
-          <Link to="/">Início</Link>
+          <Link to={homePath}>Início</Link>
           <span className="separator">›</span>
           <span className="current">Livros</span>
         </div>

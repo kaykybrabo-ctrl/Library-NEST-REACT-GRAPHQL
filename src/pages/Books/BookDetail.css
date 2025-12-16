@@ -41,6 +41,30 @@
   box-shadow: 0 6px 20px rgba(22, 44, 116, 0.4);
 }
 
+.book-actions {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.book-actions .edit-button {
+  background: #162c74;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(22, 44, 116, 0.3);
+}
+
+.book-actions .edit-button:hover {
+  background: #1a3080;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 44, 116, 0.4);
+}
+
 .admin-view-only {
   background-color: #f59e0b !important;
   color: white !important;
@@ -515,14 +539,13 @@
 
 .review-textarea {
   width: 100% !important;
-  padding: 15px !important;
+  padding: 12px !important;
   border: 2px solid #e0e0e0 !important;
   border-radius: 8px !important;
-  margin-bottom: 20px !important;
   font-family: inherit !important;
-  resize: vertical !important;
-  min-height: 120px !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
+  resize: none !important;
+  height: 40px !important;
   line-height: 1.5 !important;
 }
 

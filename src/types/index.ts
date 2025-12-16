@@ -40,6 +40,15 @@ export interface Loan {
   title: string;
   photo?: string;
   description?: string;
+  due_date?: string;
+  returned_at?: string | null;
+  is_overdue?: boolean;
+  fine_amount?: number;
+  days_remaining?: number;
+  hours_remaining?: number;
+  time_remaining?: string;
+  user_id?: number;
+  username?: string;
 }
 
 export interface Review {

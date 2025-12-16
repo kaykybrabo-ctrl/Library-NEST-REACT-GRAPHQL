@@ -18,17 +18,24 @@ services:
     networks:
       - app-network
     ports:
-      - "8080:8082"
+      - "8080:8083"
     command: >
       sh -c "
         echo 'Aguardando banco de dados...' &&
-        npx prisma db push &&
+        sleep 20 &&
+        npx prisma db push --skip-generate &&
         echo 'Schema sincronizado com sucesso!' &&
         echo 'Populando banco com dados iniciais...' &&
         npx prisma db seed &&
         echo 'Iniciando aplicação...' &&
         npm run start:prod
       "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/graphql"]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+      start_period: 60s
 
   db:
     image: mysql:8.0

@@ -13,6 +13,7 @@ export class LoansResolver {
   @Mutation(() => Loan)
   async rentBook(
     @Args('bookId', { type: () => Int }) bookId: number,
+    @Args('dueDate', { type: () => String, nullable: true }) dueDate: string | null,
     @Context() context
   ): Promise<Loan> {
     const user = context.req.user;
@@ -23,6 +24,7 @@ export class LoansResolver {
     const loan = await this.loansService.create({
       user_id: user.id,
       book_id: bookId,
+      due_date: dueDate || undefined,
     });
 
     return {
@@ -50,6 +52,32 @@ export class LoansResolver {
   async returnBook(@Args('loanId', { type: () => Int }) loanId: number): Promise<boolean> {
     await this.loansService.remove(loanId);
     return true;
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Loan)
+  async renewLoan(
+    @Args('loanId', { type: () => Int }) loanId: number,
+  ): Promise<Loan> {
+    const loan: any = await this.loansService.renew(loanId);
+
+    return {
+      loans_id: loan.loans_id,
+      loan_date: loan.loan_date,
+      due_date: loan.due_date,
+      returned_at: loan.returned_at,
+      is_overdue: loan.is_overdue,
+      fine_amount: Number(loan.fine_amount) || 0,
+      days_remaining: 0,
+      hours_remaining: 0,
+      time_remaining: '',
+      book_id: loan.book_id,
+      title: loan.book?.title || '',
+      photo: loan.book?.photo,
+      description: loan.book?.description,
+      user_id: loan.user_id,
+      username: '',
+    } as any;
   }
 
   @UseGuards(GqlAuthGuard)

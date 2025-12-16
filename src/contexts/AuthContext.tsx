@@ -33,12 +33,34 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null); // Auto-login desabilitado
-  const [token, setToken] = useState<string | null>(null); // Auto-login desabilitado
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedUser = localStorage.getItem('user')
+      return storedUser ? JSON.parse(storedUser) : null
+    } catch {
+      return null
+    }
+  })
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('token')
+    } catch {
+      return null
+    }
+  })
   
   const apolloClient = useApolloClient();
   const [loginMutation] = useMutation(LOGIN_MUTATION);
   const [registerMutation] = useMutation(REGISTER_MUTATION);
+
+  useEffect(() => {
+    try {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (storedToken) setToken(storedToken);
+      if (storedUser) setUser(JSON.parse(storedUser));
+    } catch {}
+  }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
@@ -101,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!token,
+    isAuthenticated: !!(token || (typeof localStorage !== 'undefined' && localStorage.getItem('token'))),
     isAdmin: user?.role === 'admin',
   };
 

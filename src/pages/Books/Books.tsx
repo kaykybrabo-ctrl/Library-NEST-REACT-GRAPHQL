@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { GET_BOOKS, GET_BOOKS_COUNT, CREATE_BOOK, CREATE_BOOK_WITH_AUTHOR, UPDATE_BOOK, REMOVE_BOOK, RESTORE_BOOK } from '@/graphql/queries/books'
 import { GET_AUTHORS } from '@/graphql/queries/authors'
 import { RENT_BOOK_MUTATION, RETURN_BOOK_MUTATION, BOOK_LOAN_STATUS_QUERY, MY_BOOK_LOAN_QUERY } from '@/graphql/queries/loans'
+import { UPLOAD_BOOK_IMAGE_MUTATION } from '@/graphql/queries/upload'
+import { ADD_TO_FAVORITES_MUTATION, MY_FAVORITE_BOOK_QUERY } from '@/graphql/queries/favorites'
 import { useAuth } from '@/contexts/AuthContext'
 import Layout from '@/components/Layout'
 import ErrorModal from '@/components/ErrorModal'
-import ConfirmModal from '@/components/ConfirmModal'
+import RentModal from '@/components/RentModal'
+import EditModal from '@/components/EditModal'
 import { Book, Author } from '@/types'
 import { getImageUrl } from '@/utils/imageUtils'
 import { ClickableUser } from '../../components/ClickableNames'
+import { toast } from 'react-toastify'
 import './BooksCards.css'
 
 const Books: React.FC = () => {
@@ -27,17 +31,21 @@ const Books: React.FC = () => {
   const [editingBook, setEditingBook] = useState<number | null>(null)
   const [editData, setEditData] = useState({ title: '', author_id: '' })
   const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
   const [includeDeleted, setIncludeDeleted] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorModalMessage, setErrorModalMessage] = useState('')
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [bookToRent, setBookToRent] = useState<Book | null>(null)
+  const [showRentModal, setShowRentModal] = useState(false)
+  const [rentLoading, setRentLoading] = useState(false)
   const [featured, setFeatured] = useState<Book[]>([])
   const [carouselItems, setCarouselItems] = useState<Book[]>([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const [bookLoans, setBookLoans] = useState<{[key: number]: any}>({})
   const [userLoans, setUserLoans] = useState<{[key: number]: any}>({})
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
+  const [favoriteAnimating, setFavoriteAnimating] = useState<number | null>(null)
   const limit = 6
   const navigate = useNavigate()
   const featuredInitialized = useRef(false)
@@ -60,6 +68,12 @@ const Books: React.FC = () => {
   const { data: authorsData } = useQuery(GET_AUTHORS, {
     fetchPolicy: 'cache-first',
   });
+
+  const { data: favoriteData } = useQuery(MY_FAVORITE_BOOK_QUERY, {
+    fetchPolicy: 'cache-and-network',
+    skip: !user || isAdmin,
+  })
+  const favoriteBookId = favoriteData?.myFavoriteBook?.favoriteBook?.book_id ?? null
   
   const [createBookMutation] = useMutation(CREATE_BOOK);
   const [createBookWithAuthorMutation] = useMutation(CREATE_BOOK_WITH_AUTHOR);
@@ -67,7 +81,11 @@ const Books: React.FC = () => {
   const [removeBookMutation] = useMutation(REMOVE_BOOK);
   const [restoreBookMutation] = useMutation(RESTORE_BOOK);
   const [rentBookMutation] = useMutation(RENT_BOOK_MUTATION);
+  const [uploadBookImageMutation] = useMutation(UPLOAD_BOOK_IMAGE_MUTATION);
   const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION);
+  const [addToFavorites] = useMutation(ADD_TO_FAVORITES_MUTATION, {
+    refetchQueries: [{ query: MY_FAVORITE_BOOK_QUERY }]
+  });
   
   const displayedItems = useMemo(() => (
     carouselItems.length > 0
@@ -111,7 +129,7 @@ const Books: React.FC = () => {
     if (books.length > 0) {
       fetchLoanStatuses();
     }
-  }, [books]);
+  }, [books, favoriteBookId]);
 
   useEffect(() => {
     if (slidesLength <= 1) return;
@@ -155,7 +173,6 @@ const Books: React.FC = () => {
     try {
       const loanStatuses: {[key: number]: any} = {};
       const userLoanStatuses: {[key: number]: any} = {};
-      
       for (const book of books) {
         try {
           const { data } = await apolloClient.query({
@@ -165,7 +182,9 @@ const Books: React.FC = () => {
           });
           
           if (data?.bookLoanStatus) {
-            loanStatuses[book.book_id] = data.bookLoanStatus;
+            loanStatuses[book.book_id] = {
+              ...data.bookLoanStatus,
+            };
           }
 
           const { data: userLoanData } = await apolloClient.query({
@@ -193,27 +212,29 @@ const Books: React.FC = () => {
       setShowErrorModal(true)
       return
     }
-    
+
     const book = books.find(b => b.book_id === bookId)
     if (book) {
       setBookToRent(book)
-      setShowConfirmModal(true)
+      setShowRentModal(true)
     }
   };
 
-  const confirmRentBook = async () => {
+  const handleConfirmRent = async (returnDate: string) => {
     if (!bookToRent) return
-    
-    setShowConfirmModal(false)
+
+    setRentLoading(true)
     try {
       await rentBookMutation({
-        variables: { bookId: bookToRent.book_id }
-      });
-      fetchLoanStatuses();
+        variables: { bookId: bookToRent.book_id, dueDate: returnDate }
+      })
+      setShowRentModal(false)
       setBookToRent(null)
+      setError('')
+      await fetchLoanStatuses()
     } catch (err: any) {
       let errorMessage = 'Erro ao alugar livro. Tente novamente.'
-      
+
       if (err.message?.includes('já está emprestado')) {
         errorMessage = 'Este livro já está emprestado para outro usuário.'
       } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
@@ -221,11 +242,12 @@ const Books: React.FC = () => {
       } else if (err.message) {
         errorMessage = err.message
       }
-      
+
       setErrorModalMessage(errorMessage)
       setShowErrorModal(true)
       setError('')
-      setBookToRent(null)
+    } finally {
+      setRentLoading(false)
     }
   };
 
@@ -257,7 +279,7 @@ const Books: React.FC = () => {
       await fetchBooks();
       await fetchLoanStatuses();
       
-      alert('Livro devolvido com sucesso!');
+      toast.success('Livro devolvido com sucesso!');
       
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Erro ao devolver livro';
@@ -265,13 +287,44 @@ const Books: React.FC = () => {
     }
   };
 
+  const handleFavoriteBook = async (bookId: number) => {
+    if (isAdmin) {
+      toast.error('Administradores não podem favoritar livros.')
+      return
+    }
+
+    if (!user) {
+      toast.error('Faça login para adicionar aos favoritos')
+      return
+    }
+
+    try {
+      setFavoriteAnimating(bookId)
+      setTimeout(() => setFavoriteAnimating(null), 600)
+
+      await addToFavorites({
+        variables: { bookId }
+      })
+
+      await fetchLoanStatuses()
+
+      toast.success('Livro favoritado!')
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Erro ao atualizar favorito'
+      toast.error(errorMsg)
+    }
+  }
+
   const handleRestoreBook = async (bookId: number) => {
     try {
       await restoreBookMutation({ variables: { id: bookId } })
       await fetchBooks()
       setError('')
+      toast.success('Livro restaurado com sucesso!')
     } catch (err) {
-      setError('Falha ao restaurar livro')
+      const errorMsg = 'Falha ao restaurar livro'
+      setError(errorMsg)
+      toast.error(errorMsg)
     }
   }
 
@@ -316,7 +369,7 @@ const Books: React.FC = () => {
             { query: GET_BOOKS_COUNT }
           ]
         })
-        setSuccessMessage('Livro criado com sucesso! Novo autor foi criado automaticamente.')
+        toast.success('Livro criado com sucesso! Novo autor foi criado automaticamente.')
       } else {
         await createBookMutation({
           variables: {
@@ -335,15 +388,13 @@ const Books: React.FC = () => {
             { query: GET_BOOKS_COUNT }
           ]
         })
-        setSuccessMessage('Livro criado com sucesso!')
+        toast.success('Livro criado com sucesso!')
       }
       
       setNewBook({ title: '', author_id: '', author_name: '' })
       setUseNewAuthor(false)
       setError('')
       await fetchBooks()
-      
-      setTimeout(() => setSuccessMessage(''), 3000)
     } catch (err: any) {
       let errorMessage = 'Erro ao criar livro. Tente novamente.'
       
@@ -355,12 +406,13 @@ const Books: React.FC = () => {
       
       setErrorModalMessage(errorMessage)
       setShowErrorModal(true)
+      toast.error(errorMessage)
     }
   }
 
   const handleEditBook = (book: Book) => {
-    setEditingBook(book.book_id)
-    setEditData({ title: book.title, author_id: book.author_id.toString() })
+    setSelectedBook(book)
+    setShowEditModal(true)
   }
 
   const handleSaveEdit = async () => {
@@ -392,8 +444,11 @@ const Books: React.FC = () => {
       await removeBookMutation({ variables: { id: bookId } })
       await fetchBooks()
       setError('')
+      toast.success('Livro excluído com sucesso!')
     } catch (err) {
-      setError('Falha ao excluir livro')
+      const errorMsg = 'Falha ao excluir livro'
+      setError(errorMsg)
+      toast.error(errorMsg)
     }
   }
 
@@ -418,7 +473,6 @@ const Books: React.FC = () => {
   return (
     <Layout title="Livros">
       {error && <div className="error-message">{error}</div>}
-      {successMessage && <div className="success-message">{successMessage}</div>}
 
       <section className="featured-carousel">
         <h2>Novidades</h2>
@@ -694,10 +748,12 @@ const Books: React.FC = () => {
           <h2>Livros</h2>
           
           <div className={`books-grid ${loading ? 'loading' : ''}`}>
-            {books.map(book => (
+            {books.map(book => {
+              const isFavorited = !!favoriteBookId && book.book_id === favoriteBookId
+              return (
               <div 
                 key={book.book_id} 
-                className={`book-card ${book.deleted_at ? 'deleted' : ''} ${editingBook === book.book_id ? 'editing' : ''}`}
+                className={`book-card ${book.deleted_at ? 'deleted' : ''} ${editingBook === book.book_id ? 'editing' : ''} ${isFavorited ? 'favorited' : ''}`}
                 onClick={() => editingBook !== book.book_id && navigate(`/books/${book.book_id}`)}
                 style={{ cursor: editingBook === book.book_id ? 'default' : 'pointer' }}
               >
@@ -762,9 +818,6 @@ const Books: React.FC = () => {
                           {getAuthorName(book)}
                         </span>
                       </p>
-                      <p className="book-card-description">
-                        {book.description || 'Sem descrição disponível para este livro.'}
-                      </p>
                       
                       <div className="book-card-meta">
                         <span>ID: {book.book_id}</span>
@@ -788,17 +841,15 @@ const Books: React.FC = () => {
                       </div>
                       
                       <div className="book-card-actions">
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); navigate(`/books/${book.book_id}`); }}
+                        <Link
+                          to={`/books/${book.book_id}`}
+                          className="icon-button"
                           aria-label="Ver detalhes"
                           title="Ver detalhes"
-                          className="icon-button"
+                          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="currentColor" />
-                          </svg>
-                        </button>
+                          👁️
+                        </Link>
 
                         {!book.deleted_at && (
                           <>
@@ -811,31 +862,7 @@ const Books: React.FC = () => {
                                   handleReturnBook(book.book_id);
                                 }}
                                 title="📤 Clique para devolver este livro"
-                                style={{
-                                  background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '8px',
-                                  padding: '8px 16px',
-                                  fontSize: '0.85rem',
-                                  fontWeight: '600',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s ease',
-                                  boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
-                                  minWidth: '90px',
-                                  justifyContent: 'center'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(-1px)';
-                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 152, 0, 0.4)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(0)';
-                                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.3)';
-                                }}
+                                className="action-button return-button"
                               >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M12 5v2a5 5 0 1 1-4.9 6h2.02A3 3 0 1 0 12 9v2l4-3-4-3Z" fill="currentColor" />
@@ -876,34 +903,7 @@ const Books: React.FC = () => {
                                 }}
                                 aria-label="Alugar livro"
                                 title="📚 Clique para alugar este livro"
-                                className="rent-button"
-                                style={{
-                                  background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '8px',
-                                  padding: '8px 16px',
-                                  fontSize: '0.85rem',
-                                  fontWeight: '600',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s ease',
-                                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                                  minWidth: '90px',
-                                  justifyContent: 'center',
-                                  position: 'relative',
-                                  zIndex: '10'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(-1px)';
-                                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.4)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'translateY(0)';
-                                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(76, 175, 80, 0.3)';
-                                }}
+                                className="action-button rent-button"
                               >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
@@ -914,6 +914,21 @@ const Books: React.FC = () => {
                           </>
                         )}
                         
+                        {!isAdmin && !book.deleted_at && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleFavoriteBook(book.book_id); }}
+                            aria-label="Favoritar"
+                            title={isFavorited ? "❤️ Remover dos favoritos" : "🤍 Adicionar aos favoritos"}
+                            className={`icon-button ${favoriteAnimating === book.book_id ? 'favorite-active' : ''} ${isFavorited ? 'favorited' : ''}`}
+                            style={{color: isFavorited ? '#e91e63' : '#999'}}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                          </button>
+                        )}
+
                         {isAdmin && (
                           <>
                             <button
@@ -961,7 +976,7 @@ const Books: React.FC = () => {
                   )}
                 </div>
               </div>
-            ))}
+            )})}
           </div>
           
           {totalPages > 1 && (
@@ -987,17 +1002,93 @@ const Books: React.FC = () => {
         onClose={() => setShowErrorModal(false)}
       />
 
-      <ConfirmModal
-        isOpen={showConfirmModal}
-        title="Confirmar Aluguel"
-        message={`Tem certeza que deseja alugar o livro "${bookToRent?.title}"?`}
-        onConfirm={confirmRentBook}
-        onCancel={() => {
-          setShowConfirmModal(false)
+      <EditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false)
+          setSelectedBook(null)
+        }}
+        onSave={async (data: any) => {
+          if (!selectedBook?.book_id) return
+
+          setEditLoading(true)
+          try {
+            await updateBookMutation({
+              variables: {
+                id: selectedBook.book_id,
+                updateBookInput: {
+                  title: data.title?.trim() || selectedBook.title,
+                  author_id: data.author_id ? parseInt(data.author_id) : selectedBook.author_id,
+                  description: data.description || selectedBook.description,
+                },
+              },
+              refetchQueries: [
+                { query: GET_BOOKS, variables: { page: currentPage + 1, limit, search: searchQuery || undefined } },
+              ],
+              awaitRefetchQueries: true,
+            })
+
+            if (data.imageFile) {
+              await new Promise<void>((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = async () => {
+                  try {
+                    const fileData = reader.result as string
+
+                    await uploadBookImageMutation({
+                      variables: {
+                        bookId: selectedBook.book_id,
+                        filename: data.imageFile.name,
+                        fileData,
+                      },
+                      refetchQueries: [
+                        { query: GET_BOOKS, variables: { page: currentPage + 1, limit, search: searchQuery || undefined } },
+                      ],
+                      awaitRefetchQueries: true,
+                    })
+
+                    resolve()
+                  } catch (error) {
+                    reject(error)
+                  }
+                }
+                reader.onerror = () => {
+                  reject(new Error('Falha ao ler o arquivo de imagem'))
+                }
+                reader.readAsDataURL(data.imageFile)
+              })
+            }
+
+            setShowEditModal(false)
+            setSelectedBook(null)
+            toast.success('Livro atualizado com sucesso!')
+          } catch (err: any) {
+            const msg = err?.message || 'Falha ao atualizar livro'
+            toast.error(msg)
+          } finally {
+            setEditLoading(false)
+          }
+        }}
+        title="Editar Livro"
+        type="book"
+        initialData={selectedBook ? {
+          title: selectedBook.title,
+          description: selectedBook.description,
+          author_id: selectedBook.author_id.toString(),
+          photo: selectedBook.photo,
+        } : undefined}
+        loading={editLoading}
+      />
+
+      <RentModal
+        isOpen={showRentModal}
+        onClose={() => {
+          setShowRentModal(false)
           setBookToRent(null)
         }}
-        confirmText="Sim, alugar"
-        cancelText="Cancelar"
+        book={bookToRent || undefined}
+        onConfirm={handleConfirmRent}
+        loading={rentLoading}
       />
     </Layout>
   )

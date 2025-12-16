@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useApolloClient } from '@apollo/client'
-import { RETURN_BOOK_MUTATION, MY_LOANS_QUERY, OVERDUE_LOANS_QUERY } from '@/graphql/queries/loans'
+import { RETURN_BOOK_MUTATION, MY_LOANS_QUERY, OVERDUE_LOANS_QUERY, RENEW_LOAN_MUTATION } from '@/graphql/queries/loans'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/contexts/AuthContext'
 import { getImageUrl } from '@/utils/imageUtils'
@@ -11,6 +11,7 @@ interface LoanData {
   loans_id: number
   loan_date: string
   due_date: string
+  returned_at?: string | null
   book_id: number
   title: string
   photo: string | null
@@ -35,6 +36,7 @@ const MyLoans: React.FC = () => {
   const [error, setError] = useState('')
   const [showOverdueModal, setShowOverdueModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'returned' | 'overdue'>('active')
   const navigate = useNavigate()
 
   const { data: loansData, loading, refetch: refetchLoans } = useQuery(MY_LOANS_QUERY, {
@@ -57,6 +59,7 @@ const MyLoans: React.FC = () => {
   }, [user, overdueLoans])
 
   const [returnBookMutation] = useMutation(RETURN_BOOK_MUTATION)
+  const [renewLoanMutation] = useMutation(RENEW_LOAN_MUTATION)
 
   const handleReturnBook = async (loanId: number, bookTitle: string) => {
     if (!confirm(`Tem certeza de que deseja devolver o livro "${bookTitle}"?`)) {
@@ -81,6 +84,34 @@ const MyLoans: React.FC = () => {
       }, 100)
     } catch (err: any) {
       const errorMsg = err.message || 'Erro ao devolver livro'
+      setError(errorMsg)
+      setTimeout(() => setError(''), 5000)
+    }
+  }
+
+  const handleRenewLoan = async (loanId: number, bookTitle: string) => {
+    if (!confirm(`Deseja renovar o empréstimo de "${bookTitle}" por mais 7 dias?`)) {
+      return
+    }
+
+    try {
+      await renewLoanMutation({
+        variables: { loanId: Number(loanId) },
+        refetchQueries: [
+          { query: MY_LOANS_QUERY }
+        ]
+      })
+
+      await apolloClient.resetStore()
+      setSuccessMessage(`Empréstimo de "${bookTitle}" renovado com sucesso! 🎉`)
+      setTimeout(() => setSuccessMessage(''), 5000)
+
+      setTimeout(async () => {
+        await refetchLoans()
+        await refetchOverdue()
+      }, 100)
+    } catch (err: any) {
+      const errorMsg = err.message || 'Erro ao renovar empréstimo'
       setError(errorMsg)
       setTimeout(() => setError(''), 5000)
     }
@@ -142,6 +173,18 @@ const MyLoans: React.FC = () => {
     }
   }
 
+  const getFilteredLoans = () => {
+    if (filterStatus === 'all') return loans
+
+    const getLoanStatus = (loan: LoanData): 'active' | 'returned' | 'overdue' => {
+      if (loan.returned_at) return 'returned'
+      if (loan.is_overdue) return 'overdue'
+      return 'active'
+    }
+
+    return loans.filter((loan: LoanData) => getLoanStatus(loan) === filterStatus)
+  }
+
   if (loading) {
     return (
       <Layout title="Meus Empréstimos">
@@ -149,6 +192,18 @@ const MyLoans: React.FC = () => {
       </Layout>
     )
   }
+
+  const filteredLoans = getFilteredLoans()
+
+  const getLoanStatus = (loan: LoanData): 'active' | 'returned' | 'overdue' => {
+    if (loan.returned_at) return 'returned'
+    if (loan.is_overdue) return 'overdue'
+    return 'active'
+  }
+
+  const activeCount = loans.filter((loan: LoanData) => getLoanStatus(loan) === 'active').length
+  const returnedCount = loans.filter((loan: LoanData) => getLoanStatus(loan) === 'returned').length
+  const overdueCount = loans.filter((loan: LoanData) => getLoanStatus(loan) === 'overdue').length
 
   return (
     <Layout title="Meus Empréstimos">
@@ -158,6 +213,33 @@ const MyLoans: React.FC = () => {
           {successMessage}
         </div>
       )}
+
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <button 
+          onClick={() => setFilterStatus('active')}
+          style={{ padding: '10px 20px', backgroundColor: filterStatus === 'active' ? '#162c74' : '#e0e0e0', color: filterStatus === 'active' ? 'white' : 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          Ativos ({activeCount})
+        </button>
+        <button 
+          onClick={() => setFilterStatus('overdue')}
+          style={{ padding: '10px 20px', backgroundColor: filterStatus === 'overdue' ? '#162c74' : '#e0e0e0', color: filterStatus === 'overdue' ? 'white' : 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          Atrasados ({overdueCount})
+        </button>
+        <button 
+          onClick={() => setFilterStatus('returned')}
+          style={{ padding: '10px 20px', backgroundColor: filterStatus === 'returned' ? '#162c74' : '#e0e0e0', color: filterStatus === 'returned' ? 'white' : 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          Histórico ({returnedCount})
+        </button>
+        <button 
+          onClick={() => setFilterStatus('all')}
+          style={{ padding: '10px 20px', backgroundColor: filterStatus === 'all' ? '#162c74' : '#e0e0e0', color: filterStatus === 'all' ? 'white' : 'black', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          Todos ({loans.length})
+        </button>
+      </div>
 
       {showOverdueModal && overdueLoans.length > 0 && (
         <div className="modal-overlay">
@@ -208,9 +290,16 @@ const MyLoans: React.FC = () => {
               </button>
             </div>
           </div>
+        ) : filteredLoans.length === 0 ? (
+          <div className="no-loans">
+            <div className="no-loans-content">
+              <h3>Nenhum empréstimo encontrado</h3>
+              <p>Nenhum empréstimo corresponde ao filtro selecionado.</p>
+            </div>
+          </div>
         ) : (
           <div className="loans-grid">
-            {loans.map(loan => (
+            {filteredLoans.map(loan => (
               <div key={loan.loans_id} className={`loan-card ${loan.is_overdue ? 'overdue-card' : ''}`}>
                 <div className="loan-card-image">
                   <img 
@@ -273,14 +362,24 @@ const MyLoans: React.FC = () => {
                     >
                       Ver Detalhes
                     </button>
-                    
-                    <button
-                      type="button"
-                      onClick={() => handleReturnBook(Number(loan.loans_id), loan.title)}
-                      className="btn-primary"
-                    >
-                      Devolver Livro
-                    </button>
+                    {getLoanStatus(loan) === 'active' && (
+                      <button
+                        type="button"
+                        onClick={() => handleRenewLoan(Number(loan.loans_id), loan.title)}
+                        className="btn-primary"
+                      >
+                        Renovar Empréstimo
+                      </button>
+                    )}
+                    {!loan.returned_at && (
+                      <button
+                        type="button"
+                        onClick={() => handleReturnBook(Number(loan.loans_id), loan.title)}
+                        className="btn-primary"
+                      >
+                        Devolver Livro
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

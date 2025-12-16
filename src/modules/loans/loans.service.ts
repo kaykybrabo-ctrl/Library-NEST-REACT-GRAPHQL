@@ -42,7 +42,30 @@ export class LoansService {
     }
 
     const now = new Date();
-    const dueDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+    let dueDate: Date;
+
+    if (createLoanDto.due_date) {
+      const parsed = new Date(createLoanDto.due_date);
+
+      if (isNaN(parsed.getTime())) {
+        throw new ConflictException('Data de devolução inválida');
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const dueOnly = new Date(parsed);
+      dueOnly.setHours(0, 0, 0, 0);
+
+      if (dueOnly <= today) {
+        throw new ConflictException('A data de devolução deve ser futura em relação à data atual');
+      }
+
+      dueDate = parsed;
+    } else {
+      dueDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+    }
     
     const loan = await this.prisma.loan.create({
       data: {
@@ -79,7 +102,6 @@ export class LoansService {
       const loans = await this.prisma.loan.findMany({
         where: {
           user_id: authUser.user_id,
-          returned_at: null,
         },
         include: {
           book: {
@@ -94,17 +116,32 @@ export class LoansService {
       });
 
       const now = new Date();
-      const loansWithTimeRemaining = loans.map(loan => {
+      const loansWithTimeRemaining = loans.map((loan: any) => {
         const dueDate = new Date(loan.due_date);
-        const isOverdue = now > dueDate;
-        const timeDiff = dueDate.getTime() - now.getTime();
-        const daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
+        const hasReturned = !!loan.returned_at;
+
+        let isOverdue = false;
+        let timeDiff = 0;
+        let daysRemaining = 0;
+        let hoursRemaining = 0;
+        let timeRemaining = '';
+
+        if (!hasReturned) {
+          isOverdue = now > dueDate;
+          timeDiff = dueDate.getTime() - now.getTime();
+          daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+          hoursRemaining = Math.floor(timeDiff / (1000 * 60 * 60));
+          timeRemaining = isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining);
+        } else {
+          isOverdue = false;
+          timeRemaining = 'Devolvido';
+        }
 
         return {
           loans_id: loan.loans_id,
           loan_date: loan.loan_date,
           due_date: loan.due_date,
+          returned_at: loan.returned_at,
           book_id: loan.book_id,
           title: loan.book?.title || 'Título não encontrado',
           photo: loan.book?.photo || null,
@@ -113,7 +150,7 @@ export class LoansService {
           fine_amount: loan.fine_amount,
           days_remaining: Math.max(0, daysRemaining),
           hours_remaining: Math.max(0, hoursRemaining),
-          time_remaining: isOverdue ? 'Vencido' : this.formatTimeRemaining(daysRemaining, hoursRemaining),
+          time_remaining: timeRemaining,
         };
       });
 
@@ -151,7 +188,7 @@ export class LoansService {
       });
 
       const now = new Date();
-      const loansWithTimeRemaining = loans.map(loan => {
+      const loansWithTimeRemaining = loans.map((loan: any) => {
         const dueDate = new Date(loan.due_date);
         const isOverdue = now > dueDate;
         const timeDiff = dueDate.getTime() - now.getTime();
@@ -204,7 +241,7 @@ export class LoansService {
       });
 
       const now = new Date();
-      const loansWithTimeRemaining = await Promise.all(loans.map(async loan => {
+      const loansWithTimeRemaining = await Promise.all(loans.map(async (loan: any) => {
         const dueDate = new Date(loan.due_date);
         const isOverdue = now > dueDate;
         const timeDiff = dueDate.getTime() - now.getTime();
@@ -352,6 +389,44 @@ export class LoansService {
     }
   }
 
+  async renew(loanId: number): Promise<any> {
+    const loan = await this.prisma.loan.findUnique({
+      where: { loans_id: loanId },
+      include: { book: { include: { author: true } } },
+    });
+
+    if (!loan) {
+      throw new NotFoundException('Empréstimo não encontrado');
+    }
+
+    if (loan.returned_at) {
+      throw new ConflictException('Não é possível renovar um empréstimo já devolvido');
+    }
+
+    const now = new Date();
+    const currentDue = new Date(loan.due_date);
+    const baseDate = currentDue > now ? currentDue : now;
+    const newDueDate = new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const updated = await this.prisma.loan.update({
+      where: { loans_id: loanId },
+      data: {
+        due_date: newDueDate,
+        is_overdue: false,
+        fine_amount: 0,
+      },
+      include: {
+        book: {
+          include: {
+            author: true,
+          },
+        },
+      },
+    });
+
+    return updated;
+  }
+
   async remove(loanId: number): Promise<void> {
     try {
       await this.prisma.loan.update({
@@ -391,7 +466,7 @@ export class LoansService {
         },
       });
 
-      const formattedOverdueLoans = overdueLoans.map(loan => ({
+      const formattedOverdueLoans = overdueLoans.map((loan: any) => ({
         loans_id: loan.loans_id,
         book_title: loan.book?.title || 'Título não encontrado',
         fine_amount: loan.fine_amount,
