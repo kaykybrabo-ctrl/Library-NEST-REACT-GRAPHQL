@@ -65,8 +65,12 @@ const Books: React.FC = () => {
     fetchPolicy: 'network-only',
   });
   
-  const { data: authorsData } = useQuery(GET_AUTHORS, {
-    fetchPolicy: 'cache-first',
+  const { data: authorsData, refetch: refetchAuthors } = useQuery(GET_AUTHORS, {
+    variables: {
+      page: 1,
+      limit: 9999,
+    },
+    fetchPolicy: 'cache-and-network',
   });
 
   const { data: favoriteData } = useQuery(MY_FAVORITE_BOOK_QUERY, {
@@ -366,7 +370,8 @@ const Books: React.FC = () => {
               search: searchQuery || undefined,
               includeDeleted: includeDeleted || undefined
             }},
-            { query: GET_BOOKS_COUNT }
+            { query: GET_BOOKS_COUNT },
+            { query: GET_AUTHORS, variables: { page: 1, limit: 9999 } }
           ]
         })
         toast.success('Livro criado com sucesso! Novo autor foi criado automaticamente.')
@@ -385,7 +390,8 @@ const Books: React.FC = () => {
               search: searchQuery || undefined,
               includeDeleted: includeDeleted || undefined
             }},
-            { query: GET_BOOKS_COUNT }
+            { query: GET_BOOKS_COUNT },
+            { query: GET_AUTHORS, variables: { page: 1, limit: 9999 } }
           ]
         })
         toast.success('Livro criado com sucesso!')
@@ -395,6 +401,7 @@ const Books: React.FC = () => {
       setUseNewAuthor(false)
       setError('')
       await fetchBooks()
+      await refetchAuthors()
     } catch (err: any) {
       let errorMessage = 'Erro ao criar livro. Tente novamente.'
       
@@ -1071,6 +1078,7 @@ const Books: React.FC = () => {
         }}
         title="Editar Livro"
         type="book"
+        authors={authors}
         initialData={selectedBook ? {
           title: selectedBook.title,
           description: selectedBook.description,

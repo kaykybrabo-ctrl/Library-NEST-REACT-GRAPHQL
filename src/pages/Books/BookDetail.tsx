@@ -46,7 +46,11 @@ const BookDetail: React.FC = () => {
   })
 
   const { data: authorsData } = useQuery(GET_AUTHORS, {
-    fetchPolicy: 'cache-first',
+    variables: {
+      page: 1,
+      limit: 9999,
+    },
+    fetchPolicy: 'cache-and-network',
   })
 
   const { data: reviewsData, refetch: refetchReviews } = useQuery(BOOK_REVIEWS_QUERY, {
